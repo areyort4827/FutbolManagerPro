@@ -38,20 +38,33 @@
 <th>Nombre</th>
 <th>Edad</th>
 <th>Posición</th>
+<th>Equipo</th>
+<th>Categoria</th>
 </tr>
 
 <?php
 
 include "conexion.php";
 
-$sql = "SELECT * FROM jugadores";
+$sql = "SELECT 
+            jugadores.nombre AS jugador,
+            jugadores.edad,
+            jugadores.posicion,
+            equipos.nombre AS equipo,
+            equipos.categoria
+        FROM jugadores
+        INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
+
+
 $resultado = $conexion->query($sql);
 
 while($fila = $resultado->fetch_assoc()){
     echo "<tr>";
-    echo "<td>".$fila["nombre"]."</td>";
+    echo "<td>".$fila["jugador"]."</td>";
     echo "<td>".$fila["edad"]."</td>";
     echo "<td>".$fila["posicion"]."</td>";
+    echo "<td>".$fila["equipo"]."</td>";
+    echo "<td>".$fila["categoria"]."</td>";
     echo "</tr>";
 }
 
