@@ -1,34 +1,34 @@
-# Futbol Manager Pro
+# Gestor de Fútbol Pro
 
-Welcome to Futbol Manager Pro, the ultimate football management simulation that allows you to manage your favorite teams, strategize your gameplay, and compete against others in thrilling matches!
+Bienvenido a Gestor de Fútbol Pro, la simulación de gestión de fútbol definitiva que te permite administrar tus equipos favoritos, planificar estrategias de juego y competir contra otros en emocionantes partidos.
 
-## Features
-- **Team Management:** Take charge of your team's roster, finances, and facilities.
-- **Match Simulation:** Experience realistic match simulations and outcomes based on your strategies.
-- **Player Development:** Scout and train players to improve their skills and performance.
-- **Dynamic League System:** Compete in various leagues and tournaments with up-to-date standings.
-- **User-Friendly Interface:** Enjoy a clean, intuitive user interface to enhance your gameplay experience.
+## Características
+- **Gestión de Equipos:** Toma control de la alineación, finanzas e instalaciones de tu equipo.
+- **Simulación de Partidos:** Experimenta simulaciones de partidos realistas y resultados basados en tus estrategias.
+- **Desarrollo de Jugadores:** Descubre y entrena jugadores para mejorar sus habilidades y rendimiento.
+- **Sistema de Liga Dinámico:** Compite en varias ligas y torneos con clasificaciones actualizadas.
+- **Interfaz Amigable:** Disfruta de una interfaz limpia e intuitiva para mejorar tu experiencia de juego.
 
-## Getting Started
-1. **Clone the Repository:**  
+## Cómo Empezar
+1. **Clonar el Repositorio:**  
    `git clone https://github.com/areyort4827/FutbolManagerPro.git`
-2. **Navigate to the Directory:**  
+2. **Navegar al Directorio:**  
    `cd FutbolManagerPro`
-3. **Install Dependencies:**  
+3. **Instalar Dependencias:**  
    `npm install`  
-4. **Start the Application:**  
+4. **Iniciar la Aplicación:**  
    `npm start`
 
-## Contributing
-We welcome contributions from the community! Feel free to submit issues, fork the repository, and create pull requests.
+## Contribuciones
+¡Bienvenimos contribuciones de la comunidad! Siéntete libre de enviar problemas, hacer fork del repositorio y crear solicitudes de extracción.
 
-## Contact
-For any inquiries or suggestions, please reach out to us at:  
+## Contacto
+Para cualquier consulta o sugerencia, contáctanos en:  
 [contact@example.com](mailto:contact@example.com)
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Licencia
+Este proyecto está bajo la Licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-**Join us on our journey to create the best football management game ever!**
+**¡Únete a nosotros en nuestro viaje para crear el mejor juego de gestión de fútbol jamás hecho!
