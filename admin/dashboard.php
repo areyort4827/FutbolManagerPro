@@ -65,34 +65,45 @@ $nombre = htmlspecialchars($user['nombre']);
         </div>
     </div>
 
-      <!-- Pantalla Jugadores  -->
+        <!-- Pantalla Jugadores  -->
     <div id="jugadores" class="page">
-        <h1>Jugadores</h1>
-        <?php if ($role === 'jugador'): ?>
-            <p style="color: #ef4444; font-weight: bold;">
-                No tienes permiso para ver la lista completa de jugadores.
-            </p>
-        <?php else: ?>
-            <table border="1">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Posición</th>
-                    <th>Equipo</th>
-                    <th>Categoria</th>
-                </tr>
-                <?php
-                include "../conexion.php";
-                $sql = "SELECT jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
-                               equipos.nombre AS equipo, equipos.categoria
-                        FROM jugadores INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
-                $resultado = $conexion->query($sql);
-                while($fila = $resultado->fetch_assoc()){
-                    echo "<tr><td>".$fila["jugador"]."</td><td>".$fila["edad"]."</td><td>".$fila["posicion"]."</td><td>".$fila["equipo"]."</td><td>".$fila["categoria"]."</td></tr>";
-                }
-                ?>
-            </table>
-        <?php endif; ?>
+            <h1>Jugadores</h1>
+                <div id="jugadores-grid" class="page">
+    <?php
+    include "../conexion.php";
+
+    $sql = "SELECT jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
+                equipos.nombre AS equipo, equipos.categoria
+            FROM jugadores 
+            INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
+
+    $resultado = $conexion->query($sql);
+
+    while($fila = $resultado->fetch_assoc()){
+    ?>
+        <div id="jugador-card">
+            <div class="jugador-top">
+
+                    <div class="avatar">
+                        <img src="../assets/img/player.png" alt="Jugador">
+                    </div>
+
+                    <div class="nombre-info">
+                        <h3><?= htmlspecialchars($fila["jugador"]) ?></h3>
+                        <span class="posicion"><?= strtoupper($fila["posicion"]) ?></span>
+                    </div>
+
+                </div>
+
+            <div id="jugador-info">
+                <p><?= $fila["edad"] ?> años</p>
+                <p><?= $fila["equipo"] ?></p>
+                <span id="categoria"><?= $fila["categoria"] ?></span>
+            </div>
+
+        </div>
+    <?php } ?>
+    </div>
     </div>
 
       <!-- Pantalla Entrenamientos  -->
