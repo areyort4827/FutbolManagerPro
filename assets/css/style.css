@@ -181,3 +181,23 @@ display:block;
 h1{
 margin-bottom:15px;
 }
+
+ .role-icono {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .admin-icono   { background: #eab308; color: #000; }
+    .equipo-icono  { background: #3b82f6; color: white; }
+    .jugador-icono { background: #22c55e; color: white; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .menu a.restricted {
+        opacity: 0.5;
+        pointer-events: none;
+        color: #64748b;
+    }
