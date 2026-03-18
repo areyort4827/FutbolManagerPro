@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futbol Manager</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="sidebar">
+<div class="logo">FutbolManager Pro</div>
+
+<div class="menu">
+<a class="active" onclick="mostrarPagina('dashboard')">Dashboard</a>
+<a onclick="mostrarPagina('jugadores')">Jugadores</a>
+<a onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
+<a onclick="mostrarPagina('partidos')">Partidos</a>
+<a onclick="mostrarPagina('estadisticas')">Estadísticas</a>
+<a onclick="mostrarPagina('calendario')">Calendario</a>
+</div>
+</div>
+
+<div class="main">
+
+<div id="dashboard" class="page active">
+<h1>Dashboard</h1>
+<div class="card">Contenido del dashboard...</div>
+</div>
+
+<div id="jugadores" class="page">
+
+<h1>Jugadores</h1>
+
+<table border="1">
+
+<tr>
+<th>Nombre</th>
+<th>Edad</th>
+<th>Posición</th>
+<th>Equipo</th>
+<th>Categoria</th>
+</tr>
+
+<?php
+
+include "conexion.php";
+
+$sql = "SELECT 
+            jugadores.nombre AS jugador,
+            jugadores.edad,
+            jugadores.posicion,
+            equipos.nombre AS equipo,
+            equipos.categoria
+        FROM jugadores
+        INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
+
+
+$resultado = $conexion->query($sql);
+
+while($fila = $resultado->fetch_assoc()){
+    echo "<tr>";
+    echo "<td>".$fila["jugador"]."</td>";
+    echo "<td>".$fila["edad"]."</td>";
+    echo "<td>".$fila["posicion"]."</td>";
+    echo "<td>".$fila["equipo"]."</td>";
+    echo "<td>".$fila["categoria"]."</td>";
+    echo "</tr>";
+}
+
+?>
+
+</table>
+
+</div>
+
+<div id="entrenamientos" class="page">
+<h1>Entrenamientos</h1>
+<div class="card">Gestión de entrenamientos...</div>
+</div>
+
+<div id="partidos" class="page">
+<h1>Partidos</h1>
+<div class="card">Información de partidos...</div>
+</div>
+
+<div id="estadisticas" class="page">
+<h1>Estadísticas</h1>
+<div class="card">Aquí irían las estadísticas...</div>
+</div>
+
+<div id="calendario" class="page">
+<h1>Calendario</h1>
+<div class="card">Calendario del equipo...</div>
+</div>
+
+</div>
+<script src="script.js"></script>
+
+</body>
+</html>
+
+
