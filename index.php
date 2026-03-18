@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role = $user['role'];
 
         if ($role === 'admin'){
-        header("Location: admin/dashboard.php");
+        header("Location: admin/menu.php");
 
         }elseif($role === 'entrenador'){
-        header("Location: entrenador/dashboard.php");
+        header("Location: entrenador/menu.php");
         }else{
-        header("Location: jugador/dashboard.php");
+        header("Location: jugador/menu.php");
         }
         exit;
     } else {
@@ -40,114 +40,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/style.css">
     
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        .contenedor {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 50px 40px;
-            width: 100%;
-            max-width: 600px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            text-align: center;
-            color: white;
-        }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #ffffff;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1f2937;
+    }
 
-        .logo-login {
-            font-size: 2.8rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #22c55e;
-        }
+    /* CONTENEDOR GENERAL */
+    .contenedor {
+        width: 100%;
+        max-width: 450px;
+        padding: 40px;
+        text-align: center;
+    }
 
-        .subtitle {
-            color: #94a3b8;
-            margin-bottom: 35px;
-            font-size: 1.1rem;
-        }
+    /* TITULO */
+    .logo-login {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #16a34a;
+        margin-bottom: 5px;
+    }
 
-        .input {
-            margin-bottom: 22px;
-            text-align: left;
-        }
+    .subtitle {
+        color: #6b7280;
+        margin-bottom: 35px;
+    }
 
-        .input label {
-            display: block;
-            margin-bottom: 8px;
-            color: #cbd5e1;
-            font-size: 0.95rem;
-        }
+    /* INPUTS */
+    .input {
+        margin-bottom: 20px;
+        text-align: left;
+    }
 
-        .input input {
-            width: 100%;
-            padding: 16px 18px;
-            border: none;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.08);
-            color: white;
-            font-size: 1.05rem;
-        }
+    .input label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+    }
 
-        .input input:focus {
-            outline: none;
-            background: rgba(34, 197, 94, 0.15);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4);
-        }
+    .input input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        font-size: 1rem;
+        transition: 0.25s;
+    }
 
-        .btn-login {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.15rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
+    .input input:focus {
+        outline: none;
+        border-color: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22,163,74,0.15);
+    }
 
-        .btn-login:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
-        }
+    /* BOTONES */
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #16a34a;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: 0.25s;
+    }
 
-        .error-message {
-            background: #ff0808;
-            color: white;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1rem;
-        }
+    .btn-login:hover {
+        background: #15803d;
+    }
 
-        .demo {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-    </style>
+    .btn-registrarse {
+        width: 100%;
+        padding: 14px;
+        background: white;
+        color: #16a34a;
+        border: 2px solid #16a34a;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: 0.25s;
+    }
+
+    .btn-registrarse:hover {
+        background: #16a34a;
+        color: white;
+    }
+
+    /* ERROR */
+    .error-message {
+        background: #ef4444;
+        color: white;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    /* DEMO USERS */
+    .demo {
+        margin-top: 35px;
+        font-size: 0.9rem;
+        color: #6b7280;
+        line-height: 1.6;
+    }
+</style>
+
 </head>
 <body>
 
 <div class="contenedor">
     <h1 class="logo-login">FutbolManager Pro</h1>
-    <p class="subtitle">Gestión Profesional de Equipos de Fútbol</p>
+    <p class="subtitle">Accede a tu panel de gestión</p>
 
     <?php if ($error): ?>
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
@@ -165,6 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <button type="submit" class="btn-login">Iniciar Sesión</button>
+        <button type="submit" class="btn-registrarse">Registrarse</button>
+
     </form>
 
     <div class="demo">
