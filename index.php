@@ -12,7 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($usuario) {
         $_SESSION['user'] = $usuario;
-        header("Location: dashboard.php");
+        $user = $_SESSION['user'];
+
+        $role = $user['role'];
+
+        if ($role === 'admin'){
+        header("Location: admin/dashboard.php");
+
+        }elseif($role === 'entrenador'){
+        header("Location: entrenador/dashboard.php");
+        }else{
+        header("Location: jugador/dashboard.php");
+        }
         exit;
     } else {
         $error = "Usuario o contraseña incorrectos.";

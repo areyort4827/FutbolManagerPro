@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/auth.php';
+require_once '../config/auth.php';
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
-$role = $user['role'];
+$role = 'Entrenador';
 $nombre = htmlspecialchars($user['nombre']);
 ?>
 
@@ -18,7 +18,7 @@ $nombre = htmlspecialchars($user['nombre']);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Futbol Manager</title>
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
     
 <style>
    
@@ -30,11 +30,8 @@ $nombre = htmlspecialchars($user['nombre']);
     <div class="logo">FutbolManager Pro</div>
     
     <div style="padding: 15px; text-align: center; border-bottom: 1px solid #334155; color: white;">
-        <strong><?= $nombre ?></strong><br>
-        <span class="role-icono 
-            <?= $role === 'admin' ? 'admin-icono' : '' ?>
-            <?= $role === 'equipo' ? 'equipo-icono' : '' ?>
-            <?= $role === 'jugador' ? 'jugador-icono' : '' ?>">
+        <strong><?= $nombre ?></strong><br><br>
+        <span class="role-icono equipo-icono">
             <?= strtoupper($role) ?>
         </span>
     </div>
@@ -51,7 +48,7 @@ $nombre = htmlspecialchars($user['nombre']);
         <a onclick="mostrarPagina('partidos')">Partidos</a>
         <a onclick="mostrarPagina('estadisticas')">Estadísticas</a>
         <a onclick="mostrarPagina('calendario')">Calendario</a>
-        <a href="logout.php" style="color:#ef4444; margin-top: 30px;">Cerrar Sesión</a>
+        <a href="../logout.php" style="color:#ef4444; margin-top: 30px;">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -85,7 +82,7 @@ $nombre = htmlspecialchars($user['nombre']);
                     <th>Categoria</th>
                 </tr>
                 <?php
-                include "conexion.php";
+                include "../conexion.php";
                 $sql = "SELECT jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
                                equipos.nombre AS equipo, equipos.categoria
                         FROM jugadores INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
@@ -123,7 +120,7 @@ $nombre = htmlspecialchars($user['nombre']);
 
 </div>
 
-<script src="script.js"></script>
+<script src="../script.js"></script>
 
 </body>
 </html>

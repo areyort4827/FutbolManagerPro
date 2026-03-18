@@ -12,7 +12,7 @@ $usuarios = [
     [
         'username' => 'entrenador',
         'password' => 'equipo123',
-        'role'     => 'equipo',
+        'role'     => 'entrenador',
         'nombre'   => 'Pep Guardiola'
     ],
     // JUGADOR

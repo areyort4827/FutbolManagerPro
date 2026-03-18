@@ -80,7 +80,7 @@ CREATE TABLE `jugadores` (
 
 INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 (1, 'Antonio Reyes', 21, 'Delantero', 1),
-(2, 'Emerson Cruz', 19, 'Central', 1);
+(2, 'Emerson Cruz', 19, 'Banquillo izquierdo', 1);
 
 -- --------------------------------------------------------
 
