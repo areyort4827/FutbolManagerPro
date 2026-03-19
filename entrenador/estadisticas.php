@@ -96,6 +96,8 @@ new Chart(golesCtx, {
         }
     }
 });
+
+
 </script>
 </body>
 

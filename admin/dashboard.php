@@ -3,4 +3,5 @@
       Bienvenido, <strong><?= $nombre ?></strong>
       <br><br>
       Contenido del dashboard admin...
+      
   </div>

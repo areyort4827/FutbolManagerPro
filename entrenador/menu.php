@@ -21,8 +21,10 @@ $nombre = htmlspecialchars($user['nombre']);
 <link rel="stylesheet" href="../assets/css/style.css">
     
 <style>
+
    
 </style>
+
 </head>
 <body>
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-03-2026 a las 10:59:33
+-- Tiempo de generación: 19-03-2026 a las 13:09:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -79,8 +79,8 @@ CREATE TABLE `jugadores` (
 --
 
 INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
-(1, 'Antonio Reyes', 21, 'Delantero', 1),
-(2, 'Emerson Cruz', 19, 'Banquillo izquierdo', 1);
+(1, 'Antonio Reyes', 21, 'Aguatero Izquierdo', 1),
+(2, 'Emerson Cruz', 19, 'Central', 1);
 
 -- --------------------------------------------------------
 
