@@ -14,13 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
 
-        $role = $user['role'];
+        $role = $user['rol'];
 
         if ($role === 'admin'){
         header("Location: admin/menu.php");
 
         }elseif($role === 'entrenador'){
         header("Location: entrenador/menu.php");
+    
+        }elseif($role === 'equipo'){
+        header("Location: equipo/menu.php");
         }else{
         header("Location: jugador/menu.php");
         }
@@ -190,9 +193,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="demo">
         <strong>Usuarios de prueba:</strong><br><br>
-        <strong style="color:#22c55e;">Admin:</strong> admin / admin123<br>
-        <strong style="color:#3b82f6;">Equipo:</strong> entrenador / equipo123<br>
-        <strong style="color:#eab308;">Jugador:</strong> jugador / jugador123
+        <strong style="color:#eab308;">Admin:</strong> admin / admin123<br>
+          <strong style="color:#ee660b;">Equipo:</strong> equipo / equipo123<br>
+        <strong style="color:#3b82f6;">Entrenador:</strong> entrenador / entrenador123<br>
+        <strong style="color:#22c55e;">Jugador:</strong> jugador / jugador123
     </div>
 </div>
 

@@ -20,6 +20,8 @@ $nombre = htmlspecialchars($user['nombre']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Futbol Manager</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
     <style>
 
@@ -32,7 +34,10 @@ $nombre = htmlspecialchars($user['nombre']);
         <div class="logo">FutbolManager Pro</div>
 
         <div style="padding: 15px; text-align: center; border-bottom: 1px solid #334155; color: white;">
-            <strong><?= $nombre ?></strong><br><br>
+             <div style="font-size: 20px; margin-bottom: 10px;">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <strong><?= strtoupper($nombre) ?></strong><br><br>
             <span class="role-icono admin-icono">
                 <?= strtoupper($role) ?>
             </span>
@@ -40,11 +45,7 @@ $nombre = htmlspecialchars($user['nombre']);
 
         <div class="menu">
             <a class="active" onclick="mostrarPagina('dashboard')">Dashboard</a>
-
-            <a onclick="mostrarPagina('jugadores')" class="<?= ($role === 'jugador') ? 'restricted' : '' ?>">
-                Jugadores
-            </a>
-
+            <a onclick="mostrarPagina('jugadores')">Jugadores</a>
             <a onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
             <a onclick="mostrarPagina('partidos')">Partidos</a>
             <a onclick="mostrarPagina('estadisticas')">Estadísticas</a>
@@ -78,17 +79,18 @@ $nombre = htmlspecialchars($user['nombre']);
             <?php include 'partidos.php' ?>
 
         </div>
+            <!-- Pantalla Calendario  -->
+        <div id="calendario" class="page">
+            <?php include 'calendario.php' ?>
 
+        </div>
         <!-- Pantalla Estadisticas  -->
         <div id="estadisticas" class="page">
             <?php include 'estadisticas.php' ?>
 
         </div>
-        <!-- Pantalla Calendario  -->
-        <div id="calendario" class="page">
-            <?php include 'calendario.php' ?>
-
-        </div>
+     
+        
 
     </div>
 

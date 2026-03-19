@@ -1,16 +1,17 @@
  <h1>Jugadores</h1>
                 <div id="jugadores-grid" class="page">
     <?php
-    include "../conexion.php";
+    include "../config/conexion.php";
 
     $sql = "SELECT jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
                 equipos.nombre AS equipo, equipos.categoria
             FROM jugadores 
             INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
 
-    $resultado = $conexion->query($sql);
+    $resultado = $pdo->query($sql);
+    $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
-    while($fila = $resultado->fetch_assoc()){
+    foreach ($jugadores as $fila){
     ?>
         <div id="jugador-card">
             <div class="jugador-top">

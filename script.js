@@ -10,6 +10,12 @@ links.forEach(l=>l.classList.remove('active')); // Quita todos los links del men
 document.getElementById(id).classList.add('active'); // Le añade activo a la pagina seleccionada
 
 event.target.classList.add('active'); // El menu seleccionado pasa a activo
+
+ if(id === 'estadisticas'){
+        crearRendimientoChart();
+        crearGolesChart();
+        crearVictoriasChart();
+    }
 }
 
 
