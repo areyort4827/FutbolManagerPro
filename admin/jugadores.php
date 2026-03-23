@@ -100,6 +100,21 @@
         font-size: 12px;
         font-weight: bold;
     }
+
+    .btn-eliminar {
+        width: 30%;
+        padding: 8px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        float:right;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
     </style>
 </head>
 
@@ -114,7 +129,7 @@
         <?php
     include "../config/conexion.php";
 
-    $sql = "SELECT jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
+    $sql = "SELECT jugadores.id, jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
                 equipos.nombre AS equipo, equipos.categoria
             FROM jugadores 
             INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
@@ -144,7 +159,11 @@
                 <p><?= $fila["equipo"] ?></p>
                 <span id="categoria"><?= $fila["categoria"] ?></span>
             </div>
-
+            <form action="eliminar_jugador.php" method="POST"
+                onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
+                <input type="hidden" name="id" value="<?= $fila['id'] ?>">
+                <button type="submit" class="btn-eliminar">Eliminar</button>
+            </form>
         </div>
         <?php } ?>
     </div>
