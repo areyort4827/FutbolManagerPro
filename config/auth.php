@@ -65,15 +65,4 @@ $usuarios = [
     ]
 ];
 
-// Función para verificar login
-function verificarLogin($username, $password) {
-    global $usuarios;
-    
-    foreach ($usuarios as $user) {
-        if ($user['username'] === $username && $user['password'] === $password) {
-            return $user;
-        }
-    }
-    return false;
-}*/
 ?>

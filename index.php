@@ -5,6 +5,13 @@ require_once 'config/auth.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+  if (isset($_POST['registro'])) {
+        header("Location: registro.php");
+        exit;
+    }
+
+  if (isset($_POST['iniciar'])) {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
@@ -32,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Usuario o contraseña incorrectos.";
     }
 }
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     body {
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #ffffff;
+        background: linear-gradient(135deg,#ffffff,#ecfdf5);
         height: 100vh;
         display: flex;
         align-items: center;
@@ -186,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" required>
         </div>
 
-        <button type="submit" class="btn-login">Iniciar Sesión</button>
-        <button type="submit" class="btn-registrarse">Registrarse</button>
+        <button type="submit" name="iniciar" class="btn-login">Iniciar Sesión</button>
+        <button type="submit" name="registro" class="btn-registrarse" formnovalidate>Registrarse</button>
 
     </form>
 
