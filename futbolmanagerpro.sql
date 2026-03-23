@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-03-2026 a las 12:48:21
+-- Tiempo de generación: 23-03-2026 a las 10:20:26
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,7 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `futbolmanagerpro`
 --
-DROP DATABASE IF EXISTS `futbolmanagerpro`;
 CREATE DATABASE IF NOT EXISTS `futbolmanagerpro` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `futbolmanagerpro`;
 
@@ -34,15 +33,16 @@ CREATE TABLE `entrenadores` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL,
   `experiencia` int(11) DEFAULT NULL,
-  `equipo_id` int(11) DEFAULT NULL
+  `equipo_id` int(11) DEFAULT NULL,
+  `usuario_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `entrenadores`
 --
 
-INSERT INTO `entrenadores` (`id`, `nombre`, `experiencia`, `equipo_id`) VALUES
-(1, 'Alejandro Quezada', 2, 1);
+INSERT INTO `entrenadores` (`id`, `nombre`, `experiencia`, `equipo_id`, `usuario_id`) VALUES
+(1, 'Alejandro Quezada', 2, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -118,7 +118,8 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`) VALUES
 --
 ALTER TABLE `entrenadores`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `equipo_id` (`equipo_id`);
+  ADD KEY `equipo_id` (`equipo_id`),
+  ADD KEY `fk_usuario_entrenador` (`usuario_id`);
 
 --
 -- Indices de la tabla `equipos`
@@ -175,7 +176,8 @@ ALTER TABLE `usuarios`
 -- Filtros para la tabla `entrenadores`
 --
 ALTER TABLE `entrenadores`
-  ADD CONSTRAINT `entrenadores_ibfk_1` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
+  ADD CONSTRAINT `entrenadores_ibfk_1` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`),
+  ADD CONSTRAINT `fk_usuario_entrenador` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
 
 --
 -- Filtros para la tabla `jugadores`

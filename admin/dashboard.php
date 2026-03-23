@@ -52,7 +52,7 @@
         <i class="fa-solid fa-user"></i>
         <h3>Jugadores</h3>
         <p>25 registrados</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 80%;"></div></div>
+        <div class="bar-container"><div class="bar-fill" style="width: 100%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-futbol"></i>

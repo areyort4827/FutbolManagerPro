@@ -1,0 +1,101 @@
+<?php
+require_once "../config/conexion.php";
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuevo Jugador - FutbolManager Pro</title>
+<style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #ecfdf5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    width: 400px;
+    border-top: 6px solid #16a34a;
+}
+
+.form-container h2 {
+    color: #16a34a;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-container input,
+.form-container select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 14px;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.form-container button:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+}
+
+.volver {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #16a34a;
+}
+.volver:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Nuevo Jugador</h2>
+
+    <form action="guardar_jugador.php" method="POST">
+
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="number" name="edad" placeholder="Edad" required>
+        <input type="text" name="posicion" placeholder="Posición" required>
+
+        <select name="equipo_id" required>
+            <option value="">Seleccionar equipo</option>
+            <?php
+            $equipos = $pdo->query("SELECT id, nombre FROM equipos");
+            while($e = $equipos->fetch(PDO::FETCH_ASSOC)){
+                echo "<option value='{$e['id']}'>{$e['nombre']}</option>";
+            }
+            ?>
+        </select>
+
+        <button type="submit">Guardar jugador</button>
+    </form>
+
+    <a class="volver" href="jugadores.php">← Volver a Jugadores</a>
+</div>
+
+</body>
+</html>
