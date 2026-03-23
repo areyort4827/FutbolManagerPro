@@ -4,8 +4,7 @@ require_once "../config/conexion.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
-
-    // Eliminar jugador
+    
     $sql = "DELETE FROM jugadores WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id]);

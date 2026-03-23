@@ -79,7 +79,14 @@ body {
 
         <input type="text" name="nombre" placeholder="Nombre" required>
         <input type="number" name="edad" placeholder="Edad" required>
-        <input type="text" name="posicion" placeholder="Posición" required>
+
+           <select name="posicion_id" required>
+            <option value="">Seleccionar posición</option>
+            <option value="">Delantero</option>
+            <option value="">Mediocentro</option>
+            <option value="">Defensa</option>
+            <option value="">Portero</option>
+        </select>
 
         <select name="equipo_id" required>
             <option value="">Seleccionar equipo</option>
@@ -94,7 +101,7 @@ body {
         <button type="submit">Guardar jugador</button>
     </form>
 
-    <a class="volver" href="jugadores.php">← Volver a Jugadores</a>
+    <a class="volver" href="menu.php">← Volver a Menu</a>
 </div>
 
 </body>
