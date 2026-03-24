@@ -5,6 +5,13 @@ require_once 'config/auth.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+  if (isset($_POST['registro'])) {
+        header("Location: registro.php");
+        exit;
+    }
+
+  if (isset($_POST['iniciar'])) {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
@@ -14,13 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
 
-        $role = $user['role'];
+        $role = $user['rol'];
 
         if ($role === 'admin'){
         header("Location: admin/menu.php");
 
         }elseif($role === 'entrenador'){
         header("Location: entrenador/menu.php");
+    
+        }elseif($role === 'equipo'){
+        header("Location: equipo/menu.php");
         }else{
         header("Location: jugador/menu.php");
         }
@@ -28,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = "Usuario o contraseña incorrectos.";
     }
+}
 }
 ?>
 
@@ -47,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     body {
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #ffffff;
+        background: linear-gradient(135deg,#ffffff,#ecfdf5);
         height: 100vh;
         display: flex;
         align-items: center;
@@ -183,16 +194,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" required>
         </div>
 
-        <button type="submit" class="btn-login">Iniciar Sesión</button>
-        <button type="submit" class="btn-registrarse">Registrarse</button>
+        <button type="submit" name="iniciar" class="btn-login">Iniciar Sesión</button>
+        <button type="submit" name="registro" class="btn-registrarse" formnovalidate>Registrarse</button>
 
     </form>
 
     <div class="demo">
         <strong>Usuarios de prueba:</strong><br><br>
-        <strong style="color:#22c55e;">Admin:</strong> admin / admin123<br>
-        <strong style="color:#3b82f6;">Equipo:</strong> entrenador / equipo123<br>
-        <strong style="color:#eab308;">Jugador:</strong> jugador / jugador123
+        <strong style="color:#eab308;">Admin:</strong> admin / admin123<br>
+          <strong style="color:#ee660b;">Equipo:</strong> equipo / equipo123<br>
+        <strong style="color:#3b82f6;">Entrenador:</strong> entrenador / entrenador123<br>
+        <strong style="color:#22c55e;">Jugador:</strong> jugador / jugador123
     </div>
 </div>
 

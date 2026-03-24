@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
-$role = 'Entrenador';
+$role = 'Equipo';
 $nombre = htmlspecialchars($user['nombre']);
 ?>
 
@@ -22,6 +22,7 @@ $nombre = htmlspecialchars($user['nombre']);
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+
     <style>
 
     </style>
@@ -33,22 +34,18 @@ $nombre = htmlspecialchars($user['nombre']);
         <div class="logo">FutbolManager Pro</div>
 
         <div style="padding: 15px; text-align: center; border-bottom: 1px solid #334155; color: white;">
-            <div style="font-size: 20px; margin-bottom: 10px;">
+             <div style="font-size: 20px; margin-bottom: 10px;">
                 <i class="fa-solid fa-user"></i>
             </div>
             <strong><?= strtoupper($nombre) ?></strong><br><br>
-            <span class="role-icono entrenador-icono">
+            <span class="role-icono equipo-icono">
                 <?= strtoupper($role) ?>
             </span>
         </div>
 
         <div class="menu">
             <a class="active" onclick="mostrarPagina('dashboard')">Dashboard</a>
-
-            <a onclick="mostrarPagina('jugadores')" class="<?= ($role === 'jugador') ? 'restricted' : '' ?>">
-                Plantilla
-            </a>
-
+            <a onclick="mostrarPagina('jugadores')">Jugadores</a>
             <a onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
             <a onclick="mostrarPagina('partidos')">Partidos</a>
             <a onclick="mostrarPagina('estadisticas')">Estadísticas</a>
@@ -82,7 +79,7 @@ $nombre = htmlspecialchars($user['nombre']);
             <?php include 'partidos.php' ?>
 
         </div>
-        <!-- Pantalla Calendario  -->
+         <!-- Pantalla Calendario  -->
         <div id="calendario" class="page">
             <?php include 'calendario.php' ?>
 
@@ -92,7 +89,9 @@ $nombre = htmlspecialchars($user['nombre']);
             <?php include 'estadisticas.php' ?>
 
         </div>
-
+       
+       
+        
 
     </div>
 
