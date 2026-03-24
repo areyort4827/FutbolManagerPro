@@ -13,7 +13,7 @@ $sql = "INSERT INTO jugadores (nombre, edad, posicion, equipo_id) VALUES (?, ?, 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$nombre, $edad, $posicion, $equipo_id]);
 
-// Guardar la página que queremos mostrar en menu.php
+// Guardar la sesion para volver a la pantalla de jugadores
 $_SESSION['paginaActual'] = 'jugadores';
 
 // Redirigir al menú principal

@@ -18,7 +18,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.form-container {
+.formularioContainer {
     background: white;
     padding: 40px;
     border-radius: 12px;
@@ -27,14 +27,14 @@ body {
     border-top: 6px solid #16a34a;
 }
 
-.form-container h2 {
+.formularioContainer h2 {
     color: #16a34a;
     text-align: center;
     margin-bottom: 25px;
 }
 
-.form-container input,
-.form-container select {
+.formularioContainer input,
+.formularioContainer select {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
@@ -43,7 +43,7 @@ body {
     font-size: 15px;
 }
 
-.form-container button {
+.formularioContainer button {
     width: 100%;
     padding: 14px;
     background: #16a34a;
@@ -55,7 +55,7 @@ body {
     transition: 0.25s;
 }
 
-.form-container button:hover {
+.formularioContainer button:hover {
     background: #15803d;
     transform: translateY(-2px);
 }
@@ -72,7 +72,7 @@ body {
 </head>
 <body>
 
-<div class="form-container">
+<div class="formularioContainer">
     <h2>Nuevo Jugador</h2>
 
     <form action="guardar_jugador.php" method="POST">
@@ -80,12 +80,12 @@ body {
         <input type="text" name="nombre" placeholder="Nombre" required>
         <input type="number" name="edad" placeholder="Edad" required>
 
-           <select name="posicion_id" required>
+           <select name="posicion" required>
             <option value="">Seleccionar posición</option>
-            <option value="">Delantero</option>
-            <option value="">Mediocentro</option>
-            <option value="">Defensa</option>
-            <option value="">Portero</option>
+            <option value="delantero">Delantero</option>
+            <option value="mediocentro">Mediocentro</option>
+            <option value="defensa">Defensa</option>
+            <option value="portero">Portero</option>
         </select>
 
         <select name="equipo_id" required>

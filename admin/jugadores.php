@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-    .acciones-jugadores {
+    .accionesJugadores {
         display: flex;
         justify-content: flex-end;
         margin-bottom: 20px;
     }
 
-    .btn-add {
+    .btnAñadir {
         background: #16a34a;
         color: white;
         border: none;
@@ -23,20 +23,20 @@
         transition: 0.25s;
     }
 
-    .btn-add:hover {
+    .btnAñadir:hover {
         background: #15803d;
         transform: translateY(-2px);
     }
 
     /*Pantalla jugadores*/
-    #jugadores-grid {
+    #jugadoresGrid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
         gap: 20px;
         margin-top: 20px;
     }
 
-    #jugador-card {
+    #jugadorCard {
         background: #dbdbdb;
         border-radius: 14px;
         overflow: hidden;
@@ -45,12 +45,12 @@
         transition: 0.3s;
     }
 
-    #jugador-card:hover {
+    #jugadorCard:hover {
         transform: translateY(-6px);
         box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
     }
 
-    .jugador-top {
+    .jugadorTop {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -72,17 +72,17 @@
         object-fit: cover;
     }
 
-    .nombre-info h3 {
+    .nombreInfo h3 {
         margin: 0;
         font-size: 18px;
     }
 
-    .nombre-info span {
+    .nombreInfo span {
         font-size: 12px;
         opacity: 0.85;
     }
 
-    #jugador-info {
+    #jugadorInfo {
         padding: 15px;
     }
 
@@ -101,7 +101,7 @@
         font-weight: bold;
     }
 
-    .btn-eliminar {
+    .btnEliminar {
         width: 30%;
         padding: 8px;
         background: #ef4444;
@@ -120,12 +120,12 @@
 
 <body>
     <h1>Jugadores</h1>
-    <div class="acciones-jugadores">
-        <a href="nuevo_jugador.php" class="btn-add">
+    <div class="accionesJugadores">
+        <a href="nuevo_jugador.php" class="btnAñadir">
             + Añadir jugador
         </a>
     </div>
-    <div id="jugadores-grid" class="page">
+    <div id="jugadoresGrid" class="page">
         <?php
     include "../config/conexion.php";
 
@@ -140,21 +140,21 @@
     foreach ($jugadores as $fila){
     ?>
 
-        <div id="jugador-card">
-            <div class="jugador-top">
+        <div id="jugadorCard">
+            <div class="jugadorTop">
 
                 <div class="avatar">
                     <img src="../assets/img/player.png" alt="Jugador">
                 </div>
 
-                <div class="nombre-info">
+                <div class="nombreInfo">
                     <h3><?= htmlspecialchars($fila["jugador"]) ?></h3>
                     <span class="posicion"><?= strtoupper($fila["posicion"]) ?></span>
                 </div>
 
             </div>
 
-            <div id="jugador-info">
+            <div id="jugadorInfo">
                 <p><?= $fila["edad"] ?> años</p>
                 <p><?= $fila["equipo"] ?></p>
                 <span id="categoria"><?= $fila["categoria"] ?></span>
@@ -162,7 +162,7 @@
             <form action="eliminar_jugador.php" method="POST"
                 onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
                 <input type="hidden" name="id" value="<?= $fila['id'] ?>">
-                <button type="submit" class="btn-eliminar">Eliminar</button>
+                <button type="submit" class="btnEliminar">Eliminar</button>
             </form>
         </div>
         <?php } ?>
