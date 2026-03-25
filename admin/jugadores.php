@@ -107,7 +107,7 @@
         background: #ef4444;
         color: white;
         border: none;
-        float:right;
+        float: right;
         border-radius: 6px;
         margin-top: 10px;
         font-weight: bold;
@@ -115,57 +115,77 @@
         transition: 0.2s;
     }
 
+    .jugadoresHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .jugadoresContenedor {
+        padding: 30px;
+    }
     </style>
 </head>
 
 <body>
-    <h1>Jugadores</h1>
-    <div class="accionesJugadores">
-        <a href="nuevo_jugador.php" class="btnAñadir">
-            + Añadir jugador
-        </a>
-    </div>
-    <div id="jugadoresGrid" class="page">
-        <?php
-    include "../config/conexion.php";
+    <div class="jugadoresContenedor">
+        <div class="jugadoresHeader">
+            <div>
+                <h2>Gestión de Jugadores</h2>
+                <span style="color:#64748b">Gestiona tu plantilla</span>
+            </div>
 
-    $sql = "SELECT jugadores.id, jugadores.nombre AS jugador, jugadores.edad, jugadores.posicion, 
-                equipos.nombre AS equipo, equipos.categoria
-            FROM jugadores 
-            INNER JOIN equipos ON jugadores.equipo_id = equipos.id";
+            <a href="nuevo_jugador.php" class="btnAñadir">
+                + Añadir jugador
+            </a>
+        </div>
 
+        <div id="jugadoresGrid" class="page">
+            <?php
+     
+        $equipo_id = $_SESSION['equipo_id'];
+  $sql = "
+        SELECT j.id, j.nombre AS jugador, j.edad, j.posicion,
+               e.nombre AS equipo, e.categoria, c.nombre AS club
+        FROM jugadores j
+        INNER JOIN equipos e ON j.equipo_id = e.id
+        INNER JOIN clubes c ON e.equipo_id = c.id
+        ORDER BY c.nombre
+    ";
     $resultado = $pdo->query($sql);
     $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($jugadores as $fila){
     ?>
 
-        <div id="jugadorCard">
-            <div class="jugadorTop">
+            <div id="jugadorCard">
+                <div class="jugadorTop">
 
-                <div class="avatar">
-                    <img src="../assets/img/player.png" alt="Jugador">
+                    <div class="avatar">
+                        <img src="../assets/img/player.png" alt="Jugador">
+                    </div>
+
+                    <div class="nombreInfo">
+                        <h3><?= htmlspecialchars($fila["jugador"]) ?></h3>
+                        <span class="posicion"><?= strtoupper($fila["posicion"]) ?></span>
+                    </div>
+
                 </div>
 
-                <div class="nombreInfo">
-                    <h3><?= htmlspecialchars($fila["jugador"]) ?></h3>
-                    <span class="posicion"><?= strtoupper($fila["posicion"]) ?></span>
+                <div id="jugadorInfo">
+                    <p><?= $fila["edad"] ?> años</p>
+                    <p><?= $fila["equipo"] ?></p>
+                    <span id="categoria"><?= $fila["categoria"] ?></span>
                 </div>
-
+                <form action="eliminar_jugador.php" method="POST"
+                    onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
+                    <input type="hidden" name="id" value="<?= $fila['id'] ?>">
+                    <button type="submit" class="btnEliminar">Eliminar</button>
+                </form>
             </div>
-
-            <div id="jugadorInfo">
-                <p><?= $fila["edad"] ?> años</p>
-                <p><?= $fila["equipo"] ?></p>
-                <span id="categoria"><?= $fila["categoria"] ?></span>
-            </div>
-            <form action="eliminar_jugador.php" method="POST"
-                onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
-                <input type="hidden" name="id" value="<?= $fila['id'] ?>">
-                <button type="submit" class="btnEliminar">Eliminar</button>
-            </form>
+            <?php } ?>
         </div>
-        <?php } ?>
     </div>
 </body>
 
