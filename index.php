@@ -20,13 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($usuario) {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
-
+        
+        $_SESSION['equipo_id'] = $user['equipo_id'];
         $role = $user['rol'];
-
+        echo $user['equipo_id'];
+        
         if ($role === 'admin'){
         header("Location: admin/menu.php");
 
         }elseif($role === 'entrenador'){
+
+        
         header("Location: entrenador/menu.php");
     
         }elseif($role === 'equipo'){

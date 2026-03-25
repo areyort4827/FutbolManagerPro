@@ -12,7 +12,7 @@ function verificarLogin($username, $password)
 
     try {
         // Buscar usuario por nombre
-        $sql = "SELECT id, nombre, email, password, rol
+        $sql = "SELECT id, nombre, email, password, rol, equipo_id
                 FROM usuarios
                 WHERE nombre = :username
                 LIMIT 1";
@@ -40,29 +40,3 @@ function verificarLogin($username, $password)
         die("Error en login: " . $e->getMessage());
     }
 }
-/*
-$usuarios = [
-    // ADMIN
-    [
-        'username' => 'admin',
-        'password' => 'admin123',     // En producción hay que usar password_hash()
-        'role'     => 'admin',
-        'nombre'   => 'Administrador'
-    ],
-    // EQUIPO
-    [
-        'username' => 'entrenador',
-        'password' => 'equipo123',
-        'role'     => 'entrenador',
-        'nombre'   => 'Pep Guardiola'
-    ],
-    // JUGADOR
-    [
-        'username' => 'jugador',
-        'password' => 'jugador123',
-        'role'     => 'jugador',
-        'nombre'   => 'Cristiano Ronaldo'
-    ]
-];
-
-?>*/
