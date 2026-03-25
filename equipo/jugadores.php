@@ -38,7 +38,8 @@
     }
 
     #jugadorCard {
-        background: #dbdbdb;
+        background: #e9e9e9;
+        padding:10px;
         border-radius: 14px;
         overflow: hidden;
         color: rgb(0, 0, 0);
@@ -89,17 +90,7 @@
 
     .posicion {
         margin: 0 0 10px;
-        color: #20b155;
-    }
-
-    #categoria {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 5px 10px;
-        background: #22c55e;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: bold;
+        color: #000000;
     }
 
     .btnEliminar {
@@ -126,6 +117,33 @@
     .jugadoresContenedor {
         padding: 30px;
     }
+
+    .categoria {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Colores según categoría */
+.cadete {
+    background-color: #22c55e; /* verde */
+}
+
+.senior {
+    background-color: #3b82f6; /* azul */
+}
+
+.juvenil {
+    background-color: #f59e0b; /* naranja */
+}
+
+.infantil {
+    background-color: #ef4444; /* rojo */
+}
     </style>
 </head>
 
@@ -145,7 +163,7 @@
         <div id="jugadoresGrid" class="page">
             <?php
      
-        $equipo_id = $_SESSION['equipo_id'];
+        $club_id = $_SESSION['club_id'];
 $sql = "
 SELECT 
     j.id,
@@ -158,9 +176,9 @@ SELECT
 FROM jugadores j
 INNER JOIN equipos e ON j.equipo_id = e.id
 INNER JOIN clubes c ON e.equipo_id = c.id
-WHERE e.equipo_id = $equipo_id
+WHERE e.equipo_id = $club_id
    OR e.id IN (
-        SELECT id FROM equipos WHERE equipo_id = $equipo_id
+        SELECT id FROM equipos WHERE equipo_id = $club_id
    )
 ";
 
@@ -187,7 +205,9 @@ WHERE e.equipo_id = $equipo_id
                 <div id="jugadorInfo">
                     <p><?= $fila["edad"] ?> años</p>
                     <p><?= $fila["equipo"] ?></p>
-                    <span id="categoria"><?= $fila["categoria"] ?></span>
+                   <span class="categoria <?= strtolower($fila['categoria']) ?>">
+    <?= htmlspecialchars($fila['categoria']) ?>
+</span>
                 </div>
                 <form action="eliminar_jugador.php" method="POST"
                     onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">

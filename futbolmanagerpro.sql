@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-03-2026 a las 09:37:18
+-- Tiempo de generación: 25-03-2026 a las 12:38:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `futbolmanagerpro`
 --
-CREATE DATABASE IF NOT EXISTS `futbolmanagerpro` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `futbolmanagerpro`;
 
 -- --------------------------------------------------------
 
@@ -71,23 +69,28 @@ INSERT INTO `entrenadores` (`id`, `nombre`, `experiencia`, `equipo_id`, `usuario
 
 CREATE TABLE `entrenamientos` (
   `id` int(11) NOT NULL,
-  `equipo_id` int(11) NOT NULL,
+  `club_id` int(11) NOT NULL,
   `titulo` enum('Sesión táctica','Sesión técnica','Sesión pre-partido','Sesión de físico') NOT NULL,
   `descripcion` text DEFAULT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
   `duracion` int(11) NOT NULL,
-  `lugar` varchar(100) DEFAULT NULL
+  `lugar` varchar(100) DEFAULT NULL,
+  `equipo_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `entrenamientos`
 --
 
-INSERT INTO `entrenamientos` (`id`, `equipo_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `lugar`) VALUES
-(2, 1, 'Sesión técnica', 'Trabajo con balón y precisión', '2025-12-23', '17:00:00', 90, 'Campo B'),
-(3, 1, 'Sesión de físico', 'Preparación física intensiva', '2025-12-21', '15:00:00', 120, 'Gimnasio'),
-(18, 2, 'Sesión técnica', 'Partido de práctica', '2026-03-25', '12:00:00', 120, 'Campo A');
+INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `lugar`, `equipo_id`) VALUES
+(1, 1, 'Sesión técnica', 'Trabajo con balón y precisión', '2025-12-23', '17:00:00', 90, 'Campo B', NULL),
+(2, 1, 'Sesión de físico', 'Preparación física intensiva', '2025-12-21', '15:00:00', 120, 'Gimnasio', NULL),
+(3, 2, 'Sesión técnica', 'Partido de práctica', '2026-03-25', '12:00:00', 120, 'Campo A', NULL),
+(4, 1, 'Sesión táctica', '', '2026-03-25', '10:00:00', 30, 'Campo A', NULL),
+(21, 1, 'Sesión pre-partido', '', '2026-03-25', '12:04:00', 11, 'Pabellon alcarrachela', NULL),
+(22, 2, 'Sesión táctica', '', '2026-03-02', '14:04:00', 2, 'Pabellon alcarrachela', NULL),
+(23, 2, 'Sesión táctica', '', '2026-03-26', '12:34:00', 12, 'Pabellon alcarrachela', 3);
 
 -- --------------------------------------------------------
 
@@ -122,7 +125,9 @@ CREATE TABLE `equipos` (
 INSERT INTO `equipos` (`id`, `equipo_id`, `nombre`, `categoria`) VALUES
 (1, 2, 'Real Madrid', 'Cadete'),
 (2, 1, 'Barcelona B', 'Senior'),
-(3, 2, 'Real Madrid Castilla', 'Senior');
+(3, 2, 'Real Madrid Castilla', 'Senior'),
+(4, 2, 'Real Madrid A', 'Cadete'),
+(5, 2, 'Real Madrid B', 'Cadete');
 
 -- --------------------------------------------------------
 
@@ -145,7 +150,9 @@ CREATE TABLE `jugadores` (
 INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 (1, 'Antonio Reyes', 21, 'delantero', 3),
 (2, 'Emerson Cruz', 19, 'defensa', 1),
-(22, 'Vinicius', 22, 'delantero', 2);
+(22, 'Vinicius', 22, 'delantero', 2),
+(23, 'Prueba', 33, 'delantero', 3),
+(25, 'Jose', 23, 'portero', 4);
 
 -- --------------------------------------------------------
 
@@ -159,14 +166,14 @@ CREATE TABLE `usuarios` (
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `rol` enum('admin','equipo','entrenador','jugador') DEFAULT NULL,
-  `equipo_id` int(11) DEFAULT NULL
+  `club_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `equipo_id`) VALUES
+INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) VALUES
 (1, 'admin', 'admin@gmail.com', 'admin123', 'admin', 2),
 (2, 'entrenador', 'entrenador@gmail.com', 'entrenador123', 'entrenador', 1),
 (3, 'jugador', 'jugador@gmail.com', 'jugador123', 'jugador', 1),
@@ -195,7 +202,8 @@ ALTER TABLE `entrenadores`
 --
 ALTER TABLE `entrenamientos`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `equipo_id` (`equipo_id`);
+  ADD KEY `equipo_id` (`club_id`),
+  ADD KEY `entrenamiento_equipo_id_fk` (`equipo_id`);
 
 --
 -- Indices de la tabla `entrenamiento_asistencia`
@@ -224,7 +232,7 @@ ALTER TABLE `jugadores`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `equipo_id_usuarios` (`equipo_id`);
+  ADD KEY `equipo_id_usuarios` (`club_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -246,7 +254,7 @@ ALTER TABLE `entrenadores`
 -- AUTO_INCREMENT de la tabla `entrenamientos`
 --
 ALTER TABLE `entrenamientos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenamiento_asistencia`
@@ -258,13 +266,13 @@ ALTER TABLE `entrenamiento_asistencia`
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -287,7 +295,8 @@ ALTER TABLE `entrenadores`
 -- Filtros para la tabla `entrenamientos`
 --
 ALTER TABLE `entrenamientos`
-  ADD CONSTRAINT `entrenamientos_ibfk_1` FOREIGN KEY (`equipo_id`) REFERENCES `clubes` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `entrenamiento_equipo_id_fk` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`),
+  ADD CONSTRAINT `entrenamientos_ibfk_1` FOREIGN KEY (`club_id`) REFERENCES `clubes` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `entrenamiento_asistencia`
@@ -312,7 +321,7 @@ ALTER TABLE `jugadores`
 -- Filtros para la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD CONSTRAINT `equipo_id_usuarios` FOREIGN KEY (`equipo_id`) REFERENCES `clubes` (`id`);
+  ADD CONSTRAINT `equipo_id_usuarios` FOREIGN KEY (`club_id`) REFERENCES `clubes` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

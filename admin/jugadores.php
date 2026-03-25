@@ -37,13 +37,15 @@
     }
 
     #jugadorCard {
-        background: #dbdbdb;
+        background: #e9e9e9;
+        padding: 10px;
         border-radius: 14px;
         overflow: hidden;
         color: rgb(0, 0, 0);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
         transition: 0.3s;
     }
+
 
     #jugadorCard:hover {
         transform: translateY(-6px);
@@ -88,17 +90,38 @@
 
     .posicion {
         margin: 0 0 10px;
-        color: #20b155;
+        color: #000000;
     }
 
-    #categoria {
+    .categoria {
         display: inline-block;
         margin-top: 10px;
         padding: 5px 10px;
-        background: #22c55e;
         border-radius: 8px;
         font-size: 12px;
         font-weight: bold;
+        color: white;
+    }
+
+    /* Colores según categoría */
+    .cadete {
+        background-color: #22c55e;
+        /* verde */
+    }
+
+    .senior {
+        background-color: #3b82f6;
+        /* azul */
+    }
+
+    .juvenil {
+        background-color: #f59e0b;
+        /* naranja */
+    }
+
+    .infantil {
+        background-color: #ef4444;
+        /* rojo */
     }
 
     .btnEliminar {
@@ -144,7 +167,7 @@
         <div id="jugadoresGrid" class="page">
             <?php
      
-        $equipo_id = $_SESSION['equipo_id'];
+        $club_id = $_SESSION['club_id'];
   $sql = "
         SELECT j.id, j.nombre AS jugador, j.edad, j.posicion,
                e.nombre AS equipo, e.categoria, c.nombre AS club
@@ -176,7 +199,9 @@
                 <div id="jugadorInfo">
                     <p><?= $fila["edad"] ?> años</p>
                     <p><?= $fila["equipo"] ?></p>
-                    <span id="categoria"><?= $fila["categoria"] ?></span>
+                    <span class="categoria <?= strtolower($fila['categoria']) ?>">
+                        <?= htmlspecialchars($fila['categoria']) ?>
+                    </span>
                 </div>
                 <form action="eliminar_jugador.php" method="POST"
                     onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
