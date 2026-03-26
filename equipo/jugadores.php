@@ -1,13 +1,14 @@
 <?php
 $club_id = $_SESSION['club_id'];
-
+ $_SESSION['paginaActual'] = 'jugadores';
+ 
 // Obtener todos los equipos del club
 $sqlEquipos = "SELECT id, nombre,categoria FROM equipos WHERE equipo_id = $club_id ORDER BY nombre ASC";
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
 //si hay un equipo seleccionado en GET, si no es la opcion de todos por defecto
-$equipoSeleccionado = isset($_GET['equipo']) ? (int)$_GET['equipo'] : 0;
+$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
 
 // Consulta de jugadores filtrada
 $sql = "
@@ -205,11 +206,11 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <div>
                 <h2>Gestión de Jugadores</h2>
                 <span>Gestiona tu plantilla</span><br>
-                <span> Total de jugadores del club: <?= count($jugadores) ?></span>
+              <span><?= ($equipoSeleccionado == 0) ? "Total de jugadores del club: ". count($jugadores) : "Total de jugadores del equipo: ".count($jugadores) . "/25" ?></span>
             </div>
 
             <!-- Select filtro equipos -->
-            <form method="get">
+            <form method="POST">
                 <label for="equipo">Filtrar por equipo:</label>
                 <select name="equipo" id="equipo" onchange="this.form.submit()">
                     <option value="0">Todos los equipos</option>
