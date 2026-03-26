@@ -12,7 +12,7 @@ function verificarLogin($username, $password)
 
     try {
         // Buscar usuario por nombre
-        $sql = "SELECT id, nombre, email, password, rol, equipo_id
+        $sql = "SELECT id, nombre, email, password, rol, club_id
                 FROM usuarios
                 WHERE nombre = :username
                 LIMIT 1";

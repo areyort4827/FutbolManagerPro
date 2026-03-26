@@ -1,5 +1,7 @@
 <?php
+session_start();
 require_once "../config/conexion.php";
+ $club_id = $_SESSION['club_id'];
 ?>
 
 <!DOCTYPE html>
@@ -91,9 +93,9 @@ body {
         <select name="equipo_id" required>
             <option value="">Seleccionar equipo</option>
             <?php
-            $equipos = $pdo->query("SELECT id, nombre FROM equipos");
+            $equipos = $pdo->query("SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id ORDER BY nombre");
             while($e = $equipos->fetch(PDO::FETCH_ASSOC)){
-                echo "<option value='{$e['id']}'>{$e['nombre']}</option>";
+                echo "<option value='{$e['id']}'>{$e['nombre']} ({$e['categoria']})</option>";
             }
             ?>
         </select>

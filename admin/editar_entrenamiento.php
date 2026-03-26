@@ -124,8 +124,8 @@ if (!$entrenamiento) {
                         <?= $entrenamiento['titulo'] == 'Sesión táctica' ? 'selected' : '' ?>>Sesión táctica</option>
                     <option value="Sesión técnica"
                         <?= $entrenamiento['titulo'] == 'Sesión técnica' ? 'selected' : '' ?>>Sesión técnica</option>
-                    <option value="Sesión de física"
-                        <?= $entrenamiento['titulo'] == 'Sesión de física' ? 'selected' : '' ?>>Sesión de física
+                    <option value="Sesión de físico"
+                        <?= $entrenamiento['titulo'] == 'Sesión de físico' ? 'selected' : '' ?>>Sesión de física
                     </option>
                     <option value="Sesión pre-partido"
                         <?= $entrenamiento['titulo'] == 'Sesión pre-partido' ? 'selected' : '' ?>>Sesión pre-partido

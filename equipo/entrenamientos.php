@@ -1,7 +1,12 @@
 <?php
 include "../config/conexion.php";
-
-$sql = "SELECT * FROM entrenamientos ORDER BY fecha DESC";
+$club_id = $_SESSION['club_id'];
+$sql = "SELECT e.*, eq.nombre AS nombre_equipo, eq.categoria 
+FROM entrenamientos e
+LEFT JOIN equipos eq ON e.equipo_id = eq.id
+WHERE e.club_id = $club_id
+   OR (e.equipo_id IS NOT NULL AND eq.equipo_id = $club_id)
+ORDER BY e.fecha DESC, e.hora DESC;";
 $stmt = $pdo->query($sql);
 $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -194,6 +199,7 @@ foreach($entrenamientos as $e){
                     • 🕒 <?= substr($e['hora'],0,5) ?>
                     • ⏱ <?= $e['duracion'] ?> min
                     • 📍 <?= $e['lugar'] ?>
+                    • 👤 <?= $e['nombre_equipo'] ?> (<?= $e['categoria'] ?>)
                 </div>
 
                 <div class="entrenamientoDescripcion">

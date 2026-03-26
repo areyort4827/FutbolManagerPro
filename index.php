@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
         
-        $_SESSION['equipo_id'] = $user['equipo_id'];
+        $_SESSION['club_id'] = $user['club_id']; // PARA SABER A QUE CLUB PERTENECE EL USUARIO
         $role = $user['rol'];
-        echo $user['equipo_id'];
+
         
         if ($role === 'admin'){
         header("Location: admin/menu.php");
