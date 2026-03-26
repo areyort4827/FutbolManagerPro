@@ -2,8 +2,8 @@
 session_start();
 require_once "../config/conexion.php";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $id = $_GET['id'];
     
     $sql = "DELETE FROM jugadores WHERE id = ?";
     $stmt = $pdo->prepare($sql);

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "../config/conexion.php";
+ $club_id = $_SESSION['club_id'];
 
 if ($_POST) {
     $id = $_POST['id'];
@@ -35,9 +36,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$id]);
 $entrenamiento = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$entrenamiento) {
-    die("Entrenamiento no encontrado");
-}
 ?>
 
 <!DOCTYPE html>
@@ -124,8 +122,8 @@ if (!$entrenamiento) {
                         <?= $entrenamiento['titulo'] == 'Sesión táctica' ? 'selected' : '' ?>>Sesión táctica</option>
                     <option value="Sesión técnica"
                         <?= $entrenamiento['titulo'] == 'Sesión técnica' ? 'selected' : '' ?>>Sesión técnica</option>
-                    <option value="Sesión de física"
-                        <?= $entrenamiento['titulo'] == 'Sesión de física' ? 'selected' : '' ?>>Sesión de física
+                    <option value="Sesión de físico"
+                        <?= $entrenamiento['titulo'] == 'Sesión de físico' ? 'selected' : '' ?>>Sesión de físico
                     </option>
                     <option value="Sesión pre-partido"
                         <?= $entrenamiento['titulo'] == 'Sesión pre-partido' ? 'selected' : '' ?>>Sesión pre-partido
@@ -137,11 +135,11 @@ if (!$entrenamiento) {
                 <label>Equipo</label>
                 <select name="equipo_id" required>
                     <?php
-                    $equipos = $pdo->query("SELECT id, nombre FROM equipos");
+                    $equipos = $pdo->query("SELECT id, nombre,categoria FROM equipos WHERE equipo_id = $club_id");
                     while($e = $equipos->fetch(PDO::FETCH_ASSOC)):
                     ?>
                     <option value="<?= $e['id'] ?>" <?= $entrenamiento['equipo_id'] == $e['id'] ? 'selected' : '' ?>>
-                        <?= $e['nombre'] ?>
+                        <?= $e['nombre'] ." (" . $e['categoria']. ")"?>
                     </option>
                     <?php endwhile; ?>
                 </select>
@@ -171,7 +169,6 @@ if (!$entrenamiento) {
                 <label>Descripción</label>
                 <textarea name="descripcion" rows="3"><?= htmlspecialchars($entrenamiento['descripcion']) ?></textarea>
             </div>
-
             <button type="submit" class="btn-verde">Actualizar Entrenamiento</button>
         </form>
         <a class="volver" href="menu.php">← Volver al menú</a>

@@ -2,10 +2,20 @@
 session_start();
 require_once '../config/auth.php';
 
+  // Detectar la página activa
+$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+unset($_SESSION['paginaActual']); // Borrar para la próxima carga
+
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
     exit;
 }
+    $club_id = $_SESSION['club_id']; // PARA SABER A QUE CLUB PERTENECE EL USUARIO
+   $equipo = $pdo->query("SELECT nombre FROM clubes WHERE id = $club_id");
+            while($e = $equipo->fetch(PDO::FETCH_ASSOC)){
+                $club = $e['nombre'];
+            }
+
 
 $user = $_SESSION['user'];
 $role = 'Equipo';
@@ -37,19 +47,20 @@ $nombre = htmlspecialchars($user['nombre']);
              <div style="font-size: 20px; margin-bottom: 10px;">
                 <i class="fa-solid fa-user"></i>
             </div>
-            <strong><?= strtoupper($nombre) ?></strong><br><br>
+            
+            <strong><?= $club ?></strong><br><br>
             <span class="role-icono equipo-icono">
                 <?= strtoupper($role) ?>
             </span>
         </div>
 
-        <div class="menu">
-            <a class="active" onclick="mostrarPagina('dashboard')">Dashboard</a>
-            <a onclick="mostrarPagina('jugadores')">Jugadores</a>
-            <a onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
-            <a onclick="mostrarPagina('partidos')">Partidos</a>
-            <a onclick="mostrarPagina('estadisticas')">Estadísticas</a>
-            <a onclick="mostrarPagina('calendario')">Calendario</a>
+           <div class="menu">
+            <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">Dashboard</a>
+            <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">Jugadores</a>
+            <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
+            <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">Partidos</a>
+            <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">Estadísticas</a>
+            <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">Calendario</a>
             <a href="../logout.php" style="color:#ef4444; margin-top: 30px;">Cerrar Sesión</a>
         </div>
     </div>
@@ -58,40 +69,32 @@ $nombre = htmlspecialchars($user['nombre']);
 
         <!-- Pantallas  -->
         <!-- Pantalla Principal  -->
-        <div id="dashboard" class="page active">
+        <div id="dashboard" class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>">
             <?php include 'dashboard.php' ?>
         </div>
-
         <!-- Pantalla Jugadores  -->
-        <div id="jugadores" class="page">
+        <div id="jugadores" class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
             <?php include 'jugadores.php' ?>
-
         </div>
 
         <!-- Pantalla Entrenamientos  -->
-        <div id="entrenamientos" class="page">
+        <div id="entrenamientos" class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>">
             <?php include 'entrenamientos.php' ?>
-
         </div>
 
         <!-- Pantalla Partidos  -->
-        <div id="partidos" class="page">
+        <div id="partidos" class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>">
             <?php include 'partidos.php' ?>
-
         </div>
-         <!-- Pantalla Calendario  -->
-        <div id="calendario" class="page">
+        <!-- Pantalla Calendario  -->
+        <div id="calendario" class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>">
             <?php include 'calendario.php' ?>
-
         </div>
         <!-- Pantalla Estadisticas  -->
-        <div id="estadisticas" class="page">
-            <?php include 'estadisticas.php' ?>
 
+        <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
+            <?php include 'estadisticas.php' ?>
         </div>
-       
-       
-        
 
     </div>
 
