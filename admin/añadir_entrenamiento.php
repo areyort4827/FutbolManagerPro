@@ -70,6 +70,7 @@
     <?php
 session_start();
 require_once "../config/conexion.php";
+ $club_id = $_SESSION['club_id'];
 
 // GUARDAR ENTRENAMIENTO
 if (isset($_POST['guardar'])) {
@@ -85,19 +86,21 @@ if (isset($_POST['guardar'])) {
     try {
 
         $sql = "INSERT INTO entrenamientos 
-                (equipo_id,titulo, fecha, hora,duracion, lugar, descripcion)
-                VALUES (:equipo_id,:titulo, :fecha, :hora, :duracion, :lugar, :descripcion)";
+                (equipo_id,titulo, fecha, hora,duracion, lugar, descripcion, club_id)
+                VALUES (:equipo_id, :titulo, :fecha, :hora, :duracion, :lugar, :descripcion, :club_id)";
 
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
+            
             ':equipo_id' => $equipo_id,
             ':titulo' => $titulo,
             ':fecha' => $fecha,
             ':hora' => $hora,
             ':duracion' => $duracion,
             ':lugar' => $lugar,
-            ':descripcion' => $descripcion
+            ':descripcion' => $descripcion,
+            ':club_id' => $club_id
         ]);
     $_SESSION['paginaActual'] = 'entrenamientos';
         header("Location: menu.php");
@@ -120,55 +123,56 @@ if (isset($_POST['guardar'])) {
                 <div class="form-group">
                     <label>Tipo</label>
                     <select name="titulo" required>
-            <option value="">Seleccionar tipo de entrenamiento</option>
-            <option value="Sesión táctica">Sesión táctica</option>
-            <option value="Sesión técnica">Sesión técnica</option>
-            <option value="Sesión de físico">Sesión de físico</option>
-            <option value="Sesión pre-partido">Sesión pre-partido</option>
-        </select>
+                        <option value="">Seleccionar tipo de entrenamiento</option>
+                        <option value="Sesión táctica">Sesión táctica</option>
+                        <option value="Sesión técnica">Sesión técnica</option>
+                        <option value="Sesión de físico">Sesión de físico</option>
+                        <option value="Sesión pre-partido">Sesión pre-partido</option>
+                    </select>
                     </select>
                 </div>
 
-                    <div class="form-group">
-                        <label>Equipo</label>
-                        <select name="equipo_id" required>
-                            <?php    
-            $equipos = $pdo->query("SELECT id, nombre FROM equipos");
+                <div class="form-group">
+                    <label>Equipo</label>
+                    <select name="equipo_id" required>
+                        <?php    
+                           
+            $equipos = $pdo->query("SELECT id, nombre,categoria FROM equipos WHERE equipo_id = $club_id");
             while($e = $equipos->fetch(PDO::FETCH_ASSOC)){
-                echo "<option value='{$e['id']}'>{$e['nombre']}</option>";
+                echo "<option value='{$e['id']}'>{$e['nombre']} ({$e['categoria']})</option>";
             }
          ?>
-                        </select>
-                    </div>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" required>
+                </div>
 
-                    <div class="form-group">
-                        <label>Hora</label>
-                        <input type="time" name="hora" required>
-                    </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" name="hora" required>
+                </div>
 
-                    <div class="form-group">
-                        <label>Duración (minutos)</label>
-                        <input type="number" name="duracion" required>
-                    </div>
+                <div class="form-group">
+                    <label>Duración (minutos)</label>
+                    <input type="number" name="duracion" required>
+                </div>
 
-                    <div class="form-group">
-                        <label>Lugar</label>
-                        <input type="text" name="lugar" required>
-                    </div>
+                <div class="form-group">
+                    <label>Lugar</label>
+                    <input type="text" name="lugar" required>
+                </div>
 
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion"></textarea>
-                    </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="descripcion"></textarea>
+                </div>
 
-                    <button class="btn-verde" name="guardar">
-                        Guardar Entrenamiento
-                    </button>
+                <button class="btn-verde" name="guardar">
+                    Guardar Entrenamiento
+                </button>
 
             </form>
             <a class="volver" href="menu.php">← Volver a Menu</a>

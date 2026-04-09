@@ -1,6 +1,8 @@
 <?php
 include "../config/conexion.php";
 $club_id = $_SESSION['club_id'];
+
+
 $sql = "SELECT e.*, eq.nombre AS nombre_equipo, eq.categoria 
 FROM entrenamientos e
 LEFT JOIN equipos eq ON e.equipo_id = eq.id
@@ -78,7 +80,7 @@ foreach($entrenamientos as $e){
     align-items: center;
     border: 1px solid #e2e8f0;
     transition: .2s;
-}
+} 
 
 .entrenamientoCard:hover {
     border-color: #16a34a;

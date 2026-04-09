@@ -2,9 +2,12 @@
 session_start();
 require_once '../config/auth.php';
 
-  // Detectar la página activa
+// Si viene un POST de la pantalla de jugadores, aseguramos que la página activa sea jugadores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
+    $_SESSION['paginaActual'] = 'jugadores';
+}
+
 $paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
-unset($_SESSION['paginaActual']); // Borrar para la próxima carga
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
