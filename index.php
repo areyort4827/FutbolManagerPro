@@ -5,32 +5,33 @@ require_once 'config/auth.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    $usuario = verificarLogin($username, $password);
+    $usuario = verificarLogin($email, $password);
 
     if ($usuario) {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
 
-        $role = $user['role'];
+        $rol = $user['rol']; 
 
-        if ($role === 'admin'){
-        header("Location: admin/menu.php");
+        if ($rol === 'admin'){
+            header("Location: admin/menu.php");
 
-        }elseif($role === 'entrenador'){
-        header("Location: entrenador/menu.php");
-        }else{
-        header("Location: jugador/menu.php");
+        } elseif ($rol === 'entrenador'){
+            header("Location: entrenador/menu.php");
+
+        } else {
+            header("Location: jugador/menu.php");
         }
         exit;
+
     } else {
         $error = "Usuario o contraseña incorrectos.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -172,28 +173,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="">
-        <div class="input">
-            <label>Usuario</label>
-            <input type="text" name="username" required autofocus>
-        </div>
-
-        <div class="input">
-            <label>Contraseña</label>
-            <input type="password" name="password" required>
-        </div>
-
-        <button type="submit" class="btn-login">Iniciar Sesión</button>
-        <button type="submit" class="btn-registrarse">Registrarse</button>
-
-    </form>
-
-    <div class="demo">
-        <strong>Usuarios de prueba:</strong><br><br>
-        <strong style="color:#22c55e;">Admin:</strong> admin / admin123<br>
-        <strong style="color:#3b82f6;">Equipo:</strong> entrenador / equipo123<br>
-        <strong style="color:#eab308;">Jugador:</strong> jugador / jugador123
+   <form method="POST" action="">
+    <div class="input">
+        <label>Email</label>
+        <input type="email" name="email" required autofocus>
     </div>
+
+    <div class="input">
+        <label>Contraseña</label>
+        <input type="password" name="password" required>
+    </div>
+
+    <button type="submit" class="btn-login">Iniciar Sesión</button>
+    <button type="submit" class="btn-registrarse">Registrarse</button>
+</form>
+
 </div>
 
 </body>
