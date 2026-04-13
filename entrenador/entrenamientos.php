@@ -40,10 +40,6 @@ foreach($entrenamientos as $e){
     font-weight: bold;
     cursor: pointer;
 }
-.entrenamientosHeader span {
-        color: #64748b;
-        font-size: 14px;
-    }
 
 /* Estadisticas */
 .estadisticas {

@@ -26,11 +26,6 @@ foreach($entrenamientos as $e){
     margin-bottom: 25px;
 }
 
-.entrenamientosHeader span {
-        color: #64748b;
-        font-size: 14px;
-    }
-
 .btnAñadir {
     background: #16a34a;
     color: white;
