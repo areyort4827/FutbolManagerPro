@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-04-2026 a las 08:28:30
+-- Tiempo de generación: 13-04-2026 a las 09:32:51
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -221,6 +221,33 @@ INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `partidos`
+--
+
+DROP TABLE IF EXISTS `partidos`;
+CREATE TABLE `partidos` (
+  `id` int(11) NOT NULL,
+  `equipo_local` varchar(100) DEFAULT NULL,
+  `equipo_visitante` varchar(100) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `resultado` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `partidos`
+--
+
+INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `resultado`) VALUES
+(1, 'Real Madrid', 'Barcelona', '2026-04-06', '0-20'),
+(2, 'Sevilla', 'Valencia', '2026-04-12', '2-2'),
+(3, 'Betis', 'Atletico Madrid', '2026-04-15', '1-1'),
+(4, 'Paris', 'Liverpool', '2026-04-11', '3-2'),
+(5, 'Juventus', 'Marsella', '2026-04-17', '1-2'),
+(6, 'Real Madrid', 'FC Barcelona', '2026-04-15', '2-1');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios`
 --
 
@@ -294,6 +321,12 @@ ALTER TABLE `jugadores`
   ADD KEY `jugadores_id_cantera` (`equipo_id`);
 
 --
+-- Indices de la tabla `partidos`
+--
+ALTER TABLE `partidos`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -339,6 +372,12 @@ ALTER TABLE `equipos`
 --
 ALTER TABLE `jugadores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+
+--
+-- AUTO_INCREMENT de la tabla `partidos`
+--
+ALTER TABLE `partidos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
