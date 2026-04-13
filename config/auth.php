@@ -1,38 +1,44 @@
 <?php
+require_once 'conexion.php';
+/**
+ * Verifica el login del usuario
+ * @param string $email
+ * @param string $password
+ * @return array|false
+ */
+function verificarLogin($email, $password)
+{
+    global $pdo;
 
-$usuarios = [
-    // ADMIN
-    [
-        'username' => 'admin',
-        'password' => 'admin123',     // En producción hay que usar password_hash()
-        'role'     => 'admin',
-        'nombre'   => 'Administrador'
-    ],
-    // EQUIPO
-    [
-        'username' => 'entrenador',
-        'password' => 'equipo123',
-        'role'     => 'entrenador',
-        'nombre'   => 'Pep Guardiola'
-    ],
-    // JUGADOR
-    [
-        'username' => 'jugador',
-        'password' => 'jugador123',
-        'role'     => 'jugador',
-        'nombre'   => 'Cristiano Ronaldo'
-    ]
-];
+    try {
+        // Buscar usuario por nombre
+        $sql = "SELECT id, nombre, email, password, rol, club_id
+                FROM usuarios
+                WHERE email = :email
+                LIMIT 1";
 
-// Función para verificar login
-function verificarLogin($username, $password) {
-    global $usuarios;
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':email' => $email
+        ]);
+
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
     
-    foreach ($usuarios as $user) {
-        if ($user['username'] === $username && $user['password'] === $password) {
-            return $user;
+        if ($usuario && $password === $usuario['password']) {
+
+            // nunca guardar password en sesión
+            unset($usuario['password']);
+
+            return $usuario;
         }
+
+        return false;
+
+    } catch (PDOException $e) {
+        die("Error en login: " . $e->getMessage());
     }
-    return false;
 }
-?>
+
+
