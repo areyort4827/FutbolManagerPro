@@ -40,27 +40,37 @@ $nombre = htmlspecialchars($user['nombre']);
 
 <body>
 
-    <div class="sidebar">
-        <div class="logo">FutbolManager Pro</div>
+<div class="sidebar">
+    <div class="logo">
+        FutbolManager Pro
+    </div>
 
-        <div style="padding: 15px; text-align: center; border-bottom: 1px solid #334155; color: white;">
-            <div style="font-size: 20px; margin-bottom: 10px;">
-                <i class="fa-solid fa-user"></i>
-            </div>
-            <strong><?= strtoupper($nombre) ?></strong><br><br>
-            <span class="role-icono admin-icono">
-                <?= strtoupper($role) ?>
-            </span>
-        </div>
-
-        <div class="menu">
-            <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">Dashboard</a>
-            <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">Jugadores</a>
-            <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
-            <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">Partidos</a>
-            <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">Estadísticas</a>
-            <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">Calendario</a>
-            <a href="../logout.php" style="color:#ef4444; margin-top: 30px;">Cerrar Sesión</a>
+   <div class="menu">
+        <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
+            <i class="fa-solid fa-gauge"></i> Dashboard
+        </a>
+        <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
+            <i class="fa-solid fa-user"></i> Jugadores
+        </a>        
+        <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
+            <i class="fa-solid fa-dumbbell"></i> Entrenamientos
+        </a>
+        <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
+            <i class="fa-solid fa-futbol"></i> Partidos
+        </a>
+        <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
+            <i class="fa-solid fa-chart-line"></i> Estadísticas
+        </a>
+        <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
+            <i class="fa-solid fa-calendar"></i> Calendario
+        </a>
+    </div>
+    <!-- USER BOX - Icono a la izquierda + abajo del todo -->
+    <div class="user-box">
+        <i class="fa-solid fa-circle-user"></i>
+        <div class="user-info">
+            <strong><?= strtoupper($nombre) ?></strong>
+            <div class="role"><?= strtoupper($role) ?></div>
         </div>
     </div>
 
