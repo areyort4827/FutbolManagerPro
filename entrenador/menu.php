@@ -172,22 +172,22 @@ $nombre = htmlspecialchars($user['nombre']);
     </div>
 
     <div class="menu">
-        <a class="active" onclick="mostrarPagina('dashboard')">
+        <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
-        <a onclick="mostrarPagina('jugadores')">
+        <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
             <i class="fa-solid fa-user"></i> Jugadores
         </a>        
-        <a onclick="mostrarPagina('entrenamientos')">
+        <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos
         </a>
-        <a onclick="mostrarPagina('partidos')">
+        <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
             <i class="fa-solid fa-futbol"></i> Partidos
         </a>
-        <a onclick="mostrarPagina('estadisticas')">
+        <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
             <i class="fa-solid fa-chart-line"></i> Estadísticas
         </a>
-        <a onclick="mostrarPagina('calendario')">
+        <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
             <i class="fa-solid fa-calendar"></i> Calendario
         </a>
     </div>
