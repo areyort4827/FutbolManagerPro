@@ -47,10 +47,7 @@ $nombre = htmlspecialchars($user['nombre']);
         <div class="menu">
             <a class="active" onclick="mostrarPagina('dashboard')">Dashboard</a>
 
-            <a onclick="mostrarPagina('jugadores')" class="<?= ($role === 'jugador') ? 'restricted' : '' ?>">
-                Plantilla
-            </a>
-
+            <a onclick="mostrarPagina('jugadores')">Plantilla</a>
             <a onclick="mostrarPagina('entrenamientos')">Entrenamientos</a>
             <a onclick="mostrarPagina('partidos')">Partidos</a>
             <a onclick="mostrarPagina('estadisticas')">Estadísticas</a>

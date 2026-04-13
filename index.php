@@ -5,47 +5,39 @@ require_once 'config/auth.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-  if (isset($_POST['registro'])) {
-        header("Location: registro.php");
-        exit;
-    }
-
-  if (isset($_POST['iniciar'])) {
-    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    $usuario = verificarLogin($username, $password);
+    $usuario = verificarLogin($email, $password);
 
     if ($usuario) {
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
-        
+
         $_SESSION['club_id'] = $user['club_id']; // PARA SABER A QUE CLUB PERTENECE EL USUARIO
-        $role = $user['rol'];
 
-        
-        if ($role === 'admin'){
-        header("Location: admin/menu.php");
+        $rol = $user['rol']; 
 
-        }elseif($role === 'entrenador'){
+        if ($rol === 'admin'){
+            header("Location: admin/menu.php");
 
-        
-        header("Location: entrenador/menu.php");
-    
-        }elseif($role === 'equipo'){
-        header("Location: equipo/menu.php");
-        }else{
-        header("Location: jugador/menu.php");
+        } elseif ($rol === 'entrenador'){
+            header("Location: entrenador/menu.php");
+
+        } elseif ($rol === 'equipo'){
+            
+            header("Location: equipo/menu.php");
+
+        } else {
+            header("Location: jugador/menu.php");
         }
         exit;
+
     } else {
         $error = "Usuario o contraseña incorrectos.";
     }
 }
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     body {
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg,#ffffff,#ecfdf5);
+        background: #ffffff;
         height: 100vh;
         display: flex;
         align-items: center;
@@ -187,29 +179,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="">
-        <div class="input">
-            <label>Usuario</label>
-            <input type="text" name="username" required autofocus>
-        </div>
-
-        <div class="input">
-            <label>Contraseña</label>
-            <input type="password" name="password" required>
-        </div>
-
-        <button type="submit" name="iniciar" class="btn-login">Iniciar Sesión</button>
-        <button type="submit" name="registro" class="btn-registrarse" formnovalidate>Registrarse</button>
-
-    </form>
-
-    <div class="demo">
-        <strong>Usuarios de prueba:</strong><br><br>
-        <strong style="color:#eab308;">Admin:</strong> admin / admin123<br>
-          <strong style="color:#ee660b;">Equipo:</strong> equipo / equipo123<br>
-        <strong style="color:#3b82f6;">Entrenador:</strong> entrenador / entrenador123<br>
-        <strong style="color:#22c55e;">Jugador:</strong> jugador / jugador123
+   <form method="POST" action="">
+    <div class="input">
+        <label>Email</label>
+        <input type="email" name="email" required autofocus>
     </div>
+
+    <div class="input">
+        <label>Contraseña</label>
+        <input type="password" name="password" required>
+    </div>
+
+    <button type="submit" class="btn-login">Iniciar Sesión</button>
+    <button type="submit" class="btn-registrarse">Registrarse</button>
+</form>
+
 </div>
 
 </body>

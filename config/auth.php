@@ -2,11 +2,11 @@
 require_once 'conexion.php';
 /**
  * Verifica el login del usuario
- * @param string $username
+ * @param string $email
  * @param string $password
  * @return array|false
  */
-function verificarLogin($username, $password)
+function verificarLogin($email, $password)
 {
     global $pdo;
 
@@ -14,13 +14,13 @@ function verificarLogin($username, $password)
         // Buscar usuario por nombre
         $sql = "SELECT id, nombre, email, password, rol, club_id
                 FROM usuarios
-                WHERE nombre = :username
+                WHERE email = :email
                 LIMIT 1";
 
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
-            ':username' => $username
+            ':email' => $email
         ]);
 
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
