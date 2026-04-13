@@ -196,6 +196,8 @@
         }
     }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -290,6 +292,8 @@
                     <div style="text-align:right; font-size:0.85rem; color:#6b7280;">goles</div>
                 </div>
             </div>
+
+
         </div>
     </div>
 
@@ -373,6 +377,100 @@
     });
     </script>
 
+        <script>
+        let rendimientoChartInstance = null;
+        let golesChartInstance = null;
+        let victoriasChartInstance = null;
+        /* ===== GRÁFICA 1: Rendimiento últimos partidos ===== */
+
+        function crearRendimientoChart() {
+            const ctx = document.getElementById('rendimientoChart').getContext('2d');
+
+            if (rendimientoChartInstance) rendimientoChartInstance.destroy();
+
+            rendimientoChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['J1', 'J2', 'J3', 'J4', 'J5', 'J6'],
+                    datasets: [{
+                        label: 'Puntuación del equipo',
+                        data: [1, 6, 8, 7, 9, 5, 10],
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22,163,74,0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+
+        /* ===== GRÁFICA 2: Goles por jugador ===== */
+
+        function crearGolesChart() {
+            const ctx = document.getElementById('golesChart').getContext('2d');
+
+            if (golesChartInstance) golesChartInstance.destroy();
+
+            golesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Antonio', 'Emerson', 'Messi', 'Cristiano'],
+                    datasets: [{
+                        label: 'Goles',
+                        data: [12, 0, 8, 10],
+                        backgroundColor: '#16a34a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        /* ===== GRÁFICA 3: Victorias del equipo ===== */
+
+        function crearVictoriasChart() {
+            const victorias = 4;
+            const empates = 1;
+            const derrotas = 1;
+            const total = victorias + empates + derrotas;
+
+            document.getElementById("totalVictorias").textContent = victorias;
+            document.getElementById("totalEmpates").textContent = empates;
+            document.getElementById("totalDerrotas").textContent = derrotas;
+            document.getElementById("totalPartidos").textContent = total;
+
+            const ctx = document.getElementById('victoriasChart').getContext('2d');
+
+            if (victoriasChartInstance) victoriasChartInstance.destroy();
+
+            victoriasChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Victorias', 'Empates', 'Derrotas'],
+                    datasets: [{
+                        data: [victorias, empates, derrotas],
+                        backgroundColor: ['#16a34a', '#eab308', '#ef4444']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        </script>
 </body>
 
 </html>
