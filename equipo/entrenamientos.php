@@ -25,11 +25,6 @@ foreach($entrenamientos as $e){
     padding: 30px;
 }
 
- .entrenamientosHeader span {
-        color: #64748b;
-        font-size: 14px;
-    }
-
 /* HEADER */
 .entrenamientosHeader {
     display: flex;
