@@ -60,15 +60,9 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     /* Header */
     .jugadoresHeader {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
+        flex-direction: column;
+        align-items: flex-start;
         margin-bottom: 25px;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-
-    .header-left {
-        flex: 1;
     }
 
     .jugadoresHeader h2 {
@@ -81,11 +75,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         font-size: 14px;
     }
 
-    .filtro-container {
-        margin-top: 10px;
-    }
-
-    /* Botón Añadir a la derecha, misma altura que el select */
+    /* Botón Añadir */
     .btnAñadir {
         background: #16a34a;
         color: white;
@@ -95,8 +85,6 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         font-weight: bold;
         text-decoration: none;
         transition: 0.25s;
-        white-space: nowrap;
-        height: fit-content;
         margin-top: 10px;
     }
 
@@ -111,6 +99,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         border-radius: 6px;
         border: 1px solid #cbd5e1;
         font-size: 14px;
+        margin-top: 10px;
     }
 
     #jugadoresGrid {
@@ -213,32 +202,26 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="jugadoresContenedor">
         <div class="jugadoresHeader">
-            
-            <!-- Izquierda: Título + Filtro -->
-            <div class="header-left">
+            <div>
                 <h2>Gestión de Jugadores</h2>
                 <span>Gestiona tu plantilla</span><br>
-                <span><?= ($equipoSeleccionado == 0) ? "Total de jugadores del club: ". count($jugadores) : "Total de jugadores del equipo: ".count($jugadores) . "/25" ?></span>
-                
-                <!-- Select filtro -->
-                <div class="filtro-container">
-                    <form method="POST" action="">
-                        <label for="equipo">Filtrar por equipo:</label>
-                        <select name="equipo" id="equipo" onchange="this.form.submit()">
-                            <option value="0">Todos los equipos</option>
-                            <?php foreach ($equipos as $equipo): ?>
-                            <option value="<?= $equipo['id']?>" <?= $equipoSeleccionado == $equipo['id'] ? 'selected' : '' ?>>
-                                <?= $equipo['nombre'] . " (" . $equipo['categoria'] . ")"  ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </form>
-                </div>
+              <span><?= ($equipoSeleccionado == 0) ? "Total de jugadores del club: ". count($jugadores) : "Total de jugadores del equipo: ".count($jugadores) . "/25" ?></span>
             </div>
 
-            <!-- Derecha: Botón -->
-            <a href="nuevo_jugador.php" class="btnAñadir">+ Añadir jugador</a>
+            <!-- Select filtro equipos -->
+            <form method="POST" action="">
+                <label for="equipo">Filtrar por equipo:</label>
+                <select name="equipo" id="equipo" onchange="this.form.submit()">
+                    <option value="0">Todos los equipos</option>
+                    <?php foreach ($equipos as $equipo): ?>
+                    <option value="<?= $equipo['id']?>" <?= $equipoSeleccionado == $equipo['id'] ? 'selected' : '' ?>>
+                        <?= $equipo['nombre'] . " (" . $equipo['categoria'] . ")"  ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
 
+            <a href="nuevo_jugador.php" class="btnAñadir">+ Añadir jugador</a>
         </div>
 
         <div id="jugadoresGrid">
