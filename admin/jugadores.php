@@ -1,17 +1,81 @@
+<?php
+$club_id = $_SESSION['club_id'];
+
+// Obtener todos los equipos del club
+$sqlEquipos = "SELECT id, nombre,categoria FROM equipos ORDER BY nombre ASC";
+$resultadoEquipos = $pdo->query($sqlEquipos);
+$equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
+
+//si hay un equipo seleccionado en GET, si no es la opcion de todos por defecto
+$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
+
+// Consulta de jugadores filtrada
+$sql = "
+SELECT 
+    j.id,
+    j.nombre AS jugador,
+    j.edad,
+    j.posicion,
+    e.nombre AS equipo,
+    e.categoria,
+    c.nombre AS club
+FROM jugadores j
+INNER JOIN equipos e ON j.equipo_id = e.id
+INNER JOIN clubes c ON e.equipo_id = c.id
+
+";
+
+// si hay equipo seleccionado se filtra por equipo
+if ($equipoSeleccionado > 0) {
+    $sql .= " WHERE e.id = $equipoSeleccionado";
+}
+
+$sql .= " ORDER BY e.categoria ASC, j.posicion DESC";
+
+$resultado = $pdo->query($sql);
+$jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Gestión de Jugadores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
-    .accionesJugadores {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 20px;
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f5f7fb;
+        margin: 0;
+        padding: 0;
+        color: #374151;
     }
 
+    .jugadoresContenedor {
+        padding: 30px;
+    }
+
+    /* Header */
+    .jugadoresHeader {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 25px;
+    }
+
+    .jugadoresHeader h2 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .jugadoresHeader span {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    /* Botón Añadir */
     .btnAñadir {
         background: #16a34a;
         color: white;
@@ -21,6 +85,7 @@
         font-weight: bold;
         text-decoration: none;
         transition: 0.25s;
+        margin-top: 10px;
     }
 
     .btnAñadir:hover {
@@ -28,125 +93,108 @@
         transform: translateY(-2px);
     }
 
-    /*Pantalla jugadores*/
+    /* Select filtro */
+    form select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
     #jugadoresGrid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
         gap: 20px;
-        margin-top: 20px;
     }
 
-    #jugadorCard {
-        background: #e9e9e9;
-        padding: 10px;
+    .jugadorCard {
+        position: relative;
+        background: #fff;
         border-radius: 14px;
-        overflow: hidden;
-        color: rgb(0, 0, 0);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-        transition: 0.3s;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        transition: 0.25s;
+        overflow: visible;
+        text-align: center;
     }
 
-
-    #jugadorCard:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+    .jugadorCard:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     }
 
-    .jugadorTop {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+    /* Icono Papelera */
+    .deleteIcon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #9ca3af;
+        font-size: 16px;
+        text-decoration: none;
+        padding: 6px;
+        border-radius: 8px;
+        transition: 0.2s;
     }
 
+    .deleteIcon:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    /* Avatar */
     .avatar {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        overflow: hidden;
-        flex-shrink: 0;
-        border: 2px solid rgba(255, 255, 255, 0.4);
+        font-size: 30px;
+        color: #6b7280;
+        margin-bottom: 8px;
     }
 
-    .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .nombreInfo h3 {
-        margin: 0;
+    /* Nombre y Posición */
+    .jugadorHeader h3 {
+        margin: 5px 0 2px;
         font-size: 18px;
-    }
-
-    .nombreInfo span {
-        font-size: 12px;
-        opacity: 0.85;
-    }
-
-    #jugadorInfo {
-        padding: 15px;
+        font-weight: 600;
     }
 
     .posicion {
-        margin: 0 0 10px;
-        color: #000000;
+        font-size: 12px;
+        color: #6b7280;
+        letter-spacing: .5px;
     }
 
+    /* Info jugador */
+    .info {
+        margin: 12px 0;
+        font-size: 14px;
+        color: #374151;
+    }
+
+    /* Categoría badge */
     .categoria {
         display: inline-block;
         margin-top: 10px;
-        padding: 5px 10px;
-        border-radius: 8px;
+        padding: 5px 12px;
+        border-radius: 20px;
         font-size: 12px;
         font-weight: bold;
         color: white;
     }
 
-    /* Colores según categoría */
+    /* Colores por categoría */
     .cadete {
         background-color: #22c55e;
-        /* verde */
     }
 
     .senior {
         background-color: #3b82f6;
-        /* azul */
     }
 
     .juvenil {
         background-color: #f59e0b;
-        /* naranja */
     }
 
     .infantil {
         background-color: #ef4444;
-        /* rojo */
-    }
-
-    .btnEliminar {
-        width: 30%;
-        padding: 8px;
-        background: #ef4444;
-        color: white;
-        border: none;
-        float: right;
-        border-radius: 6px;
-        margin-top: 10px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .jugadoresHeader {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-    }
-
-    .jugadoresContenedor {
-        padding: 30px;
     }
     </style>
 </head>
@@ -156,60 +204,55 @@
         <div class="jugadoresHeader">
             <div>
                 <h2>Gestión de Jugadores</h2>
-                <span style="color:#64748b">Gestiona tu plantilla</span>
+                <span>Gestiona tu plantilla</span><br>
+              <span><?= ($equipoSeleccionado == 0) ? "Total de jugadores del club: ". count($jugadores) : "Total de jugadores del equipo: ".count($jugadores) . "/25" ?></span>
             </div>
 
-            <a href="nuevo_jugador.php" class="btnAñadir">
-                + Añadir jugador
-            </a>
+            <!-- Select filtro equipos -->
+            <form method="POST">
+                <label for="equipo">Filtrar por equipo:</label>
+                <select name="equipo" id="equipo" onchange="this.form.submit()">
+                    <option value="0">Todos los equipos</option>
+                    <?php foreach ($equipos as $equipo): ?>
+                    <option value="<?= $equipo['id']?>" <?= $equipoSeleccionado == $equipo['id'] ? 'selected' : '' ?>>
+                        <?= $equipo['nombre'] . " (" . $equipo['categoria'] . ")"  ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+
+            <a href="nuevo_jugador.php" class="btnAñadir">+ Añadir jugador</a>
         </div>
 
-        <div id="jugadoresGrid" class="page">
-            <?php
-     
-        $club_id = $_SESSION['club_id'];
-  $sql = "
-        SELECT j.id, j.nombre AS jugador, j.edad, j.posicion,
-               e.nombre AS equipo, e.categoria, c.nombre AS club
-        FROM jugadores j
-        INNER JOIN equipos e ON j.equipo_id = e.id
-        INNER JOIN clubes c ON e.equipo_id = c.id
-        ORDER BY c.nombre
-    ";
-    $resultado = $pdo->query($sql);
-    $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
+        <div id="jugadoresGrid">
+            <?php foreach ($jugadores as $jugador): ?>
+            <div class="jugadorCard">
 
-    foreach ($jugadores as $fila){
-    ?>
+                <!-- Icono eliminar -->
+                <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
+                    onclick="return confirm('¿Eliminar jugador?')">
+                    <i class="fa-solid fa-trash"></i>
+                </a>
 
-            <div id="jugadorCard">
-                <div class="jugadorTop">
-
-                    <div class="avatar">
-                        <img src="../assets/img/player.png" alt="Jugador">
-                    </div>
-
-                    <div class="nombreInfo">
-                        <h3><?= htmlspecialchars($fila["jugador"]) ?></h3>
-                        <span class="posicion"><?= strtoupper($fila["posicion"]) ?></span>
-                    </div>
-
+                <!-- Header -->
+                <div class="jugadorHeader">
+                    <i class="fa-regular fa-user avatar"></i>
+                    <h3><?= $jugador['jugador'] ?></h3>
+                    <span class="posicion"><?= strtoupper($jugador['posicion']) ?></span>
                 </div>
 
-                <div id="jugadorInfo">
-                    <p><?= $fila["edad"] ?> años</p>
-                    <p><?= $fila["equipo"] ?></p>
-                    <span class="categoria <?= strtolower($fila['categoria']) ?>">
-                        <?= htmlspecialchars($fila['categoria']) ?>
-                    </span>
-                </div>
-                <form action="eliminar_jugador.php" method="POST"
-                    onsubmit="return confirm('¿Seguro que quieres eliminar a <?= htmlspecialchars($fila['jugador'], ENT_QUOTES) ?>?')">
-                    <input type="hidden" name="id" value="<?= $fila['id'] ?>">
-                    <button type="submit" class="btnEliminar">Eliminar</button>
-                </form>
+                <!-- Info -->
+                <p class="info">
+                    <?= $jugador['edad'] ?> años<br>
+                    <?= $jugador['equipo'] ?>
+                </p>
+
+                <span class="categoria <?= strtolower($jugador['categoria']) ?>">
+                    <?= $jugador['categoria'] ?>
+                </span>
+
             </div>
-            <?php } ?>
+            <?php endforeach; ?>
         </div>
     </div>
 </body>

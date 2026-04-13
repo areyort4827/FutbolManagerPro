@@ -2,6 +2,11 @@
 session_start();
 require_once '../config/auth.php';
 
+// Si viene un POST de la pantalla de jugadores, aseguramos que la página activa sea jugadores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
+    $_SESSION['paginaActual'] = 'jugadores';
+}
+
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
     exit;

@@ -2,7 +2,6 @@
 session_start();
 require_once "../config/conexion.php";
  $club_id = $_SESSION['club_id'];
-
 if ($_POST) {
     $id = $_POST['id'];
     $titulo = $_POST['titulo'];
@@ -171,7 +170,9 @@ $entrenamiento = $stmt->fetch(PDO::FETCH_ASSOC);
             </div>
             <button type="submit" class="btn-verde">Actualizar Entrenamiento</button>
         </form>
-        <a class="volver" href="menu.php">← Volver al menú</a>
+         <button type="button" onclick="history.back()" class="volver">
+        ← Cancelar
+    </button>
     </div>
 </body>
 

@@ -1,7 +1,6 @@
 <?php
 $club_id = $_SESSION['club_id'];
- $_SESSION['paginaActual'] = 'jugadores';
- 
+
 // Obtener todos los equipos del club
 $sqlEquipos = "SELECT id, nombre,categoria FROM equipos WHERE equipo_id = $club_id ORDER BY nombre ASC";
 $resultadoEquipos = $pdo->query($sqlEquipos);
@@ -210,7 +209,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Select filtro equipos -->
-            <form method="POST">
+            <form method="POST" action="">
                 <label for="equipo">Filtrar por equipo:</label>
                 <select name="equipo" id="equipo" onchange="this.form.submit()">
                     <option value="0">Todos los equipos</option>
