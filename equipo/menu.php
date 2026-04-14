@@ -2,12 +2,19 @@
 session_start();
 require_once '../config/auth.php';
 
-// Si viene un POST de la pantalla de jugadores
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
-    $_SESSION['paginaActual'] = 'jugadores';
+$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+
+// Si viene desde la URL (cambio de mes en calendario)
+if (isset($_GET['pagina'])) {
+    $paginaActual = $_GET['pagina'];
+    $_SESSION['paginaActual'] = $_GET['pagina'];
 }
 
-$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+// Si viene de formularios POST (como filtro de jugadores)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
+    $paginaActual = 'jugadores';
+    $_SESSION['paginaActual'] = 'jugadores';
+}
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");

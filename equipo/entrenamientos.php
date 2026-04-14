@@ -60,7 +60,8 @@ foreach($entrenamientos as $e){
     border: 2px solid #bbf7d0;
     border-radius: 12px;
     padding: 20px;
-    background: #f8fafc;
+    background: #ffffff
+   
 }
 
 .estadisticasTitle {
