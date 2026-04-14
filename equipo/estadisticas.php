@@ -40,7 +40,6 @@
         margin-bottom: 30px;
     }
 
-    /* Tarjetas superiores - FORZADO a 4 en una fila */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -204,7 +203,7 @@
         <h2>Estadísticas</h2>
         <p class="subtitle">Análisis del rendimiento del club</p>
 
-        <!-- Tarjetas superiores (ahora siempre 4 en fila en desktop) -->
+     
         <div class="stats-grid">
             <div class="card">
                 <div class="card-header">
