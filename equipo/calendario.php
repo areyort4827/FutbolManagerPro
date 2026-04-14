@@ -1,4 +1,5 @@
 <?php
+
 require_once "../config/conexion.php";
 
 $club_id = $_SESSION['club_id'] ?? 0;
@@ -22,9 +23,6 @@ $stmt = $pdo->prepare($sqlEntrenamientos);
 $stmt->execute(['club_id' => $club_id]);
 $totalEntrenamientos = $stmt->fetchColumn();
 
-
-// Proximos 7 dias
-
 $fechaInicio = date('Y-m-d');
 $fechaFin    = date('Y-m-d', strtotime('+7 days'));
 
@@ -44,12 +42,10 @@ $stmt->execute([
 ]);
 $proximosEventos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Calendario
 $primerDia = mktime(0, 0, 0, $mes, 1, $anio);
 $diasEnMes = date('t', $primerDia);
 $diaInicioSemana = date('w', $primerDia);
 
-// Eventos del mes (ordenados por fecha)
 $sqlEventosMes = "
     SELECT fecha, titulo, hora, lugar 
     FROM entrenamientos 
@@ -79,7 +75,7 @@ foreach ($eventosDelMes as $fecha => $eventos) {
     <h1>Calendario</h1>
     <p class="subtitle">Planificación de entrenamientos</p>
 
-    <div class="stats-grid">
+    <div class="stats-grid-full">
         <div class="stat-card">
             <div class="card-top">
                 <span class="card-title">Eventos Totales</span>
@@ -113,14 +109,28 @@ foreach ($eventosDelMes as $fecha => $eventos) {
         <div class="calendar-box">
             <div class="calendar-header">
                 <?php
-                $mesAnt = $mes - 1;
-                $anioAnt = ($mes == 1) ? $anio - 1 : $anio;
-                $mesSig = $mes + 1;
-                $anioSig = ($mes == 12) ? $anio + 1 : $anio;
+                $mesAnterior = $mes - 1;
+                $anioAnterior = $anio;
+                if ($mesAnterior < 1) {
+                    $mesAnterior = 12;
+                    $anioAnterior = $anio - 1;
+                }
+
+                $mesSiguiente = $mes + 1;
+                $anioSiguiente = $anio;
+                if ($mesSiguiente > 12) {
+                    $mesSiguiente = 1;
+                    $anioSiguiente = $anio + 1;
+                }
                 ?>
-                <a href="menu.php?pagina=calendario&mes=<?= $mesAnt ?>&anio=<?= $anioAnt ?>" class="btn-nav">&lt;</a>
+
+                <a href="menu.php?pagina=calendario&mes=<?= $mesAnterior ?>&anio=<?= $anioAnterior ?>" 
+                   class="btn-nav">&lt;</a>
+
                 <h2><?= date("F Y", $primerDia) ?></h2>
-                <a href="menu.php?pagina=calendario&mes=<?= $mesSig ?>&anio=<?= $anioSig ?>" class="btn-nav">&gt;</a>
+
+                <a href="menu.php?pagina=calendario&mes=<?= $mesSiguiente ?>&anio=<?= $anioSiguiente ?>" 
+                   class="btn-nav">&gt;</a>
             </div>
 
             <div class="calendar-grid">
@@ -152,28 +162,27 @@ foreach ($eventosDelMes as $fecha => $eventos) {
             </div>
         </div>
 
-        <!-- Proximos Entrenamientos -->
         <div class="next-events-box">
             <h3>Próximos Entrenamientos</h3>
             <p class="next-subtitle">Próximos 7 días</p>
 
             <?php if (empty($proximosEventos)): ?>
-                <p class="no-events">No hay entrenamientos próximos</p>
+            <p class="no-events">No hay entrenamientos próximos</p>
             <?php else: ?>
-                <?php foreach ($proximosEventos as $ev): 
+            <?php foreach ($proximosEventos as $ev): 
                     $hora = substr($ev['hora'] ?? '00:00', 0, 5);
                 ?>
-                <div class="event-item">
-                    <div class="event-dot"></div>
-                    <div>
-                        <strong><?= htmlspecialchars($ev['evento']) ?></strong><br>
-                        <small>
-                            <?= date("d M", strtotime($ev['fecha'])) ?> • <?= $hora ?>
-                            <?= $ev['lugar'] ? ' • ' . htmlspecialchars($ev['lugar']) : '' ?>
-                        </small>
-                    </div>
+            <div class="event-item">
+                <div class="event-dot"></div>
+                <div>
+                    <strong><?= htmlspecialchars($ev['evento']) ?></strong><br>
+                    <small>
+                        <?= date("d M", strtotime($ev['fecha'])) ?> • <?= $hora ?>
+                        <?= $ev['lugar'] ? ' • ' . htmlspecialchars($ev['lugar']) : '' ?>
+                    </small>
                 </div>
-                <?php endforeach; ?>
+            </div>
+            <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>
@@ -185,9 +194,9 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 .calendario-contenedor { padding: 20px; }
 .subtitle { color: #64748b; margin-bottom: 30px; font-size: 1.1rem; }
 
-.stats-grid {
+.stats-grid-full {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 40px;
 }
@@ -198,11 +207,10 @@ foreach ($eventosDelMes as $fecha => $eventos) {
     padding: 28px 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     transition: transform 0.3s ease;
+    text-align: center;
 }
 
-.stat-card:hover {
-    transform: translateY(-4px);
-}
+.stat-card:hover { transform: translateY(-4px); }
 
 .card-top {
     display: flex;

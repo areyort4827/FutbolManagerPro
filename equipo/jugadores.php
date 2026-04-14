@@ -2,11 +2,11 @@
 $club_id = $_SESSION['club_id'];
 
 // Obtener todos los equipos del club
-$sqlEquipos = "SELECT id, nombre,categoria FROM equipos WHERE equipo_id = $club_id ORDER BY nombre ASC";
+$sqlEquipos = "SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id ORDER BY nombre ASC";
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
-//si hay un equipo seleccionado en GET, si no es la opcion de todos por defecto
+// Equipo seleccionado (por POST)
 $equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
 
 // Consulta de jugadores filtrada
@@ -25,7 +25,7 @@ INNER JOIN clubes c ON e.equipo_id = c.id
 WHERE e.equipo_id = $club_id
 ";
 
-// si hay equipo seleccionado se filtra por equipo
+// Filtrar por equipo si se selecciona uno
 if ($equipoSeleccionado > 0) {
     $sql .= " AND e.id = $equipoSeleccionado";
 }
@@ -85,7 +85,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         margin-top: 10px;
     }
 
-    /* Botón Añadir a la derecha, misma altura que el select */
+    /* Botón Añadir */
     .btnAñadir {
         background: #16a34a;
         color: white;
@@ -135,11 +135,33 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     }
 
-    /* Icono Papelera */
-    .deleteIcon {
+    /* Contenedor de iconos de acción */
+    .action-icons {
         position: absolute;
         top: 10px;
         right: 10px;
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+    }
+
+    /* Icono Editar */
+    .editIcon {
+        color: #64748b;
+        font-size: 16px;
+        text-decoration: none;
+        padding: 6px;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
+
+    .editIcon:hover {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    /* Icono Eliminar */
+    .deleteIcon {
         color: #9ca3af;
         font-size: 16px;
         text-decoration: none;
@@ -191,22 +213,10 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
         color: white;
     }
 
-    /* Colores por categoría */
-    .cadete {
-        background-color: #22c55e;
-    }
-
-    .senior {
-        background-color: #3b82f6;
-    }
-
-    .juvenil {
-        background-color: #f59e0b;
-    }
-
-    .infantil {
-        background-color: #ef4444;
-    }
+    .cadete   { background-color: #22c55e; }
+    .senior   { background-color: #3b82f6; }
+    .juvenil  { background-color: #f59e0b; }
+    .infantil { background-color: #ef4444; }
     </style>
 </head>
 
@@ -236,7 +246,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <!-- Derecha: Botón -->
+            <!-- Derecha: Botón Añadir -->
             <a href="nuevo_jugador.php" class="btnAñadir">+ Añadir jugador</a>
 
         </div>
@@ -245,27 +255,35 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($jugadores as $jugador): ?>
             <div class="jugadorCard">
 
-                <!-- Icono eliminar -->
-                <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
-                    onclick="return confirm('¿Eliminar jugador?')">
-                    <i class="fa-solid fa-trash"></i>
-                </a>
+                <!-- Iconos de acción: Editar y Eliminar -->
+                <div class="action-icons">
+                    <!-- Editar -->
+                    <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar jugador">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    
+                    <!-- Eliminar -->
+                    <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
+                        onclick="return confirm('¿Eliminar este jugador? Esta acción no se puede deshacer.')">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
 
                 <!-- Header -->
                 <div class="jugadorHeader">
                     <i class="fa-regular fa-user avatar"></i>
-                    <h3><?= $jugador['jugador'] ?></h3>
-                    <span class="posicion"><?= strtoupper($jugador['posicion']) ?></span>
+                    <h3><?= htmlspecialchars($jugador['jugador']) ?></h3>
+                    <span class="posicion"><?= strtoupper(htmlspecialchars($jugador['posicion'])) ?></span>
                 </div>
 
                 <!-- Info -->
                 <p class="info">
-                    <?= $jugador['edad'] ?> años<br>
-                    <?= $jugador['equipo'] ?>
+                    <?= htmlspecialchars($jugador['edad']) ?> años<br>
+                    <?= htmlspecialchars($jugador['equipo']) ?>
                 </p>
 
                 <span class="categoria <?= strtolower($jugador['categoria']) ?>">
-                    <?= $jugador['categoria'] ?>
+                    <?= htmlspecialchars($jugador['categoria']) ?>
                 </span>
 
             </div>

@@ -206,8 +206,8 @@ foreach($entrenamientos as $e){
                     📅 <?= date("d M Y", strtotime($e['fecha'])) ?>
                     • 🕒 <?= substr($e['hora'],0,5) ?>
                     • ⏱ <?= $e['duracion'] ?> min
-                    • 📍 <?= $e['lugar'] ?>
-                    • 👤 <?= $e['nombre_equipo'] ?> (<?= $e['categoria'] ?>)
+                    • 📍 <?= $e['lugar'] ?> 
+                    • 👤 <?=  $e['nombre_equipo'] ?> (<?= $e['categoria'] ?>)
                 </div>
 
                 <div class="entrenamientoDescripcion">
