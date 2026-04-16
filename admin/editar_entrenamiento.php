@@ -137,11 +137,11 @@ if (!$entrenamiento) {
                 <label>Equipo</label>
                 <select name="equipo_id" required>
                     <?php
-                    $equipos = $pdo->query("SELECT id, nombre FROM equipos");
+                    $equipos = $pdo->query("SELECT id, nombre,categoria FROM equipos");
                     while($e = $equipos->fetch(PDO::FETCH_ASSOC)):
                     ?>
                     <option value="<?= $e['id'] ?>" <?= $entrenamiento['equipo_id'] == $e['id'] ? 'selected' : '' ?>>
-                        <?= $e['nombre'] ?>
+                        <?= $e['nombre'] ." (" . $e['categoria']. ")"?>
                     </option>
                     <?php endwhile; ?>
                 </select>

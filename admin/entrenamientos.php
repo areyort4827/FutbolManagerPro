@@ -1,24 +1,29 @@
 <?php
 include "../config/conexion.php";
 
-$sql = "SELECT * FROM entrenamientos ORDER BY fecha DESC";
+$sql = "SELECT e.*, 
+               eq.nombre AS nombre_equipo, 
+               eq.categoria,
+               c.nombre AS nombre_club,
+               (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.equipo_id) as total_jugadores_equipo
+        FROM entrenamientos e
+        LEFT JOIN equipos eq ON e.equipo_id = eq.id
+        LEFT JOIN clubes c ON e.club_id = c.id
+        ORDER BY e.fecha DESC, e.hora DESC";
+
 $stmt = $pdo->query($sql);
 $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $totalEntrenamientos = count($entrenamientos);
 $horasTotales = 0;
-
 foreach($entrenamientos as $e){
     $horasTotales += $e['duracion'];
 }
 ?>
 
 <style>
-.entrenamientosContenedor {
-    padding: 30px;
-}
+.entrenamientosContenedor { padding: 30px; }
 
-/* HEADER */
 .entrenamientosHeader {
     display: flex;
     justify-content: space-between;
@@ -27,9 +32,9 @@ foreach($entrenamientos as $e){
 }
 
 .entrenamientosHeader span {
-        color: #64748b;
-        font-size: 14px;
-    }
+    color: #64748b;
+    font-size: 14px;
+}
 
 .btnAñadir {
     background: #16a34a;
@@ -41,7 +46,7 @@ foreach($entrenamientos as $e){
     cursor: pointer;
 }
 
-/* Estadisticas */
+/* Estadísticas */
 .estadisticas {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -56,18 +61,10 @@ foreach($entrenamientos as $e){
     background: #f8fafc;
 }
 
-.estadisticasTitle {
-    color: #64748b;
-    font-size: 14px;
-}
+.estadisticasTitle { color: #64748b; font-size: 14px; }
+.estadisticasValue { font-size: 22px; font-weight: bold; margin-top: 8px; }
 
-.estadisticasValue {
-    font-size: 22px;
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-/* LISTA */
+/* Lista */
 .entrenamientoCard {
     background: white;
     border-radius: 12px;
@@ -80,14 +77,13 @@ foreach($entrenamientos as $e){
     transition: .2s;
 }
 
-.entrenamientoCard:hover {
-    border-color: #16a34a;
-}
+.entrenamientoCard:hover { border-color: #16a34a; }
 
 .entrenamientoInfo {
     display: flex;
     gap: 15px;
     align-items: flex-start;
+    flex: 1;
 }
 
 .icon-box {
@@ -98,43 +94,57 @@ foreach($entrenamientos as $e){
     font-size: 20px;
 }
 
-.entrenamientoTitle {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
+.entrenamientoTitle { font-weight: bold; margin-bottom: 5px; }
 
 .entrenamientoMeta {
     color: #64748b;
     font-size: 14px;
+    margin-top: 4px;
 }
 
 .entrenamientoDescripcion {
     font-size: 14px;
-    margin-top: 5px;
+    margin-top: 6px;
 }
 
-/* BOTONES */
+/* Botones unificados */
 .actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
-.btnEditar {
+.btn-action {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 90px;
+    text-align: center;
+}
+
+.btn-editar {
     background: #dcfce7;
-    border: 1px solid #16a34a;
     color: #16a34a;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
+    border: 1px solid #16a34a;
 }
 
-.btnBorrar {
+.btn-asistencia {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #1e40af;
+}
+
+.btn-eliminar {
     background: #fee2e2;
-    border: 1px solid #ef4444;
     color: #ef4444;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
+    border: 1px solid #ef4444;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
 }
 </style>
 
@@ -143,7 +153,7 @@ foreach($entrenamientos as $e){
     <div class="entrenamientosHeader">
         <div>
             <h2>Gestión de Entrenamientos</h2>
-            <span style="color:#64748b">Planifica y registra las sesiones de entrenamiento</span>
+            <span style="color:#64748b">Todos los entrenamientos del sistema</span>
         </div>
 
         <a href="añadir_entrenamiento.php" class="btnAñadir">
@@ -151,24 +161,20 @@ foreach($entrenamientos as $e){
         </a>
     </div>
 
-    <!-- Estadisticas -->
+    <!-- Estadísticas -->
     <div class="estadisticas">
-
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Total Entrenamientos</div>
             <div class="estadisticasValue"><?= $totalEntrenamientos ?></div>
         </div>
-
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Asistencia Promedio</div>
             <div class="estadisticasValue">20</div>
         </div>
-
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Horas Totales</div>
             <div class="estadisticasValue"><?= $horasTotales ?> min</div>
         </div>
-
     </div>
 
     <!-- LISTA -->
@@ -180,41 +186,53 @@ foreach($entrenamientos as $e){
 
             <div class="icon-box">
                 <?php
-    $icono = match($e['titulo']) {
-        'Sesión técnica' => 'fa-futbol',
-        'Sesión táctica' => 'fa-clipboard-list',
-        'Sesión de físico' => 'fa-dumbbell',
-        'Sesión pre-partido' => 'fa-flag-checkered',
-        default => 'fa-futbol'
-    };
-    echo "<i class='fa-solid $icono'></i>";
-    ?>
+                $icono = match($e['titulo']) {
+                    'Sesión técnica' => 'fa-futbol',
+                    'Sesión táctica' => 'fa-clipboard-list',
+                    'Sesión de físico' => 'fa-dumbbell',
+                    'Sesión pre-partido' => 'fa-flag-checkered',
+                    default => 'fa-futbol'
+                };
+                echo "<i class='fa-solid $icono'></i>";
+                ?>
             </div>
 
-            <div>
+            <div style="flex:1">
                 <div class="entrenamientoTitle"><?= htmlspecialchars($e['titulo']) ?></div>
 
                 <div class="entrenamientoMeta">
                     📅 <?= date("d M Y", strtotime($e['fecha'])) ?>
                     • 🕒 <?= substr($e['hora'],0,5) ?>
                     • ⏱ <?= $e['duracion'] ?> min
-                    • 📍 <?= $e['lugar'] ?>
+                    • 📍 <?= htmlspecialchars($e['lugar'] ?? 'No especificado') ?>
+                    • 👤 <?= htmlspecialchars($e['nombre_equipo'] ?? 'Sin equipo') ?> 
+                    (<?= htmlspecialchars($e['categoria'] ?? '') ?>)
+                    • <strong><?= htmlspecialchars($e['nombre_club'] ?? 'Sin club') ?></strong>
                 </div>
 
                 <div class="entrenamientoDescripcion">
-                    <?= htmlspecialchars($e['descripcion']) ?>
+                    <?= htmlspecialchars($e['descripcion'] ?? '') ?>
+                </div>
+
+                <div class="entrenamientoMeta" style="margin-top: 8px;">
+                    👥 Asistentes: <strong><?= $e['num_asistentes'] ?? 0 ?></strong> / 
+                    <?= $e['total_jugadores_equipo'] ?? 0 ?> jugadores
                 </div>
             </div>
 
         </div>
 
         <div class="actions">
-            <a class="btnEditar" href="editar_entrenamiento.php?id=<?= $e['id'] ?>">Editar</a>
-
-            <form action="eliminar_entrenamiento.php" method="POST">
+            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">
+                Asistencia
+            </button>
+            
+            <a href="editar_entrenamiento.php?id=<?= $e['id'] ?>" class="btn-action btn-editar">Editar</a>
+            
+            <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
                 <input type="hidden" name="id" value="<?= $e['id'] ?>">
-                <button class="btnBorrar"
-                    onclick="return confirm('¿Estás seguro de que deseas eliminar este entrenamiento?')">
+                <button type="submit" class="btn-action btn-eliminar" 
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar este entrenamiento?')">
                     Eliminar
                 </button>
             </form>
@@ -225,3 +243,32 @@ foreach($entrenamientos as $e){
     <?php endforeach; ?>
 
 </div>
+
+<!-- Modal Asistencia -->
+<div id="modalAsistencia" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); z-index:1000; min-width:340px;">
+    <h3>Actualizar Asistentes</h3>
+    <form method="POST" action="guardar_asistencia.php">
+        <input type="hidden" name="entrenamiento_id" id="modal_entrenamiento_id">
+        
+        <label style="display:block; margin:15px 0 8px;">Número de jugadores que asistieron:</label>
+        <input type="number" name="num_asistentes" id="modal_num_asistentes" min="0" style="width:100%; padding:12px; font-size:1.1rem; border:1px solid #ddd; border-radius:8px;">
+        
+        <br><br>
+        <button type="submit" class="btn-verde" style="width:100%; padding:12px;">Guardar Asistencia</button>
+        <button type="button" onclick="cerrarModal()" style="width:100%; margin-top:8px; padding:12px; background:#f1f5f9; border:none; border-radius:8px; cursor:pointer;">
+            Cancelar
+        </button>
+    </form>
+</div>
+
+<script>
+function editarAsistencia(id) {
+    document.getElementById('modal_entrenamiento_id').value = id;
+    document.getElementById('modal_num_asistentes').value = 0; // valor por defecto
+    document.getElementById('modalAsistencia').style.display = 'block';
+}
+
+function cerrarModal() {
+    document.getElementById('modalAsistencia').style.display = 'none';
+}
+</script>
