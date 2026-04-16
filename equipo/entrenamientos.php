@@ -30,7 +30,6 @@ foreach($entrenamientos as $e){
     }
 }
 
-// Cálculo del número medio de asistentes
 $asistenciaPromedio = $entrenamientosConAsistencia > 0 
                       ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
                       : 0;
@@ -93,6 +92,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     display: flex;
     gap: 15px;
     align-items: flex-start;
+    flex: 1;
 }
 
 .icon-box {
@@ -116,7 +116,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     margin-top: 6px;
 }
 
-/* Botones unificados */
+/* Botones */
 .actions {
     display: flex;
     gap: 8px;
@@ -130,28 +130,59 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s;
+    min-width: 90px;
+    text-align: center;
 }
 
-.btn-editar {
-    background: #dcfce7;
-    color: #16a34a;
-    border: 1px solid #16a34a;
+.btn-editar   { background: #dcfce7; color: #16a34a; border: 1px solid #16a34a; }
+.btn-asistencia { background: #dbeafe; color: #1e40af; border: 1px solid #1e40af; }
+.btn-eliminar { background: #fee2e2; color: #ef4444; border: 1px solid #ef4444; }
+
+.btn-action:hover { transform: translateY(-2px); }
+
+/* Modales */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
 }
 
-.btn-asistencia {
-    background: #dbeafe;
-    color: #1e40af;
-    border: 1px solid #1e40af;
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 520px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.btn-eliminar {
-    background: #fee2e2;
-    color: #ef4444;
-    border: 1px solid #ef4444;
+.modal-content label {
+    display: block;
+    margin: 12px 0 5px;
+    font-weight: 500;
 }
 
-.btn-action:hover {
-    transform: translateY(-2px);
+.modal-content input, .modal-content select, .modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-verde {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
 }
 </style>
 
@@ -163,9 +194,9 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
             <span style="color:#64748b">Planifica y registra las sesiones de entrenamiento</span>
         </div>
 
-        <a href="añadir_entrenamiento.php" class="btnAñadir">
+        <button onclick="abrirModal('modalAñadir')" class="btnAñadir">
             + Añadir entrenamiento
-        </a>
+        </button>
     </div>
 
     <!-- Estadísticas -->
@@ -188,9 +219,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     <?php foreach($entrenamientos as $e): ?>
 
     <div class="entrenamientoCard">
-
         <div class="entrenamientoInfo">
-
             <div class="icon-box">
                 <?php
                 $icono = match($e['titulo']) {
@@ -204,9 +233,8 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
                 ?>
             </div>
 
-            <div>
+            <div style="flex:1">
                 <div class="entrenamientoTitle"><?= htmlspecialchars($e['titulo']) ?></div>
-
                 <div class="entrenamientoMeta">
                     📅 <?= date("d M Y", strtotime($e['fecha'])) ?>
                     • 🕒 <?= substr($e['hora'],0,5) ?>
@@ -214,25 +242,19 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
                     • 📍 <?= htmlspecialchars($e['lugar'] ?? 'No especificado') ?>
                     • 👤 <?= htmlspecialchars($e['nombre_equipo'] ?? 'Sin equipo') ?> (<?= htmlspecialchars($e['categoria'] ?? '') ?>)
                 </div>
-
                 <div class="entrenamientoDescripcion">
                     <?= htmlspecialchars($e['descripcion'] ?? '') ?>
                 </div>
-
                 <div class="entrenamientoMeta" style="margin-top: 8px;">
                     👥 Asistentes: <strong><?= $e['num_asistentes'] ?? 0 ?></strong> / 
                     <?= $e['total_jugadores_equipo'] ?? 0 ?> jugadores
                 </div>
             </div>
-
         </div>
 
         <div class="actions">
-            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">
-                Asistencia
-            </button>
-            
-            <a href="editar_entrenamiento.php?id=<?= $e['id'] ?>" class="btn-action btn-editar">Editar</a>
+            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">Asistencia</button>
+            <button onclick="editarEntrenamiento(<?= htmlspecialchars(json_encode($e)) ?>)" class="btn-action btn-editar">Editar</button>
             
             <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
                 <input type="hidden" name="id" value="<?= $e['id'] ?>">
@@ -242,38 +264,135 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
                 </button>
             </form>
         </div>
-
     </div>
 
     <?php endforeach; ?>
 
 </div>
 
-<!-- Modal Asistencia -->
-<div id="modalAsistencia" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2); z-index:1000; min-width:320px;">
-    <h3>Actualizar Asistentes</h3>
-    <form method="POST" action="guardar_asistencia.php">
-        <input type="hidden" name="entrenamiento_id" id="modal_entrenamiento_id">
-        
-        <label style="display:block; margin:15px 0 8px;">Número de jugadores que asistieron:</label>
-        <input type="number" name="num_asistentes" id="modal_num_asistentes" min="0" style="width:100%; padding:12px; font-size:1.1rem; border:1px solid #ddd; border-radius:8px;">
-        
-        <br><br>
-        <button type="submit" class="btn-verde" style="width:100%; padding:12px;">Guardar Asistencia</button>
-        <button type="button" onclick="cerrarModal()" style="width:100%; margin-top:8px; padding:12px; background:#f1f5f9; border:none; border-radius:8px; cursor:pointer;">
-            Cancelar
-        </button>
-    </form>
+<!-- ====================== MODAL AÑADIR ENTRENAMIENTO ====================== -->
+<div id="modalAñadir" class="modal">
+    <div class="modal-content">
+        <h3>Añadir Nuevo Entrenamiento</h3>
+        <form method="POST" action="añadir_entrenamiento.php">
+            <label>Título</label>
+            <select name="titulo" required>
+                <option value="">Seleccionar tipo</option>
+                <option value="Sesión táctica">Sesión táctica</option>
+                <option value="Sesión técnica">Sesión técnica</option>
+                <option value="Sesión de físico">Sesión de físico</option>
+                <option value="Sesión pre-partido">Sesión pre-partido</option>
+            </select>
+
+            <label>Equipo</label>
+            <select name="equipo_id" required>
+                <?php
+                $equipos = $pdo->query("SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id");
+                while($eq = $equipos->fetch(PDO::FETCH_ASSOC)):
+                ?>
+                    <option value="<?= $eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['categoria']) ?>)</option>
+                <?php endwhile; ?>
+            </select>
+
+            <label>Fecha</label>
+            <input type="date" name="fecha" required>
+
+            <label>Hora</label>
+            <input type="time" name="hora" required>
+
+            <label>Duración (minutos)</label>
+            <input type="number" name="duracion" required min="1">
+
+            <label>Lugar</label>
+            <input type="text" name="lugar">
+
+            <label>Descripción</label>
+            <textarea name="descripcion" rows="4"></textarea>
+
+            <button type="submit" class="btn-verde">Guardar Entrenamiento</button>
+            <button type="button" onclick="cerrarModal('modalAñadir')">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- ====================== MODAL ASISTENCIA ====================== -->
+<div id="modalAsistencia" class="modal">
+    <div class="modal-content">
+        <h3>Actualizar Asistentes</h3>
+        <form method="POST" action="guardar_asistencia.php">
+            <input type="hidden" name="entrenamiento_id" id="asistencia_id">
+            <label>Número de jugadores que asistieron:</label>
+            <input type="number" name="num_asistentes" id="asistencia_num" min="0" required>
+            <button type="submit" class="btn-verde">Guardar Asistencia</button>
+            <button type="button" onclick="cerrarModal('modalAsistencia')">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- ====================== MODAL EDITAR ====================== -->
+<div id="modalEditar" class="modal">
+    <div class="modal-content">
+        <h3>Editar Entrenamiento</h3>
+        <form method="POST" action="editar_entrenamiento.php">
+            <input type="hidden" name="id" id="edit_id">
+            <input type="hidden" name="equipo_id" id="edit_equipo_id">
+
+            <label>Título</label>
+            <select name="titulo" id="edit_titulo" required>
+                <option value="Sesión táctica">Sesión táctica</option>
+                <option value="Sesión técnica">Sesión técnica</option>
+                <option value="Sesión de físico">Sesión de físico</option>
+                <option value="Sesión pre-partido">Sesión pre-partido</option>
+            </select>
+
+            <label>Fecha</label>
+            <input type="date" name="fecha" id="edit_fecha" required>
+
+            <label>Hora</label>
+            <input type="time" name="hora" id="edit_hora" required>
+
+            <label>Duración (minutos)</label>
+            <input type="number" name="duracion" id="edit_duracion" required>
+
+            <label>Lugar</label>
+            <input type="text" name="lugar" id="edit_lugar">
+
+            <label>Descripción</label>
+            <textarea name="descripcion" id="edit_descripcion" rows="4"></textarea>
+
+            <button type="submit" class="btn-verde">Guardar Cambios</button>
+            <button type="button" onclick="cerrarModal('modalEditar')">Cancelar</button>
+        </form>
+    </div>
 </div>
 
 <script>
-function editarAsistencia(id) {
-    document.getElementById('modal_entrenamiento_id').value = id;
-    document.getElementById('modal_num_asistentes').value = document.getElementById('asistentes-' + id)?.innerText || 0;
-    document.getElementById('modalAsistencia').style.display = 'block';
+function abrirModal(id) {
+    document.getElementById(id).style.display = 'block';
 }
 
-function cerrarModal() {
-    document.getElementById('modalAsistencia').style.display = 'none';
+function cerrarModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function editarAsistencia(id) {
+    document.getElementById('asistencia_id').value = id;
+    document.getElementById('asistencia_num').value = 0;
+    abrirModal('modalAsistencia');
+}
+
+function editarEntrenamiento(entrenamiento) {
+    const data = typeof entrenamiento === 'string' ? JSON.parse(entrenamiento) : entrenamiento;
+
+    document.getElementById('edit_id').value = data.id;
+    document.getElementById('edit_equipo_id').value = data.equipo_id || '';
+    document.getElementById('edit_titulo').value = data.titulo;
+    document.getElementById('edit_fecha').value = data.fecha;
+    document.getElementById('edit_hora').value = data.hora ? data.hora.substring(0,5) : '';
+    document.getElementById('edit_duracion').value = data.duracion;
+    document.getElementById('edit_lugar').value = data.lugar || '';
+    document.getElementById('edit_descripcion').value = data.descripcion || '';
+
+    abrirModal('modalEditar');
 }
 </script>
