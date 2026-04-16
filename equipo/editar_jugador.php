@@ -87,7 +87,7 @@ $equipos = $stmtEquipos->fetchAll(PDO::FETCH_ASSOC);
     <style>
     body {
         font-family: 'Inter', sans-serif;
-        background: #f5f7fb;
+        background: #ecfdf5;
         margin: 0;
         padding: 0;
         color: #374151;
