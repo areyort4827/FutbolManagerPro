@@ -16,9 +16,22 @@ $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $totalEntrenamientos = count($entrenamientos);
 $horasTotales = 0;
+$asistenciaTotal = 0;
+$entrenamientosConAsistencia = 0;
+
 foreach($entrenamientos as $e){
     $horasTotales += $e['duracion'];
+    
+    if (isset($e['num_asistentes']) && $e['num_asistentes'] > 0) {
+        $asistenciaTotal += $e['num_asistentes'];
+        $entrenamientosConAsistencia++;
+    }
 }
+
+// Cálculo del número medio de asistentes
+$asistenciaPromedio = $entrenamientosConAsistencia > 0 
+                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
+                      : 0;
 ?>
 
 <style>
@@ -169,7 +182,7 @@ foreach($entrenamientos as $e){
         </div>
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Asistencia Promedio</div>
-            <div class="estadisticasValue">20</div>
+            <div class="estadisticasValue"><?= $asistenciaPromedio ?></div>
         </div>
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Horas Totales</div>
@@ -264,7 +277,7 @@ foreach($entrenamientos as $e){
 <script>
 function editarAsistencia(id) {
     document.getElementById('modal_entrenamiento_id').value = id;
-    document.getElementById('modal_num_asistentes').value = 0; // valor por defecto
+    document.getElementById('modal_num_asistentes').value = 0;
     document.getElementById('modalAsistencia').style.display = 'block';
 }
 

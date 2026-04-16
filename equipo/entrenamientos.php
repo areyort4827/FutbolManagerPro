@@ -18,9 +18,22 @@ $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $totalEntrenamientos = count($entrenamientos);
 $horasTotales = 0;
+$asistenciaTotal = 0;
+$entrenamientosConAsistencia = 0;
+
 foreach($entrenamientos as $e){
     $horasTotales += $e['duracion'];
+    
+    if (isset($e['num_asistentes']) && $e['num_asistentes'] > 0) {
+        $asistenciaTotal += $e['num_asistentes'];
+        $entrenamientosConAsistencia++;
+    }
 }
+
+// Cálculo del número medio de asistentes
+$asistenciaPromedio = $entrenamientosConAsistencia > 0 
+                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
+                      : 0;
 ?>
 
 <style>
@@ -163,7 +176,7 @@ foreach($entrenamientos as $e){
         </div>
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Asistencia Promedio</div>
-            <div class="estadisticasValue">20</div>
+            <div class="estadisticasValue"><?= $asistenciaPromedio ?></div>
         </div>
         <div class="estadisticasCard">
             <div class="estadisticasTitle">Horas Totales</div>
@@ -215,14 +228,12 @@ foreach($entrenamientos as $e){
         </div>
 
         <div class="actions">
-             <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">
+            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">
                 Asistencia
             </button>
             
             <a href="editar_entrenamiento.php?id=<?= $e['id'] ?>" class="btn-action btn-editar">Editar</a>
             
-           
-
             <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
                 <input type="hidden" name="id" value="<?= $e['id'] ?>">
                 <button type="submit" class="btn-action btn-eliminar" 
