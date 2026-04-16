@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-04-2026 a las 09:32:51
+-- Tiempo de generación: 16-04-2026 a las 09:31:11
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -41,7 +41,10 @@ CREATE TABLE `clubes` (
 
 INSERT INTO `clubes` (`id`, `nombre`) VALUES
 (1, 'Barcelona'),
-(2, 'Real Madrid');
+(2, 'Real Madrid'),
+(3, 'Atlético de Madrid'),
+(4, 'Valencia CF'),
+(5, 'Sevilla FC');
 
 -- --------------------------------------------------------
 
@@ -80,6 +83,7 @@ CREATE TABLE `entrenamientos` (
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
   `duracion` int(11) NOT NULL,
+  `num_asistentes` int(11) DEFAULT 0,
   `lugar` varchar(100) DEFAULT NULL,
   `equipo_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -88,16 +92,31 @@ CREATE TABLE `entrenamientos` (
 -- Volcado de datos para la tabla `entrenamientos`
 --
 
-INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `lugar`, `equipo_id`) VALUES
-(1, 1, 'Sesión de físico', 'Trabajo con balón y precisión', '2025-12-23', '17:00:00', 90, 'Campo B', 2),
-(3, 2, 'Sesión técnica', 'Partido de práctica', '2026-03-25', '12:00:00', 120, 'Campo A', 4),
-(4, 2, 'Sesión táctica', '', '2026-03-25', '10:00:00', 30, 'Campo A', 5),
-(21, 1, 'Sesión de físico', '', '2026-03-25', '12:04:00', 11, 'Pabellon alcarrachela', 10),
-(22, 2, 'Sesión táctica', '', '2026-03-02', '14:04:00', 2, 'Pabellon alcarrachela', 5),
-(23, 2, 'Sesión de físico', '', '2026-03-26', '12:34:00', 12, 'Pabellon alcarrachela', 3),
-(26, 2, 'Sesión táctica', '', '2026-04-07', '15:11:00', 35, 'Gimnasio', 3),
-(27, 2, 'Sesión táctica', '', '2026-04-07', '15:13:00', 35, 'Pabellon alcarrachela', 3),
-(28, 2, 'Sesión técnica', '', '2026-04-08', '12:36:00', 33, 'Aqui', 4);
+INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `num_asistentes`, `lugar`, `equipo_id`) VALUES
+(1, 1, 'Sesión de físico', 'Trabajo con balón y precisión', '2025-12-23', '17:00:00', 90, 0, 'Campo B', 2),
+(3, 2, 'Sesión técnica', 'Partido de práctica', '2026-03-25', '12:00:00', 120, 0, 'Campo A', 4),
+(4, 2, 'Sesión táctica', '', '2026-03-25', '10:00:00', 30, 0, 'Campo A', 5),
+(21, 1, 'Sesión de físico', '', '2026-03-25', '12:04:00', 11, 0, 'Pabellon alcarrachela', 10),
+(22, 2, 'Sesión táctica', '', '2026-03-02', '14:04:00', 2, 0, 'Pabellon alcarrachela', 5),
+(23, 2, 'Sesión de físico', '', '2026-03-26', '12:34:00', 12, 0, 'Pabellon alcarrachela', 3),
+(26, 2, 'Sesión táctica', '', '2026-04-07', '15:11:00', 35, 0, 'Gimnasio', 3),
+(27, 2, 'Sesión táctica', '', '2026-04-07', '15:13:00', 35, 0, 'Pabellon alcarrachela', 3),
+(31, 2, 'Sesión técnica', NULL, '2026-01-14', '17:00:00', 30, 0, 'Pabellon ', 9),
+(32, 2, 'Sesión de físico', '', '2026-04-15', '15:00:00', 90, 11, 'Aqui', 5),
+(33, 2, 'Sesión táctica', '', '2026-04-15', '11:20:00', 30, 10, 'Pabellon alcarrachela', 9),
+(79, 1, 'Sesión táctica', 'Preparación del Clásico contra Real Madrid', '2026-04-28', '17:30:00', 95, 23, 'Ciudad Deportiva Joan Gamper', 2),
+(80, 1, 'Sesión de físico', 'Trabajo de fuerza y prevención de lesiones', '2026-04-29', '09:15:00', 70, 20, 'Ciudad Deportiva Joan Gamper', 2),
+(81, 1, 'Sesión técnica', 'Posesión y transiciones rápidas', '2026-04-30', '18:00:00', 85, 18, 'Campo 3 - Gamper', 10),
+(82, 1, 'Sesión pre-partido', 'Activación y estrategia final', '2026-05-02', '10:30:00', 60, 16, 'Ciudad Deportiva Joan Gamper', 2),
+(83, 2, 'Sesión táctica', 'Análisis del derbi contra Atlético', '2026-04-28', '18:30:00', 100, 24, 'Valdebebas', 5),
+(84, 2, 'Sesión de físico', 'Velocidad y explosividad', '2026-04-29', '08:45:00', 80, 21, 'Valdebebas', 5),
+(85, 2, 'Sesión técnica', 'Trabajo de finalización', '2026-05-01', '17:30:00', 90, 23, 'Valdebebas', 6),
+(86, 2, 'Sesión pre-partido', 'Preparación contra Barcelona', '2026-05-03', '10:00:00', 65, 25, 'Valdebebas', 5),
+(87, 3, 'Sesión técnica', 'Énfasis en presión alta', '2026-04-29', '17:00:00', 90, 21, 'Centro Deportivo Wanda', 16),
+(88, 3, 'Sesión táctica', 'Defensa de bloques bajos', '2026-04-30', '16:45:00', 75, 23, 'Centro Deportivo Wanda', 16),
+(89, 4, 'Sesión de físico', 'Trabajo específico de resistencia', '2026-04-30', '19:00:00', 85, 5, 'Ciudad Deportiva Valencia', 19),
+(90, 4, 'Sesión táctica', 'Preparación contra Sevilla', '2026-05-02', '18:00:00', 90, 5, 'Ciudad Deportiva Valencia', 19),
+(91, 2, 'Sesión táctica', '', '2026-04-17', '10:23:00', 23, 0, 'Pabellon alcarrachela', 3);
 
 -- --------------------------------------------------------
 
@@ -145,7 +164,36 @@ INSERT INTO `equipos` (`id`, `equipo_id`, `nombre`, `categoria`) VALUES
 (12, 1, 'Barcelona A', 'Infantil'),
 (13, 1, 'Barcelona B', 'Juvenil'),
 (14, 1, 'Barcelona B', 'Cadete'),
-(15, 1, 'Barcelona B', 'Infantil');
+(15, 1, 'Barcelona B', 'Infantil'),
+(16, 3, 'Atlético de Madrid A', 'Senior'),
+(17, 3, 'Atlético Juvenil A', 'Juvenil'),
+(18, 3, 'Atlético Cadete A', 'Cadete'),
+(19, 4, 'Valencia CF A', 'Senior'),
+(20, 4, 'Valencia Mestalla', 'Juvenil'),
+(21, 4, 'Valencia Cadete A', 'Cadete'),
+(22, 1, 'Barcelona Juvenil B', 'Juvenil'),
+(23, 2, 'Real Madrid Juvenil B', 'Juvenil'),
+(24, 1, 'Barcelona Juvenil A', 'Juvenil'),
+(25, 1, 'Barcelona Cadete A', 'Cadete'),
+(26, 2, 'Real Madrid Juvenil A', 'Juvenil'),
+(27, 2, 'Real Madrid Cadete A', 'Cadete'),
+(28, 3, 'Atlético Juvenil A', 'Juvenil'),
+(29, 3, 'Atlético Cadete A', 'Cadete'),
+(30, 4, 'Valencia Juvenil A', 'Juvenil'),
+(31, 1, 'Barcelona Juvenil A', 'Juvenil'),
+(32, 1, 'Barcelona Cadete A', 'Cadete'),
+(33, 2, 'Real Madrid Juvenil A', 'Juvenil'),
+(34, 2, 'Real Madrid Cadete A', 'Cadete'),
+(35, 3, 'Atlético Juvenil A', 'Juvenil'),
+(36, 3, 'Atlético Cadete A', 'Cadete'),
+(37, 4, 'Valencia Juvenil A', 'Juvenil'),
+(38, 1, 'Barcelona Juvenil A', 'Juvenil'),
+(39, 1, 'Barcelona Cadete A', 'Cadete'),
+(40, 2, 'Real Madrid Juvenil A', 'Juvenil'),
+(41, 2, 'Real Madrid Cadete A', 'Cadete'),
+(42, 3, 'Atlético Juvenil A', 'Juvenil'),
+(43, 3, 'Atlético Cadete A', 'Cadete'),
+(44, 4, 'Valencia Juvenil A', 'Juvenil');
 
 -- --------------------------------------------------------
 
@@ -206,17 +254,34 @@ INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 (67, 'Rodrygo Goes', 23, 'delantero', 3),
 (68, 'Brahim Díaz', 25, 'delantero', 3),
 (69, 'Joselu Mato', 34, 'delantero', 3),
-(70, 'Nico Paz', 20, 'mediocentro', 4),
-(71, 'Álvaro Rodríguez', 20, 'delantero', 4),
-(74, 'Manuel Ángel', 20, 'mediocentro', 4),
+(70, 'Nico Paz', 20, 'mediocentro', 6),
+(71, 'Álvaro Rodríguez', 25, 'defensa', 6),
+(74, 'Manuel Ángel', 20, 'portero', 7),
 (75, 'Raphina', 22, 'delantero', 2),
 (76, 'Lucas Cañizares', 29, 'delantero', 3),
-(77, 'Raphina', 3, 'mediocentro', 4),
-(79, 'Raphina', 33, 'mediocentro', 4),
-(80, '33', 3, 'delantero', 3),
-(81, '2', 22, 'defensa', 3),
+(77, 'Raphina', 5, 'mediocentro', 3),
+(80, 'Juan', 5, 'portero', 3),
 (82, '33', 3, 'delantero', 3),
-(83, 's', 222, 'mediocentro', 4);
+(84, 'Antonio Reyes', 23, 'portero', 7),
+(85, 'Antonio Rüdiger', 33, 'defensa', 5),
+(86, 'Aurélien Tchouaméni', 26, 'mediocentro', 5),
+(87, 'Rodrygo Goes', 25, 'delantero', 5),
+(88, 'Brahim Díaz', 26, 'delantero', 5),
+(89, 'Jan Oblak', 33, 'portero', 16),
+(90, 'Koke Resurrección', 34, 'mediocentro', 16),
+(91, 'Álvaro Morata', 33, 'delantero', 16),
+(92, 'Giorgi Mamardashvili', 24, 'portero', 19),
+(93, 'Javi Guerra', 21, 'mediocentro', 19),
+(99, 'Antonio Rüdiger', 33, 'defensa', 5),
+(100, 'Aurélien Tchouaméni', 26, 'mediocentro', 5),
+(101, 'Rodrygo Goes', 25, 'delantero', 5),
+(102, 'Brahim Díaz', 26, 'delantero', 5),
+(103, 'Jan Oblak', 33, 'portero', 16),
+(104, 'Koke Resurrección', 34, 'mediocentro', 16),
+(105, 'Álvaro Morata', 33, 'delantero', 16),
+(106, 'Giorgi Mamardashvili', 24, 'portero', 19),
+(107, 'Javi Guerra', 21, 'mediocentro', 19),
+(108, 'Hugo Duro', 26, 'delantero', 19);
 
 -- --------------------------------------------------------
 
@@ -238,12 +303,19 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `resultado`) VALUES
-(1, 'Real Madrid', 'Barcelona', '2026-04-06', '0-20'),
+(1, 'Real Madrid', 'Barcelona', '2026-04-06', '20-0'),
 (2, 'Sevilla', 'Valencia', '2026-04-12', '2-2'),
 (3, 'Betis', 'Atletico Madrid', '2026-04-15', '1-1'),
 (4, 'Paris', 'Liverpool', '2026-04-11', '3-2'),
-(5, 'Juventus', 'Marsella', '2026-04-17', '1-2'),
-(6, 'Real Madrid', 'FC Barcelona', '2026-04-15', '2-1');
+(5, 'Juventus', 'Marsella', '2026-04-17', '1-3'),
+(6, 'Real Madrid', 'FC Barcelona', '2026-04-15', '2-1'),
+(12, 'Real Madrid', 'FC Barcelona', '2026-04-13', '3-0'),
+(13, 'Real Madrid', 'FC Barcelona', '2026-04-13', '2-0'),
+(14, 'FC Barcelona', 'Real Madrid CF', '2026-04-26', '2-1'),
+(15, 'Atlético de Madrid', 'Valencia CF', '2026-04-27', '3-0'),
+(16, 'Real Madrid CF', 'Sevilla FC', '2026-05-03', '4-2'),
+(17, 'FC Barcelona', 'Atlético de Madrid', '2026-05-10', '3-3'),
+(18, 'Valencia CF', 'Sevilla FC', '2026-05-11', '1-1');
 
 -- --------------------------------------------------------
 
@@ -270,7 +342,15 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) V
 (2, 'entrenador', 'entrenador@gmail.com', 'entrenador123', 'entrenador', 1),
 (3, 'jugador', 'jugador@gmail.com', 'jugador123', 'jugador', 1),
 (4, 'equipo', 'equipo@gmail.com', 'equipo123', 'equipo', 2),
-(5, 'equipo2', 'equipo2@gmail.com', 'equipo2', 'equipo', 1);
+(5, 'equipo2', 'equipo2@gmail.com', 'equipo2', 'equipo', 1),
+(6, 'Equipo Atlético', 'equipo@atleticomadrid.com', 'atleti123', 'equipo', 3),
+(7, 'Equipo Valencia', 'equipo@valenciacf.com', 'valencia123', 'equipo', 4),
+(8, 'Diego Simeone', 'simeone@atleticomadrid.com', 'cholo123', 'entrenador', 3),
+(9, 'Rubén Baraja', 'baraja@valenciacf.com', 'baraja123', 'entrenador', 4),
+(10, 'Xavi Hernández', 'xavi@fcbarcelona.com', 'xavi123', 'entrenador', 1),
+(11, 'Carlo Ancelotti', 'ancelotti@realmadrid.com', 'carlo123', 'entrenador', 2),
+(14, 'Equipo Barcelona', 'equipo@fcbarcelona.com', 'barca123', 'equipo', 1),
+(15, 'Equipo Real Madrid', 'equipo@realmadrid.com', 'madrid123', 'equipo', 2);
 
 --
 -- Índices para tablas volcadas
@@ -341,7 +421,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `clubes`
 --
 ALTER TABLE `clubes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenadores`
@@ -353,7 +433,7 @@ ALTER TABLE `entrenadores`
 -- AUTO_INCREMENT de la tabla `entrenamientos`
 --
 ALTER TABLE `entrenamientos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenamiento_asistencia`
@@ -365,25 +445,25 @@ ALTER TABLE `entrenamiento_asistencia`
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- Restricciones para tablas volcadas
