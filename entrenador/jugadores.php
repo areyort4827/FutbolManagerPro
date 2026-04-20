@@ -1,35 +1,36 @@
 <?php
-$usuario_sesion = $_SESSION['user'];
-$identificador_usuario = $usuario_sesion['id'];
 
-// Obtener el club al que pertenece el entrenador
-$consulta_club = "SELECT equipo_id AS club_id FROM entrenadores WHERE usuario_id = $identificador_usuario";
-$resultado_club = $pdo->query($consulta_club);
-$datos_club = $resultado_club->fetch(PDO::FETCH_ASSOC);
+$usuario_sesion = $_SESSION['user'] ?? null;
+$identificador_usuario = $usuario_sesion['id'] ?? 0;
 
-if (!$datos_club) {
-    die("Este entrenador no tiene club asignado");
+$consulta_perfil = "SELECT equipo_id FROM entrenadores WHERE usuario_id = :id";
+$stmt_perfil = $pdo->prepare($consulta_perfil);
+$stmt_perfil->execute([':id' => $identificador_usuario]);
+$datos_entrenador = $stmt_perfil->fetch(PDO::FETCH_ASSOC);
+
+$mi_equipo_id = $datos_entrenador['equipo_id'] ?? 0;
+$lista_jugadores = [];
+
+
+if ($mi_equipo_id > 0) {
+    $consulta_jugadores = "
+    SELECT 
+        jugadores.id,
+        jugadores.nombre AS jugador,
+        jugadores.edad,
+        jugadores.posicion,
+        equipos.nombre AS equipo,
+        equipos.categoria
+    FROM jugadores 
+    INNER JOIN equipos ON jugadores.equipo_id = equipos.id
+    WHERE jugadores.equipo_id = :mi_id
+    ORDER BY jugadores.posicion DESC
+    ";
+    
+    $stmt_jugadores = $pdo->prepare($consulta_jugadores);
+    $stmt_jugadores->execute([':mi_id' => $mi_equipo_id]);
+    $lista_jugadores = $stmt_jugadores->fetchAll(PDO::FETCH_ASSOC);
 }
-
-$identificador_club = $datos_club['club_id'];
-
-// Obtener los jugadores del club del entrenador
-$consulta_jugadores = "
-SELECT 
-    jugadores.id,
-    jugadores.nombre AS jugador,
-    jugadores.edad,
-    jugadores.posicion,
-    equipos.nombre AS equipo,
-    equipos.categoria
-FROM jugadores 
-INNER JOIN equipos ON jugadores.equipo_id = equipos.id
-WHERE equipos.equipo_id = $identificador_club
-ORDER BY equipos.categoria ASC, jugadores.posicion DESC
-";
-
-$resultado_jugadores = $pdo->query($consulta_jugadores);
-$lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
@@ -39,12 +40,17 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
         color: #374151;
     }
 
-    /* Header */
     .jugadoresHeader {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        justify-content: space-between;
+        align-items: flex-end;
         margin-bottom: 25px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        flex: 1;
     }
 
     .jugadoresHeader h2 {
@@ -55,6 +61,26 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
     .jugadoresHeader span {
         color: #64748b;
         font-size: 14px;
+    }
+
+    .btnAñadir {
+        background: #16a34a;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.25s;
+        white-space: nowrap;
+        margin-top: 10px;
+        height: fit-content;
+        display: inline-block;
+    }
+
+    .btnAñadir:hover {
+        background: #15803d;
+        transform: translateY(-2px);
     }
 
     #jugadoresGrid {
@@ -70,7 +96,6 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
         padding: 20px;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
         transition: 0.25s;
-        overflow: visible;
         text-align: center;
     }
 
@@ -79,14 +104,33 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     }
 
-    /* Avatar */
+    .action-icons {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+    }
+
+    .editIcon, .deleteIcon {
+        color: #9ca3af;
+        font-size: 16px;
+        text-decoration: none;
+        padding: 6px;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
+
+    .editIcon:hover { background: #dbeafe; color: #2563eb; }
+    .deleteIcon:hover { background: #fee2e2; color: #dc2626; }
+
     .avatar {
         font-size: 30px;
         color: #6b7280;
         margin-bottom: 8px;
     }
 
-    /* Nombre y Posición */
     .jugadorHeader h3 {
         margin: 5px 0 2px;
         font-size: 18px;
@@ -99,14 +143,12 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
         letter-spacing: .5px;
     }
 
-    /* Info jugador */
     .info {
         margin: 12px 0;
         font-size: 14px;
         color: #374151;
     }
 
-    /* Categoría badge */
     .categoria {
         display: inline-block;
         margin-top: 10px;
@@ -118,52 +160,76 @@ $lista_jugadores = $resultado_jugadores->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* Colores por categoría */
-    .cadete {
-        background-color: #22c55e;
-    }
+    .cadete { background-color: #22c55e; }
+    .senior { background-color: #3b82f6; }
+    .juvenil { background-color: #f59e0b; }
+    .infantil { background-color: #ef4444; }
 
-    .senior {
-        background-color: #3b82f6;
-    }
-
-    .juvenil {
-        background-color: #f59e0b;
-    }
-
-    .infantil {
-        background-color: #ef4444;
+    .aviso-error {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #fecaca;
+        text-align: center;
     }
 </style>
 
 <div class="jugadoresContenedor">
-    <div class="jugadoresHeader">
-        <div>
-            <h2>Plantilla del Club</h2>
-            <span>Revisa los jugadores disponibles en tu club</span><br>
-            <span>Total de jugadores: <?= count($lista_jugadores) ?></span>
+    
+    <?php if ($mi_equipo_id == 0): ?>
+        <div class="aviso-error">
+            <h3><i class="fa-solid fa-circle-exclamation"></i> Acceso restringido</h3>
+            <p>Todavía no tienes un equipo asignado por el administrador. Contacta con tu club para poder gestionar la plantilla.</p>
         </div>
-    </div>
+    <?php else: ?>
 
-    <div id="jugadoresGrid">
-        <?php foreach ($lista_jugadores as $jugador): ?>
-        <div class="jugadorCard">
-
-            <div class="jugadorHeader">
-                <i class="fa-regular fa-user avatar"></i>
-                <h3><?= htmlspecialchars($jugador['jugador']) ?></h3>
-                <span class="posicion"><?= strtoupper(htmlspecialchars($jugador['posicion'])) ?></span>
+        <div class="jugadoresHeader">
+            <div class="header-left">
+                <h2>Mi Plantilla</h2>
+                <span>Gestión de jugadores de tu equipo</span><br>
+                <span>Total de jugadores: <strong><?= count($lista_jugadores) ?>/25</strong></span>
             </div>
-
-            <p class="info">
-                <?= htmlspecialchars($jugador['edad']) ?> años<br>
-                <?= htmlspecialchars($jugador['equipo']) ?>
-            </p>
-
-            <span class="categoria <?= strtolower(htmlspecialchars($jugador['categoria'])) ?>">
-                <?= htmlspecialchars($jugador['categoria']) ?>
-            </span>
-
+            
+            <a href="nuevo_jugador.php" class="btnAñadir">
+                <i class="fa-solid fa-plus"></i> Añadir jugador
+            </a>
         </div>
-        <?php endforeach; ?>
-    </div>
+
+        <div id="jugadoresGrid">
+            <?php if (empty($lista_jugadores)): ?>
+                <p style="grid-column: 1/-1; color: #94a3b8;">No hay jugadores registrados en tu equipo.</p>
+            <?php else: ?>
+                <?php foreach ($lista_jugadores as $jugador): ?>
+                <div class="jugadorCard">
+                    <div class="action-icons">
+                        <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon" 
+                           onclick="return confirm('¿Eliminar a <?= $jugador['jugador'] ?>?')" title="Eliminar">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
+
+                    <div class="jugadorHeader">
+                        <i class="fa-regular fa-user avatar"></i>
+                        <h3><?= htmlspecialchars($jugador['jugador']) ?></h3>
+                        <span class="posicion"><?= strtoupper(htmlspecialchars($jugador['posicion'])) ?></span>
+                    </div>
+
+                    <p class="info">
+                        <?= htmlspecialchars($jugador['edad']) ?> años<br>
+                        <strong><?= htmlspecialchars($jugador['equipo']) ?></strong>
+                    </p>
+
+                    <span class="categoria <?= strtolower(htmlspecialchars($jugador['categoria'])) ?>">
+                        <?= htmlspecialchars($jugador['categoria']) ?>
+                    </span>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+    <?php endif; ?>
 </div>
