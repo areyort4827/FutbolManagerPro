@@ -11,8 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = verificarLogin($email, $password);
 
     if ($usuario) {
+        session_regenerate_id(true);
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
+
+        $_SESSION['club_id'] = $user['club_id']; // PARA SABER A QUE CLUB PERTENECE EL USUARIO
+        $_SESSION['paginaActual'] = 'dashboard';
 
         $rol = $user['rol']; 
 
@@ -21,6 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } elseif ($rol === 'entrenador'){
             header("Location: entrenador/menu.php");
+
+        } elseif ($rol === 'equipo'){
+            
+            header("Location: equipo/menu.php");
 
         } else {
             header("Location: jugador/menu.php");
@@ -34,12 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FutbolManager Pro - Login</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    
+
     <style>
     * {
         box-sizing: border-box;
@@ -102,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .input input:focus {
         outline: none;
         border-color: #16a34a;
-        box-shadow: 0 0 0 3px rgba(22,163,74,0.15);
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
     }
 
     /* BOTONES */
@@ -153,42 +162,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         font-size: 0.95rem;
     }
 
-    /* DEMO USERS */
-    .demo {
-        margin-top: 35px;
-        font-size: 0.9rem;
-        color: #6b7280;
-        line-height: 1.6;
+    /* LOGO */
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
     }
-</style>
+
+    .logo-img {
+        width: 120px;
+        height: auto;
+    }
+
+    /* TITULO */
+    .logo-login {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 5px;
+    }
+
+    .logo-login span {
+        color: #16a34a;
+    }
+    </style>
 
 </head>
+
 <body>
 
-<div class="contenedor">
-    <h1 class="logo-login">FutbolManager Pro</h1>
-    <p class="subtitle">Accede a tu panel de gestión</p>
+    <div class="contenedor">
+        <div class="logo-container">
+            <img src="assets/img/LogoFutbolManagerProS.png" alt="FutbolManagerPro Logo" class="logo-img">
+        </div>
 
-    <?php if ($error): ?>
+        <h1 class="logo-login">FutbolManager<span>Pro</span></h1>
+        <p class="subtitle">Gestión integral para clubes</p>
+
+        <?php if ($error): ?>
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
+        <?php endif; ?>
 
-   <form method="POST" action="">
-    <div class="input">
-        <label>Email</label>
-        <input type="email" name="email" required autofocus>
+        <form method="POST" action="">
+            <div class="input">
+                <label>Email</label>
+                <input type="email" name="email" required autofocus>
+            </div>
+
+            <div class="input">
+                <label>Contraseña</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-login">Iniciar Sesión</button>
+            <button type="submit" class="btn-registrarse">Registrarse</button>
+        </form>
+
     </div>
-
-    <div class="input">
-        <label>Contraseña</label>
-        <input type="password" name="password" required>
-    </div>
-
-    <button type="submit" class="btn-login">Iniciar Sesión</button>
-    <button type="submit" class="btn-registrarse">Registrarse</button>
-</form>
-
-</div>
 
 </body>
+
 </html>
