@@ -14,52 +14,54 @@ $entrenador_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $mi_equipo_id = $entrenador_data['equipo_id'] ?? 0;
 
-if (isset($_POST['guardar'])) {
+/* ===== LÓGICA DE GUARDAR NUEVO PARTIDO ===== */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar'])) {
+    // Validamos que tengamos los IDs necesarios
+    $local_id = $_POST['equipo_local_id'] ?? 0;
+    $visitante_id = $_POST['equipo_visitante_id'] ?? 0;
+    $fecha = $_POST['fecha'] ?? '';
+    $resultado = $_POST['resultado'] ?? '';
 
-    $local = $_POST['equipo_local_id'];
-    $visitante = $_POST['equipo_visitante_id'];
-    $fecha = $_POST['fecha'];
-    $resultado = $_POST['resultado'];
+    if ($local_id > 0 && $visitante_id > 0) {
+        $sql_insert = "INSERT INTO partidos (equipo_local_id, equipo_visitante_id, fecha, resultado) 
+                       VALUES (:local, :visitante, :fecha, :resultado)";
+        
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $resultado_insert = $stmt_insert->execute([
+            ':local' => $local_id,
+            ':visitante' => $visitante_id,
+            ':fecha' => $fecha,
+            ':resultado' => $resultado
+        ]);
 
-    $sql = "INSERT INTO partidos (equipo_local_id, equipo_visitante_id, fecha, resultado)
-            VALUES (:local, :visitante, :fecha, :resultado)";
-
-    $stmt = $pdo->prepare($sql);
-
-    if ($stmt->execute([
-        ':local' => $local,
-        ':visitante' => $visitante,
-        ':fecha' => $fecha,
-        ':resultado' => $resultado
-    ])) {
-        echo "<p>Partido guardado correctamente</p>";
-    } else {
-        echo "<p>Error al guardar</p>";
+        if ($resultado_insert) {
+            $_SESSION['paginaActual'] = 'partidos';
+            echo "<script>window.location.href='menu.php';</script>";
+            exit();
+        }
     }
 }
 
-/* ===== ACTUALIZAR ===== */
+/* ===== ACTUALIZAR RESULTADO ===== */
 if (isset($_POST['actualizar'])) {
-    $sql = "UPDATE partidos SET resultado = :resultado WHERE id = :id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
+    $sql_update = "UPDATE partidos SET resultado = :resultado WHERE id = :id";
+    $stmt_update = $pdo->prepare($sql_update);
+    $stmt_update->execute([
         ':resultado' => $_POST['resultado'],
         ':id' => $_POST['id']
     ]);
-    header("Location: " . $_SERVER['PHP_SELF']);
+    $_SESSION['paginaActual'] = 'partidos';
+    echo "<script>window.location.href='menu.php';</script>";
     exit();
 }
 
-/* ===== CONSULTA SOLO DE SU EQUIPO ===== */
+/* ===== CONSULTA DE PARTIDOS ===== */
 $sql_partidos = "
-    SELECT p.*,
-           el.nombre AS local,
-           ev.nombre AS visitante
+    SELECT p.*, el.nombre AS local, ev.nombre AS visitante
     FROM partidos p
     LEFT JOIN equipos el ON p.equipo_local_id = el.id
     LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
-    WHERE p.equipo_local_id = :mi_id 
-       OR p.equipo_visitante_id = :mi_id
+    WHERE p.equipo_local_id = :mi_id OR p.equipo_visitante_id = :mi_id
     ORDER BY p.fecha DESC
 ";
 $stmt_p = $pdo->prepare($sql_partidos);
@@ -68,21 +70,12 @@ $partidos = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div id="partidos-grid">
-<?php if ($mi_equipo_id == 0): ?>
-    <p>Aviso: No tienes un equipo asignado.</p>
-<?php elseif (empty($partidos)): ?>
-    <p>No hay partidos registrados para tu equipo.</p>
-<?php else: ?>
-    <?php foreach ($partidos as $fila) { ?>
+    <?php foreach ($partidos as $fila): ?>
         <div class="partido-card">
             <div class="partido-equipos">
-                <?= htmlspecialchars($fila['local'] ?? 'Desconocido') ?> 
-                vs 
-                <?= htmlspecialchars($fila['visitante'] ?? 'Desconocido') ?>
+                <?= htmlspecialchars($fila['local'] ?? 'Rival') ?> vs <?= htmlspecialchars($fila['visitante'] ?? 'Rival') ?>
             </div>
-            <div class="partido-info">
-                Fecha: <?= htmlspecialchars($fila['fecha']) ?>
-            </div>
+            <div class="partido-info">Fecha: <?= htmlspecialchars($fila['fecha']) ?></div>
             <div class="resultado">
                 <form method="POST">
                     <input type="hidden" name="id" value="<?= $fila['id'] ?>">
@@ -91,50 +84,47 @@ $partidos = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
                 </form>
             </div>
         </div>
-    <?php } ?>
-<?php endif; ?>
+    <?php endforeach; ?>
 </div>
 
 <h2>Añadir Partido</h2>
 <div class="form-box">
-<form method="POST" onsubmit="this.guardar.disabled=true; return true;">
-    <div class="form-group">
-        <label>Equipo local (Tu equipo)</label>
-       <input type="hidden" name="equipo_local_id" value="<?= $mi_equipo_id ?>">
+    <form method="POST">
+        <input type="hidden" name="equipo_local_id" value="<?= $mi_equipo_id ?>">
 
-<div class="form-group">
-    <label>Equipo local</label>
-    <input type="text" value="<?php
-        $stmt = $pdo->prepare("SELECT nombre FROM equipos WHERE id = :id");
-        $stmt->execute([':id' => $mi_equipo_id]);
-        echo $stmt->fetchColumn();
-    ?>" disabled>
-</div>
-    </div>
-    <div class="form-group">
-    <label>Equipo visitante (Rival)</label>
-    <select name="equipo_visitante_id" required>
-        <option value="">Seleccionar rival</option>
+        <div class="form-group">
+            <label>Equipo local (Tu equipo)</label>
+            <input type="text" value="<?php 
+                $st = $pdo->prepare("SELECT nombre FROM equipos WHERE id = :id");
+                $st->execute([':id' => $mi_equipo_id]);
+                echo htmlspecialchars($st->fetchColumn() ?: 'Barcelona'); 
+            ?>" disabled>
+        </div>
 
-        <?php
-        $stmt_rivales = $pdo->prepare("SELECT id, nombre FROM equipos WHERE id != :mi_id");
-        $stmt_rivales->execute([':mi_id' => $mi_equipo_id]);
+        <div class="form-group">
+            <label>Equipo visitante (Rival)</label>
+            <select name="equipo_visitante_id" required>
+                <option value="">Seleccionar rival</option>
+                <?php
+                $stmt_rivales = $pdo->prepare("SELECT id, nombre FROM equipos WHERE id != :mi_id");
+                $stmt_rivales->execute([':mi_id' => $mi_equipo_id]);
+                foreach ($stmt_rivales as $rival) {
+                    echo "<option value='{$rival['id']}'>" . htmlspecialchars($rival['nombre']) . "</option>";
+                }
+                ?>
+            </select>
+        </div>
 
-        foreach ($stmt_rivales as $rival) {
-            echo "<option value='{$rival['id']}'>{$rival['nombre']}</option>";
-        }
-        ?>
+        <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" name="fecha" required>
+        </div>
 
-    </select>
-</div>
-    <div class="form-group">
-        <label>Fecha</label>
-        <input type="date" name="fecha" required>
-    </div>
-    <div class="form-group">
-        <label>Resultado</label>
-        <input type="text" name="resultado" placeholder="0-0">
-    </div>
-    <button type="submit" name="guardar" class="boton">Guardar Partido</button>
-</form>
+        <div class="form-group">
+            <label>Resultado</label>
+            <input type="text" name="resultado" placeholder="0-0">
+        </div>
+
+        <button type="submit" name="guardar" class="boton">Guardar Partido</button>
+    </form>
 </div>

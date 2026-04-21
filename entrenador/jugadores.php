@@ -3,6 +3,7 @@
 $usuario_sesion = $_SESSION['user'] ?? null;
 $identificador_usuario = $usuario_sesion['id'] ?? 0;
 
+// Obtener equipo del entrenador
 $consulta_perfil = "SELECT equipo_id FROM entrenadores WHERE usuario_id = :id";
 $stmt_perfil = $pdo->prepare($consulta_perfil);
 $stmt_perfil->execute([':id' => $identificador_usuario]);
@@ -11,8 +12,8 @@ $datos_entrenador = $stmt_perfil->fetch(PDO::FETCH_ASSOC);
 $mi_equipo_id = $datos_entrenador['equipo_id'] ?? 0;
 $lista_jugadores = [];
 
-
 if ($mi_equipo_id > 0) {
+
     $consulta_jugadores = "
     SELECT 
         jugadores.id,
@@ -26,7 +27,7 @@ if ($mi_equipo_id > 0) {
     WHERE jugadores.equipo_id = :mi_id
     ORDER BY jugadores.posicion DESC
     ";
-    
+
     $stmt_jugadores = $pdo->prepare($consulta_jugadores);
     $stmt_jugadores->execute([':mi_id' => $mi_equipo_id]);
     $lista_jugadores = $stmt_jugadores->fetchAll(PDO::FETCH_ASSOC);
@@ -173,14 +174,16 @@ if ($mi_equipo_id > 0) {
         border: 1px solid #fecaca;
         text-align: center;
     }
+
 </style>
+
 
 <div class="jugadoresContenedor">
     
     <?php if ($mi_equipo_id == 0): ?>
         <div class="aviso-error">
             <h3><i class="fa-solid fa-circle-exclamation"></i> Acceso restringido</h3>
-            <p>Todavía no tienes un equipo asignado por el administrador. Contacta con tu club para poder gestionar la plantilla.</p>
+            <p>No tienes un equipo asignado.</p>
         </div>
     <?php else: ?>
 
@@ -202,12 +205,13 @@ if ($mi_equipo_id > 0) {
             <?php else: ?>
                 <?php foreach ($lista_jugadores as $jugador): ?>
                 <div class="jugadorCard">
+
                     <div class="action-icons">
                         <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon" 
-                           onclick="return confirm('¿Eliminar a <?= $jugador['jugador'] ?>?')" title="Eliminar">
+                        <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
+                           onclick="return confirm('¿Eliminar a <?= htmlspecialchars($jugador['jugador']) ?>?')" title="Eliminar">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>
@@ -226,6 +230,7 @@ if ($mi_equipo_id > 0) {
                     <span class="categoria <?= strtolower(htmlspecialchars($jugador['categoria'])) ?>">
                         <?= htmlspecialchars($jugador['categoria']) ?>
                     </span>
+
                 </div>
                 <?php endforeach; ?>
             <?php endif; ?>

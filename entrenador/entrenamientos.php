@@ -1,21 +1,31 @@
 <?php
 include "../config/conexion.php";
-$club_id = $_SESSION['club_id'];
 
+$usuario_sesion = $_SESSION['user'] ?? null;
+$identificador_usuario = $usuario_sesion['id'] ?? 0;
+
+// Obtener equipo del entrenador
+$stmt = $pdo->prepare("SELECT equipo_id FROM entrenadores WHERE usuario_id = :id");
+$stmt->execute([':id' => $identificador_usuario]);
+$datos_entrenador = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$mi_equipo_id = $datos_entrenador['equipo_id'] ?? 0;
+
+// CONSULTA SOLO PARA SU EQUIPO
 $sql = "SELECT e.*, 
                eq.nombre AS nombre_equipo, 
                eq.categoria,
                (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.equipo_id) as total_jugadores_equipo
         FROM entrenamientos e
         LEFT JOIN equipos eq ON e.equipo_id = eq.id
-        WHERE e.club_id = :club_id
-           OR (e.equipo_id IS NOT NULL AND eq.equipo_id = :club_id)
+        WHERE e.equipo_id = :equipo_id
         ORDER BY e.fecha DESC, e.hora DESC";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute(['club_id' => $club_id]);
+$stmt->execute(['equipo_id' => $mi_equipo_id]);
 $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// estadísticas
 $totalEntrenamientos = count($entrenamientos);
 $horasTotales = 0;
 $asistenciaTotal = 0;
@@ -160,10 +170,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     width: 90%;
     max-width: 520px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    /* Evitamos que el contenido se desborde */
-    position: relative;
 }
-
 
 .modal-content label {
     display: block;
@@ -222,7 +229,6 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 
     <!-- LISTA -->
     <?php foreach($entrenamientos as $e): ?>
-
     <div class="entrenamientoCard">
         <div class="entrenamientoInfo">
             <div class="icon-box">
@@ -270,16 +276,18 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
             </form>
         </div>
     </div>
-
     <?php endforeach; ?>
 
 </div>
 
-<!-- ====================== MODAL AÑADIR ENTRENAMIENTO ====================== -->
+<!-- MODAL AÑADIR -->
 <div id="modalAñadir" class="modal">
     <div class="modal-content">
         <h3>Añadir Nuevo Entrenamiento</h3>
         <form method="POST" action="añadir_entrenamiento.php">
+
+            <input type="hidden" name="equipo_id" value="<?= $mi_equipo_id ?>">
+
             <label>Título</label>
             <select name="titulo" required>
                 <option value="">Seleccionar tipo</option>
@@ -287,16 +295,6 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
                 <option value="Sesión técnica">Sesión técnica</option>
                 <option value="Sesión de físico">Sesión de físico</option>
                 <option value="Sesión pre-partido">Sesión pre-partido</option>
-            </select>
-
-            <label>Equipo</label>
-            <select name="equipo_id" required>
-                <?php
-                $equipos = $pdo->query("SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id");
-                while($eq = $equipos->fetch(PDO::FETCH_ASSOC)):
-                ?>
-                    <option value="<?= $eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['categoria']) ?>)</option>
-                <?php endwhile; ?>
             </select>
 
             <label>Fecha</label>
@@ -320,7 +318,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     </div>
 </div>
 
-<!-- ====================== MODAL ASISTENCIA ====================== -->
+<!-- MODAL ASISTENCIA -->
 <div id="modalAsistencia" class="modal">
     <div class="modal-content">
         <h3>Actualizar Asistentes</h3>
@@ -334,7 +332,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     </div>
 </div>
 
-<!-- ====================== MODAL EDITAR ====================== -->
+<!-- MODAL EDITAR -->
 <div id="modalEditar" class="modal">
     <div class="modal-content">
         <h3>Editar Entrenamiento</h3>
