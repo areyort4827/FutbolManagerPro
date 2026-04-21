@@ -2,32 +2,24 @@
 session_start();
 require_once '../config/auth.php';
 
-$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
-
-if (isset($_GET['pagina'])) {
-    $paginaActual = $_GET['pagina'];
-    $_SESSION['paginaActual'] = $_GET['pagina'];
-}
-
+// Si viene un POST de la pantalla de jugadores
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
-    $paginaActual = 'jugadores';
     $_SESSION['paginaActual'] = 'jugadores';
 }
 
+$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+
 if (!isset($_SESSION['user'])) {
-    header("Location: ../index.php");
+    header("Location: index.php");
     exit;
 }
 
 $club_id = $_SESSION['club_id'];
 
-if (!empty($club_id)) {
-    $stmt = $pdo->prepare("SELECT nombre FROM clubes WHERE id = ?");
-    $stmt->execute([$club_id]);
-    $club = $stmt->fetchColumn() ?? 'Mi Club';
-} else {
-    $club = 'Administrador global';
-}
+// Consulta segura recomendada
+$stmt = $pdo->prepare("SELECT nombre FROM clubes WHERE id = ?");
+$stmt->execute([$club_id]);
+$club = $stmt->fetchColumn() ?? 'Mi Club';
 
 $user = $_SESSION['user'];
 $role = 'Admin';
@@ -51,6 +43,7 @@ $nombre = htmlspecialchars($user['nombre']);
             display: flex;
         }
 
+        /* SIDEBAR */
         .sidebar {
             width: 260px;
             height: 100vh;
@@ -71,6 +64,7 @@ $nombre = htmlspecialchars($user['nombre']);
             border-bottom: 1px solid #1f2937;
         }
 
+        /* MENÚ */
         .menu {
             display: flex;
             flex-direction: column;
@@ -102,6 +96,7 @@ $nombre = htmlspecialchars($user['nombre']);
             font-weight: bold;
         }
 
+        /* USER BOX - Abajo del todo, con icono a la izquierda */
         .user-box {
             margin-top: auto;
             padding: 16px 20px;
@@ -136,6 +131,7 @@ $nombre = htmlspecialchars($user['nombre']);
             font-weight: 600;
         }
 
+        /* CERRAR SESIÓN */
         .logout {
             padding: 16px 20px;
             color: #ef4444 !important;
@@ -151,6 +147,7 @@ $nombre = htmlspecialchars($user['nombre']);
             background: #1e293b;
         }
 
+        /* MAIN */
         .main {
             margin-left: 260px;
             padding: 20px;
@@ -174,27 +171,27 @@ $nombre = htmlspecialchars($user['nombre']);
         FutbolManager Pro
     </div>
 
-    <div class="menu">
-        <a href="?pagina=dashboard" class="<?= $paginaActual === 'dashboard' ? 'active' : '' ?>">
+   <div class="menu">
+        <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
-        <a href="?pagina=jugadores" class="<?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
+        <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
             <i class="fa-solid fa-user"></i> Jugadores
-        </a>
-        <a href="?pagina=entrenamientos" class="<?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>">
+        </a>        
+        <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos
         </a>
-        <a href="?pagina=partidos" class="<?= $paginaActual === 'partidos' ? 'active' : '' ?>">
+        <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
             <i class="fa-solid fa-futbol"></i> Partidos
         </a>
-        <a href="?pagina=estadisticas" class="<?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
-            <i class="fa-solid fa-chart-line"></i> Estadisticas
+        <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
+            <i class="fa-solid fa-chart-line"></i> Estadísticas
         </a>
-        <a href="?pagina=calendario" class="<?= $paginaActual === 'calendario' ? 'active' : '' ?>">
+        <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
             <i class="fa-solid fa-calendar"></i> Calendario
         </a>
     </div>
-
+    <!-- USER BOX - Icono a la izquierda + abajo del todo -->
     <div class="user-box">
         <i class="fa-solid fa-circle-user"></i>
         <div class="user-info">
@@ -203,33 +200,34 @@ $nombre = htmlspecialchars($user['nombre']);
         </div>
     </div>
 
+    <!-- Cerrar Sesión -->
     <a href="../logout.php" class="logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesion
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
     </a>
 </div>
 
-<div class="main">
-    <div id="dashboard" class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>">
-        <?php include 'dashboard.php' ?>
+    <div class="main">
+        <div id="dashboard" class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>">
+            <?php include 'dashboard.php' ?>
+        </div>
+        <div id="jugadores" class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
+            <?php include 'jugadores.php' ?>
+        </div>
+        <div id="entrenamientos" class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>">
+            <?php include 'entrenamientos.php' ?>
+        </div>
+        <div id="partidos" class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>">
+            <?php include 'partidos.php' ?>
+        </div>
+        <div id="calendario" class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>">
+            <?php include 'calendario.php' ?>
+        </div>
+        <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
+            <?php include 'estadisticas.php' ?>
+        </div>
     </div>
-    <div id="jugadores" class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
-        <?php include 'jugadores.php' ?>
-    </div>
-    <div id="entrenamientos" class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>">
-        <?php include 'entrenamientos.php' ?>
-    </div>
-    <div id="partidos" class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>">
-        <?php include 'partidos.php' ?>
-    </div>
-    <div id="calendario" class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>">
-        <?php include 'calendario.php' ?>
-    </div>
-    <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
-        <?php include 'estadisticas.php' ?>
-    </div>
-</div>
 
-<script src="../script.js"></script>
+    <script src="../script.js"></script>
 
 </body>
 </html>

@@ -1,3 +1,25 @@
+<?php
+// Obtener total de jugadores del club
+$club_id = $_SESSION['club_id'];
+$sqlTotalJugadores = "SELECT COUNT(*) as total FROM jugadores j 
+                      INNER JOIN equipos e ON j.equipo_id = e.id 
+                      WHERE e.equipo_id = $club_id";
+$resultadoTotal = $pdo->query($sqlTotalJugadores);
+$totalJugadores = $resultadoTotal->fetch(PDO::FETCH_ASSOC)['total'];
+
+// Total de entrenamientos
+$sqlTotalEntrenamientos = "
+    SELECT COUNT(*) as total 
+    FROM entrenamientos
+    WHERE club_id = $club_id
+";
+$resultadoEntrenamientos = $pdo->query($sqlTotalEntrenamientos);
+$totalEntrenamientos = $resultadoEntrenamientos->fetch(PDO::FETCH_ASSOC)['total'];
+
+// Otros datos estáticos de ejemplo
+$totalPartidos = 12;
+$totalVictorias = 4;
+?>
 <style>
 .dashboard-grid {
     display: grid;
@@ -51,19 +73,19 @@
     <div class="box">
         <i class="fa-solid fa-user"></i>
         <h3>Jugadores</h3>
-        <p>25 registrados</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 80%;"></div></div>
+        <p><?= $totalJugadores ?> registrados</p>
+        <div class="bar-container"><div class="bar-fill" style="width: 20%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-futbol"></i>
         <h3>Partidos</h3>
         <p>12 programados</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 60%;"></div></div>
+        <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-dumbbell"></i>
         <h3>Entrenamientos</h3>
-        <p>8 esta semana</p>
+        <p><?= $totalEntrenamientos ?> entrenamientos pendientes</p>
         <div class="bar-container"><div class="bar-fill" style="width: 50%;"></div></div>
     </div>
     <div class="box">

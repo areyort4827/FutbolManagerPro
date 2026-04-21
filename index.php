@@ -11,12 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = verificarLogin($email, $password);
 
     if ($usuario) {
-        session_regenerate_id(true);
         $_SESSION['user'] = $usuario;
         $user = $_SESSION['user'];
 
         $_SESSION['club_id'] = $user['club_id']; // PARA SABER A QUE CLUB PERTENECE EL USUARIO
-        $_SESSION['paginaActual'] = 'dashboard';
 
         $rol = $user['rol']; 
 

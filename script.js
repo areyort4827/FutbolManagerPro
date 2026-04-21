@@ -1,29 +1,22 @@
-function mostrarPagina(id, linkElement) {
-    let pages = document.querySelectorAll('.main .page');
-    pages.forEach((p) => p.classList.remove('active'));
+function mostrarPagina(id){
 
-    let links = document.querySelectorAll('.menu a');
-    links.forEach((l) => l.classList.remove('active'));
+let pages = document.querySelectorAll('.page');
+pages.forEach(p=>p.classList.remove('active'));  // Quita todas las paginas de activas
 
-    let pagina = document.getElementById(id);
-    if (pagina) {
-        pagina.classList.add('active');
-    }
+let links = document.querySelectorAll('.menu a');
+links.forEach(l=>l.classList.remove('active')); // Quita todos los links del menu de activos
 
-    let enlaceActivo = linkElement || (typeof event !== 'undefined' ? event.currentTarget : null);
-    if (enlaceActivo) {
-        enlaceActivo.classList.add('active');
-    }
+document.getElementById(id).classList.add('active'); // Le añade activo a la pagina seleccionada
 
-    if (id === 'estadisticas') {
-        if (typeof crearRendimientoChart === 'function') {
-            crearRendimientoChart();
-        }
-        if (typeof crearGolesChart === 'function') {
-            crearGolesChart();
-        }
-        if (typeof crearVictoriasChart === 'function') {
-            crearVictoriasChart();
-        }
+event.target.classList.add('active'); // El menu seleccionado pasa a activo
+
+ if(id === 'estadisticas'){
+        crearRendimientoChart();
+        crearGolesChart();
+        crearVictoriasChart();
     }
 }
+
+
+
+

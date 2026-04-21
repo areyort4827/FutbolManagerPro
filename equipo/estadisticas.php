@@ -203,6 +203,7 @@
         <h2>Estadísticas</h2>
         <p class="subtitle">Análisis del rendimiento del club</p>
 
+     
         <div class="stats-grid">
             <div class="card">
                 <div class="card-header">
