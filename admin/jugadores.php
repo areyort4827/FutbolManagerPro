@@ -6,8 +6,9 @@ $sqlEquipos = "SELECT id, nombre, categoria FROM equipos ORDER BY nombre ASC";
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
-// Equipo seleccionado
-$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
+// Equipo seleccionado para esta carga puntual del listado
+$equipoSeleccionado = isset($_SESSION['filtroEquipoJugadores']) ? (int)$_SESSION['filtroEquipoJugadores'] : 0;
+unset($_SESSION['filtroEquipoJugadores']);
 
 // Consulta de jugadores
 $sql = "
@@ -180,6 +181,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .categoria {
+        background-color: #3b82f6;
         display: inline-block;
         margin-top: 10px;
         padding: 5px 12px;
@@ -190,7 +192,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .cadete   { background-color: #22c55e; }
-    .senior   { background-color: #3b82f6; }
+    .primerequipo   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
     </style>
@@ -243,7 +245,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <div class="jugadorHeader">
                 <i class="fa-regular fa-user avatar"></i>
                 <h3><?= htmlspecialchars($jugador['jugador']) ?></h3>
-                <span class="posicion"><?= strtoupper(htmlspecialchars($jugador['posicion'])) ?></span>
+                <span class="posicion"><?= strtoupper(htmlspecialchars(trim($jugador['posicion']))) ?></span>
             </div>
 
             <p class="info">

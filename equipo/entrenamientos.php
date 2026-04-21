@@ -31,7 +31,7 @@ foreach($entrenamientos as $e){
 }
 
 $asistenciaPromedio = $entrenamientosConAsistencia > 0 
-                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
+                      ? round($asistenciaTotal / $entrenamientosConAsistencia) 
                       : 0;
 ?>
 

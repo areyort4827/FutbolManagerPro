@@ -2,19 +2,23 @@
 session_start();
 require_once '../config/auth.php';
 
-$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
-
-// Si viene desde la URL (cambio de mes en calendario)
-if (isset($_GET['pagina'])) {
-    $paginaActual = $_GET['pagina'];
-    $_SESSION['paginaActual'] = $_GET['pagina'];
-}
-
-// Si viene de formularios POST (como filtro de jugadores)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
-    $paginaActual = 'jugadores';
     $_SESSION['paginaActual'] = 'jugadores';
+    $_SESSION['filtroEquipoJugadores'] = (int)$_POST['equipo'];
+    header("Location: menu.php");
+    exit;
 }
+
+if (isset($_GET['pagina']) && $_GET['pagina'] === 'calendario') {
+    $_SESSION['paginaActual'] = 'calendario';
+    $_SESSION['calendarioMes'] = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('n');
+    $_SESSION['calendarioAnio'] = isset($_GET['anio']) ? (int)$_GET['anio'] : (int)date('Y');
+    header("Location: menu.php");
+    exit;
+}
+
+$paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
@@ -183,7 +187,7 @@ $nombre = htmlspecialchars($user['nombre']);
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
         <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
-            <i class="fa-solid fa-user"></i> Jugadores
+            <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
         </a>        
         <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos

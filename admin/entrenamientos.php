@@ -1,6 +1,8 @@
 <?php
 include "../config/conexion.php";
 
+$club_id = $_SESSION['club_id'] ?? 0;
+
 $sql = "SELECT e.*, 
                eq.nombre AS nombre_equipo, 
                eq.categoria,
@@ -29,7 +31,7 @@ foreach($entrenamientos as $e){
 }
 
 $asistenciaPromedio = $entrenamientosConAsistencia > 0 
-                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
+                      ? round($asistenciaTotal / $entrenamientosConAsistencia) 
                       : 0;
 ?>
 
