@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-04-2026 a las 19:06:02
+-- Tiempo de generación: 21-04-2026 a las 12:01:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -88,18 +88,16 @@ CREATE TABLE `entrenamientos` (
 --
 
 INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `num_asistentes`, `lugar`, `equipo_id`) VALUES
-(2, 1, 'Sesión táctica', 'Táctica defensiva', '2026-04-21', '00:00:00', 0, 2, NULL, 1),
+(2, 1, 'Sesión táctica', 'Táctica defensiva', '2026-04-21', '00:00:00', 0, 2, 'Tenerife', 1),
 (4, 2, 'Sesión táctica', 'Transiciones defensa-ataque', '2026-04-20', '00:00:00', 0, 0, NULL, 6),
 (5, 2, 'Sesión táctica', 'Jugadas a balón parado', '2026-04-21', '00:00:00', 0, 0, NULL, 6),
 (7, 3, 'Sesión táctica', 'Presión en bloque medio', '2026-04-20', '00:00:00', 0, 0, NULL, 11),
 (8, 3, 'Sesión táctica', 'Basculaciones defensivas', '2026-04-21', '00:00:00', 0, 0, NULL, 11),
 (9, 3, 'Sesión táctica', 'Contragolpe explosivo', '2026-04-22', '00:00:00', 0, 5, NULL, 11),
-(10, 4, 'Sesión táctica', 'Juego por bandas', '2026-04-20', '00:00:00', 0, 0, NULL, 14),
 (11, 4, 'Sesión táctica', 'Salida de balón', '2026-04-21', '00:00:00', 0, 0, NULL, 14),
 (12, 4, 'Sesión táctica', 'Resistencia física', '2026-04-22', '00:00:00', 0, 0, NULL, 14),
-(13, 1, 'Sesión técnica', 'Nada nada', '2026-04-26', '18:00:00', 120, 4, 'Sevilla', 1),
 (14, 1, 'Sesión de físico', 'Preparacion', '2026-04-12', '17:55:00', 110, 0, 'Écija', 5),
-(15, 1, 'Sesión de físico', 'jajaja', '2026-04-20', '23:00:00', 200, 0, 'La Campana', 1);
+(15, 1, 'Sesión de físico', 'jajaja', '2026-04-20', '23:00:00', 200, 3, 'La Campana', 1);
 
 -- --------------------------------------------------------
 
@@ -124,10 +122,7 @@ INSERT INTO `entrenamiento_asistencia` (`id`, `entrenamiento_id`, `jugador_id`, 
 (6, 4, 6, 1),
 (7, 7, 7, 1),
 (8, 7, 8, 1),
-(9, 7, 9, 0),
-(10, 10, 10, 1),
-(11, 10, 11, 1),
-(12, 10, 12, 1);
+(9, 7, 9, 0);
 
 -- --------------------------------------------------------
 
@@ -185,7 +180,7 @@ CREATE TABLE `jugadores` (
 INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 (1, 'Lamine Yamal', 18, 'delantero', 1),
 (2, 'Robert Lewandowski', 37, 'delantero', 1),
-(3, 'Gavi', 21, 'mediocentro', 1),
+(3, 'Pedri', 23, 'mediocentro', 1),
 (4, 'Vinícius Júnior', 25, 'delantero', 6),
 (5, 'Jude Bellingham', 22, 'mediocentro', 6),
 (6, 'Fede Valverde', 27, 'mediocentro', 6),
@@ -196,8 +191,7 @@ INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
 (11, 'Hugo Duro', 26, 'delantero', 14),
 (12, 'José Gayà', 30, 'mediocentro', 14),
 (13, 'Diego Kochen', 20, 'portero', 2),
-(15, 'Mbappe', 27, 'delantero', 6),
-(17, 'Messi', 39, 'delantero', 1);
+(15, 'Mbappe', 27, 'delantero', 6);
 
 -- --------------------------------------------------------
 
@@ -221,9 +215,13 @@ CREATE TABLE `partidos` (
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
 (2, NULL, NULL, '2026-05-10', '1-1', 1, 11),
-(3, NULL, NULL, '2026-05-20', '3-0', 1, 14),
-(4, NULL, NULL, '2026-10-15', '0-0', 6, 1),
-(20, NULL, NULL, '2026-04-21', '2-1', 1, 15);
+(3, NULL, NULL, '2026-05-20', '3-3', 1, 14),
+(4, NULL, NULL, '2026-10-15', '3-3', 6, 1),
+(20, NULL, NULL, '2026-04-21', '2-1', 1, 15),
+(21, NULL, NULL, '2026-04-29', '2-2', 1, 2),
+(22, NULL, NULL, '2026-04-30', '3-3', 15, 16),
+(23, NULL, NULL, '2026-04-21', '10-10', 1, 15),
+(24, NULL, NULL, '2026-04-21', '4-4', 3, 14);
 
 -- --------------------------------------------------------
 
@@ -246,7 +244,8 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) VALUES
 (1, 'Emerson Cruz', 'emerson@gmail.com', 'emerson123', 'entrenador', 1),
-(2, 'Admin', 'admin@gmail.com', 'admin123', 'admin', NULL);
+(2, 'Admin', 'admin@gmail.com', 'admin123', 'admin', NULL),
+(3, 'Barcelona', 'barcelona@gmail.com', 'barcelona123', 'equipo', 1);
 
 --
 -- Índices para tablas volcadas
@@ -329,7 +328,7 @@ ALTER TABLE `entrenadores`
 -- AUTO_INCREMENT de la tabla `entrenamientos`
 --
 ALTER TABLE `entrenamientos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenamiento_asistencia`
@@ -347,19 +346,19 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
