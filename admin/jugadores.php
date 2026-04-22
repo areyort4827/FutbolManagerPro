@@ -181,7 +181,6 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .categoria {
-        background-color: #3b82f6;
         display: inline-block;
         margin-top: 10px;
         padding: 5px 12px;
@@ -192,9 +191,10 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .cadete   { background-color: #22c55e; }
-    .primerequipo   { background-color: #3b82f6; }
+    .senior   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
+    .filial { background-color: #176df7; }
     </style>
 </head>
 <body>
@@ -245,7 +245,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <div class="jugadorHeader">
                 <i class="fa-regular fa-user avatar"></i>
                 <h3><?= htmlspecialchars($jugador['jugador']) ?></h3>
-                <span class="posicion"><?= strtoupper(htmlspecialchars(trim($jugador['posicion']))) ?></span>
+                <span class="posicion"><?= strtoupper(htmlspecialchars($jugador['posicion'])) ?></span>
             </div>
 
             <p class="info">

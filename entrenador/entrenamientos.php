@@ -1,21 +1,31 @@
 <?php
 include "../config/conexion.php";
-$club_id = $_SESSION['club_id'];
 
+$usuario_sesion = $_SESSION['user'] ?? null;
+$identificador_usuario = $usuario_sesion['id'] ?? 0;
+
+// Obtener equipo del entrenador
+$stmt = $pdo->prepare("SELECT equipo_id FROM entrenadores WHERE usuario_id = :id");
+$stmt->execute([':id' => $identificador_usuario]);
+$datos_entrenador = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$mi_equipo_id = $datos_entrenador['equipo_id'] ?? 0;
+
+// CONSULTA SOLO PARA SU EQUIPO
 $sql = "SELECT e.*, 
                eq.nombre AS nombre_equipo, 
                eq.categoria,
                (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.equipo_id) as total_jugadores_equipo
         FROM entrenamientos e
         LEFT JOIN equipos eq ON e.equipo_id = eq.id
-        WHERE e.club_id = :club_id
-           OR (e.equipo_id IS NOT NULL AND eq.equipo_id = :club_id)
+        WHERE e.equipo_id = :equipo_id
         ORDER BY e.fecha DESC, e.hora DESC";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute(['club_id' => $club_id]);
+$stmt->execute(['equipo_id' => $mi_equipo_id]);
 $entrenamientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// estadísticas
 $totalEntrenamientos = count($entrenamientos);
 $horasTotales = 0;
 $asistenciaTotal = 0;
@@ -31,7 +41,7 @@ foreach($entrenamientos as $e){
 }
 
 $asistenciaPromedio = $entrenamientosConAsistencia > 0 
-                      ? round($asistenciaTotal / $entrenamientosConAsistencia) 
+                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
                       : 0;
 ?>
 
@@ -142,17 +152,19 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 
 /* Modales */
 .modal {
-    display: none;
+    display: none; 
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.6);
     z-index: 1000;
+    overflow-y: auto; 
+    padding: 20px 0;
 }
 
 .modal-content {
     background: white;
-    margin: 5% auto;
+    margin: 2% auto; 
     padding: 25px;
     border-radius: 12px;
     width: 90%;
@@ -162,16 +174,16 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 
 .modal-content label {
     display: block;
-    margin: 12px 0 5px;
+    margin: 8px 0 4px; 
     font-weight: 500;
 }
 
 .modal-content input, .modal-content select, .modal-content textarea {
     width: 100%;
-    padding: 10px;
+    padding: 8px; 
     border: 1px solid #ddd;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px; 
 }
 
 .btn-verde {
@@ -217,7 +229,6 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 
     <!-- LISTA -->
     <?php foreach($entrenamientos as $e): ?>
-
     <div class="entrenamientoCard">
         <div class="entrenamientoInfo">
             <div class="icon-box">
@@ -265,16 +276,18 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
             </form>
         </div>
     </div>
-
     <?php endforeach; ?>
 
 </div>
 
-<!-- ====================== MODAL AÑADIR ENTRENAMIENTO ====================== -->
+<!-- MODAL AÑADIR -->
 <div id="modalAñadir" class="modal">
     <div class="modal-content">
         <h3>Añadir Nuevo Entrenamiento</h3>
         <form method="POST" action="añadir_entrenamiento.php">
+
+            <input type="hidden" name="equipo_id" value="<?= $mi_equipo_id ?>">
+
             <label>Título</label>
             <select name="titulo" required>
                 <option value="">Seleccionar tipo</option>
@@ -282,16 +295,6 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
                 <option value="Sesión técnica">Sesión técnica</option>
                 <option value="Sesión de físico">Sesión de físico</option>
                 <option value="Sesión pre-partido">Sesión pre-partido</option>
-            </select>
-
-            <label>Equipo</label>
-            <select name="equipo_id" required>
-                <?php
-                $equipos = $pdo->query("SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id");
-                while($eq = $equipos->fetch(PDO::FETCH_ASSOC)):
-                ?>
-                    <option value="<?= $eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['categoria']) ?>)</option>
-                <?php endwhile; ?>
             </select>
 
             <label>Fecha</label>
@@ -315,7 +318,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     </div>
 </div>
 
-<!-- ====================== MODAL ASISTENCIA ====================== -->
+<!-- MODAL ASISTENCIA -->
 <div id="modalAsistencia" class="modal">
     <div class="modal-content">
         <h3>Actualizar Asistentes</h3>
@@ -329,7 +332,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     </div>
 </div>
 
-<!-- ====================== MODAL EDITAR ====================== -->
+<!-- MODAL EDITAR -->
 <div id="modalEditar" class="modal">
     <div class="modal-content">
         <h3>Editar Entrenamiento</h3>

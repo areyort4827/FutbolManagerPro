@@ -2,8 +2,12 @@
 session_start();
 require_once '../config/auth.php';
 
+// Si viene un POST de la pantalla de jugadores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
+    $_SESSION['paginaActual'] = 'jugadores';
+}
+
 $paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
-unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
@@ -169,7 +173,10 @@ $nombre = htmlspecialchars($user['nombre']);
   <div class="menu">
         <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
             <i class="fa-solid fa-gauge"></i> Dashboard
-        </a>       
+        </a>
+        <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
+            <i class="fa-solid fa-user"></i> Jugadores
+        </a>        
         <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos
         </a>

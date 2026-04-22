@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/auth.php';
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
     $_SESSION['paginaActual'] = 'jugadores';
     $_SESSION['filtroEquipoJugadores'] = (int)$_POST['equipo'];
@@ -179,7 +180,7 @@ $nombre = htmlspecialchars($user['nombre']);
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
         <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
-            <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
+             <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
         </a>        
         <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos
@@ -189,9 +190,6 @@ $nombre = htmlspecialchars($user['nombre']);
         </a>
         <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
             <i class="fa-solid fa-chart-line"></i> Estadísticas
-        </a>
-        <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
-            <i class="fa-solid fa-calendar"></i> Calendario
         </a>
     </div>
     <!-- USER BOX - Icono a la izquierda + abajo del todo -->
@@ -221,9 +219,6 @@ $nombre = htmlspecialchars($user['nombre']);
         </div>
         <div id="partidos" class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>">
             <?php include 'partidos.php' ?>
-        </div>
-        <div id="calendario" class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>">
-            <?php include 'calendario.php' ?>
         </div>
         <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
             <?php include 'estadisticas.php' ?>

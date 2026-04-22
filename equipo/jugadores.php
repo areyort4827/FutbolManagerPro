@@ -218,8 +218,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     .senior   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
-    .filial { background-color: #71baf7; }
-
+    .filial { background-color: #176df7; }
     </style>
 </head>
 
