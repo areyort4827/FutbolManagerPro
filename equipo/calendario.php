@@ -4,8 +4,9 @@ require_once "../config/conexion.php";
 
 $club_id = $_SESSION['club_id'] ?? 0;
 
-$mes  = isset($_GET['mes'])  ? (int)$_GET['mes']  : date('n');
-$anio = isset($_GET['anio']) ? (int)$_GET['anio'] : date('Y');
+$mes  = isset($_SESSION['calendarioMes']) ? (int)$_SESSION['calendarioMes'] : (int)date('n');
+$anio = isset($_SESSION['calendarioAnio']) ? (int)$_SESSION['calendarioAnio'] : (int)date('Y');
+unset($_SESSION['calendarioMes'], $_SESSION['calendarioAnio']);
 
 if ($mes < 1)  { $mes = 1; }
 if ($mes > 12) { $mes = 12; }

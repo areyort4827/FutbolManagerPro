@@ -2,12 +2,23 @@
 session_start();
 require_once '../config/auth.php';
 
-// Si viene un POST de la pantalla de jugadores
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
     $_SESSION['paginaActual'] = 'jugadores';
+    header("Location: menu.php");
+    exit;
+}
+
+if (isset($_GET['pagina']) && $_GET['pagina'] === 'calendario') {
+    $_SESSION['paginaActual'] = 'calendario';
+    $_SESSION['calendarioMes'] = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('n');
+    $_SESSION['calendarioAnio'] = isset($_GET['anio']) ? (int)$_GET['anio'] : (int)date('Y');
+    header("Location: menu.php");
+    exit;
 }
 
 $paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
+unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
@@ -176,7 +187,7 @@ $nombre = htmlspecialchars($user['nombre']);
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
         <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
-            <i class="fa-solid fa-user"></i> Jugadores
+             <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
         </a>        
         <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
             <i class="fa-solid fa-dumbbell"></i> Entrenamientos

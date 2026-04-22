@@ -1,5 +1,6 @@
 <?php
 include "../config/conexion.php";
+$club_id = $_SESSION['club_id'] ?? 1;
 
 $sql = "SELECT e.*, 
                eq.nombre AS nombre_equipo, 
@@ -19,18 +20,18 @@ $horasTotales = 0;
 $asistenciaTotal = 0;
 $entrenamientosConAsistencia = 0;
 
-foreach($entrenamientos as $e){
+foreach ($entrenamientos as $e) {
     $horasTotales += $e['duracion'];
-    
+
     if (isset($e['num_asistentes']) && $e['num_asistentes'] > 0) {
         $asistenciaTotal += $e['num_asistentes'];
         $entrenamientosConAsistencia++;
     }
 }
 
-$asistenciaPromedio = $entrenamientosConAsistencia > 0 
-                      ? round($asistenciaTotal / $entrenamientosConAsistencia, 1) 
-                      : 0;
+$asistenciaPromedio = $entrenamientosConAsistencia > 0
+    ? round($asistenciaTotal / $entrenamientosConAsistencia, 1)
+    : 0;
 ?>
 
 <style>
@@ -42,8 +43,6 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     align-items: center;
     margin-bottom: 25px;
 }
-
-.entrenamientosHeader span { color: #64748b; font-size: 14px; }
 
 .btnAñadir {
     background: #16a34a;
@@ -67,7 +66,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     border: 2px solid #bbf7d0;
     border-radius: 12px;
     padding: 20px;
-    background: #f8fafc;
+    background: #ffffff;
 }
 
 .estadisticasTitle { color: #64748b; font-size: 14px; }
@@ -139,6 +138,53 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 .btn-eliminar { background: #fee2e2; color: #ef4444; border: 1px solid #ef4444; }
 
 .btn-action:hover { transform: translateY(-2px); }
+
+/* Modales */
+.modal {
+    display: none; 
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    overflow-y: auto; 
+    padding: 20px 0;
+}
+
+.modal-content {
+    background: white;
+    margin: 2% auto; 
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 520px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-content label {
+    display: block;
+    margin: 8px 0 4px; 
+    font-weight: 500;
+}
+
+.modal-content input, .modal-content select, .modal-content textarea {
+    width: 100%;
+    padding: 8px; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 8px; 
+}
+
+.btn-verde {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
 </style>
 
 <div class="entrenamientosContenedor">
@@ -170,57 +216,57 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
     </div>
 
     <!-- LISTA -->
-    <?php foreach($entrenamientos as $e): ?>
+    <?php foreach ($entrenamientos as $e): ?>
 
-    <div class="entrenamientoCard">
-        <div class="entrenamientoInfo">
-            <div class="icon-box">
-                <?php
-                $icono = match($e['titulo']) {
-                    'Sesión técnica' => 'fa-futbol',
-                    'Sesión táctica' => 'fa-clipboard-list',
-                    'Sesión de físico' => 'fa-dumbbell',
-                    'Sesión pre-partido' => 'fa-flag-checkered',
-                    default => 'fa-futbol'
-                };
-                echo "<i class='fa-solid $icono'></i>";
-                ?>
+        <div class="entrenamientoCard">
+            <div class="entrenamientoInfo">
+                <div class="icon-box">
+                    <?php
+                    $icono = match ($e['titulo']) {
+                        'Sesión técnica' => 'fa-futbol',
+                        'Sesión táctica' => 'fa-clipboard-list',
+                        'Sesión de físico' => 'fa-dumbbell',
+                        'Sesión pre-partido' => 'fa-flag-checkered',
+                        default => 'fa-futbol'
+                    };
+                    echo "<i class='fa-solid $icono'></i>";
+                    ?>
+                </div>
+
+                <div style="flex:1">
+                    <div class="entrenamientoTitle"><?= htmlspecialchars($e['titulo']) ?></div>
+                    <div class="entrenamientoMeta">
+                        📅 <?= date("d M Y", strtotime($e['fecha'])) ?>
+                        • 🕒 <?= substr($e['hora'], 0, 5) ?>
+                        • ⏱ <?= $e['duracion'] ?> min
+                        • 📍 <?= htmlspecialchars($e['lugar'] ?? 'No especificado') ?>
+                        • 👤 <?= htmlspecialchars($e['nombre_equipo'] ?? 'Sin equipo') ?>
+                        (<?= htmlspecialchars($e['categoria'] ?? '') ?>)
+                        • <strong><?= htmlspecialchars($e['nombre_club'] ?? 'Sin club') ?></strong>
+                    </div>
+                    <div class="entrenamientoDescripcion">
+                        <?= htmlspecialchars($e['descripcion'] ?? '') ?>
+                    </div>
+                    <div class="entrenamientoMeta" style="margin-top: 8px;">
+                        👥 Asistentes: <strong><?= $e['num_asistentes'] ?? 0 ?></strong> /
+                        <?= $e['total_jugadores_equipo'] ?? 0 ?> jugadores
+                    </div>
+                </div>
             </div>
 
-            <div style="flex:1">
-                <div class="entrenamientoTitle"><?= htmlspecialchars($e['titulo']) ?></div>
-                <div class="entrenamientoMeta">
-                    📅 <?= date("d M Y", strtotime($e['fecha'])) ?>
-                    • 🕒 <?= substr($e['hora'],0,5) ?>
-                    • ⏱ <?= $e['duracion'] ?> min
-                    • 📍 <?= htmlspecialchars($e['lugar'] ?? 'No especificado') ?>
-                    • 👤 <?= htmlspecialchars($e['nombre_equipo'] ?? 'Sin equipo') ?> 
-                    (<?= htmlspecialchars($e['categoria'] ?? '') ?>)
-                    • <strong><?= htmlspecialchars($e['nombre_club'] ?? 'Sin club') ?></strong>
-                </div>
-                <div class="entrenamientoDescripcion">
-                    <?= htmlspecialchars($e['descripcion'] ?? '') ?>
-                </div>
-                <div class="entrenamientoMeta" style="margin-top: 8px;">
-                    👥 Asistentes: <strong><?= $e['num_asistentes'] ?? 0 ?></strong> / 
-                    <?= $e['total_jugadores_equipo'] ?? 0 ?> jugadores
-                </div>
-            </div>
-        </div>
+            <div class="actions">
+                <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">Asistencia</button>
+                <button onclick="editarEntrenamiento(<?= htmlspecialchars(json_encode($e)) ?>)" class="btn-action btn-editar">Editar</button>
 
-        <div class="actions">
-            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">Asistencia</button>
-            <button onclick="editarEntrenamiento(<?= htmlspecialchars(json_encode($e)) ?>)" class="btn-action btn-editar">Editar</button>
-            
-            <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
-                <input type="hidden" name="id" value="<?= $e['id'] ?>">
-                <button type="submit" class="btn-action btn-eliminar" 
+                <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
+                    <input type="hidden" name="id" value="<?= $e['id'] ?>">
+                    <button type="submit" class="btn-action btn-eliminar"
                         onclick="return confirm('¿Estás seguro de que deseas eliminar este entrenamiento?')">
-                    Eliminar
-                </button>
-            </form>
+                        Eliminar
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
 
     <?php endforeach; ?>
 
@@ -243,7 +289,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
             <select name="equipo_id" required>
                 <?php
                 $equipos = $pdo->query("SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club_id");
-                while($eq = $equipos->fetch(PDO::FETCH_ASSOC)):
+                while ($eq = $equipos->fetch(PDO::FETCH_ASSOC)):
                 ?>
                     <option value="<?= $eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['categoria']) ?>)</option>
                 <?php endwhile; ?>
@@ -288,7 +334,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
         <h3>Editar Entrenamiento</h3>
         <form method="POST" action="editar_entrenamiento.php">
             <input type="hidden" name="id" id="edit_id">
-            <input type="hidden" name="equipo_id" id="edit_equipo_id">   <!-- ← Este era el problema -->
+            <input type="hidden" name="equipo_id" id="edit_equipo_id"> <!-- ← Este era el problema -->
 
             <label>Título</label>
             <select name="titulo" id="edit_titulo" required>
@@ -325,85 +371,89 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 </div>
 
 <script>
-// Función genérica para abrir modal
-function abrirModal(id) {
-    document.getElementById(id).style.display = 'block';
-}
+    // Función genérica para abrir modal
+    function abrirModal(id) {
+        document.getElementById(id).style.display = 'block';
+    }
 
-function cerrarModal(id) {
-    document.getElementById(id).style.display = 'none';
-}
+    function cerrarModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
 
-// Modal Asistencia
-function editarAsistencia(id) {
-    document.getElementById('asistencia_id').value = id;
-    document.getElementById('asistencia_num').value = 0;
-    abrirModal('modalAsistencia');
-}
+    // Modal Asistencia
+    function editarAsistencia(id) {
+        document.getElementById('asistencia_id').value = id;
+        document.getElementById('asistencia_num').value = 0;
+        abrirModal('modalAsistencia');
+    }
 
-// Modal Editar Entrenamiento con datos precargados
-function editarEntrenamiento(entrenamiento) {
-    const data = typeof entrenamiento === 'string' ? JSON.parse(entrenamiento) : entrenamiento;
+    // Modal Editar Entrenamiento con datos precargados
+    function editarEntrenamiento(entrenamiento) {
+        const data = typeof entrenamiento === 'string' ? JSON.parse(entrenamiento) : entrenamiento;
 
-    document.getElementById('edit_id').value = data.id;
-    document.getElementById('edit_equipo_id').value = data.equipo_id || '';
-    document.getElementById('edit_titulo').value = data.titulo;
-    document.getElementById('edit_fecha').value = data.fecha;
-    document.getElementById('edit_hora').value = data.hora.substring(0,5);
-    document.getElementById('edit_duracion').value = data.duracion;
-    document.getElementById('edit_lugar').value = data.lugar || '';
-    document.getElementById('edit_descripcion').value = data.descripcion || '';
+        document.getElementById('edit_id').value = data.id;
+        document.getElementById('edit_equipo_id').value = data.equipo_id || '';
+        document.getElementById('edit_titulo').value = data.titulo;
+        document.getElementById('edit_fecha').value = data.fecha;
+        document.getElementById('edit_hora').value = data.hora.substring(0, 5);
+        document.getElementById('edit_duracion').value = data.duracion;
+        document.getElementById('edit_lugar').value = data.lugar || '';
+        document.getElementById('edit_descripcion').value = data.descripcion || '';
 
-    // Precargar el select de equipo
-    const selectEquipo = document.getElementById('edit_equipo_select');
-    selectEquipo.innerHTML = `<option value="${data.equipo_id}">${data.nombre_equipo || 'Sin equipo'} (${data.categoria || ''})</option>`;
+        // Precargar el select de equipo
+        const selectEquipo = document.getElementById('edit_equipo_select');
+        selectEquipo.innerHTML = `<option value="${data.equipo_id}">${data.nombre_equipo || 'Sin equipo'} (${data.categoria || ''})</option>`;
 
-    abrirModal('modalEditar');
-}
+        abrirModal('modalEditar');
+    }
 </script>
 
 <style>
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 1000;
-}
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+    }
 
-.modal-content {
-    background: white;
-    margin: 5% auto;
-    padding: 25px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 520px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
+    .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 520px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
 
-.modal-content label {
-    display: block;
-    margin: 12px 0 5px;
-    font-weight: 500;
-}
+    .modal-content label {
+        display: block;
+        margin: 12px 0 5px;
+        font-weight: 500;
+    }
 
-.modal-content input, .modal-content select, .modal-content textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 
-.btn-verde {
-    background: #16a34a;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
-}
+    .btn-verde {
+        background: #16a34a;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+    }
 </style>

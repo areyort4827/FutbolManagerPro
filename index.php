@@ -18,6 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $rol = $user['rol']; 
 
+         // SI ES ENTRENADOR SACAMOS A QUE EQUIPO PERTENECE
+        if($user['rol'] == 'entrenador'){
+
+            $sql2 = "SELECT equipo_id FROM entrenadores WHERE usuario_id = ?";
+            $stmt2 = $pdo->prepare($sql2);
+            $stmt2->execute([$user['id']]);
+
+            $entrenador = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+            $_SESSION['equipo_id'] = $entrenador['equipo_id'];
+        }
+
         if ($rol === 'admin'){
             header("Location: admin/menu.php");
 

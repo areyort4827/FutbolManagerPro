@@ -6,8 +6,9 @@ $sqlEquipos = "SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
-// Equipo seleccionado (por POST)
-$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
+// Equipo seleccionado para esta carga puntual del listado
+$equipoSeleccionado = isset($_SESSION['filtroEquipoJugadores']) ? (int)$_SESSION['filtroEquipoJugadores'] : 0;
+unset($_SESSION['filtroEquipoJugadores']);
 
 // Consulta de jugadores filtrada
 $sql = "
@@ -217,6 +218,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     .senior   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
+    .filial { background-color: #176df7; }
     </style>
 </head>
 
