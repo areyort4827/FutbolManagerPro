@@ -1,5 +1,12 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/conexion.php';
+
+$clubsStmt = $pdo->query('SELECT id, nombre FROM clubes ORDER BY nombre');
+$clubs = $clubsStmt ? $clubsStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+
+$flashError = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_error']);
 ?>
 
 <!DOCTYPE html>
@@ -108,6 +115,12 @@ body{
 
 <h2>Crear cuenta</h2>
 
+<?php if ($flashError): ?>
+    <div style="background:#ef4444;color:white;padding:12px;border-radius:8px;margin-bottom:18px;">
+        <?= htmlspecialchars($flashError) ?>
+    </div>
+<?php endif; ?>
+
 <form action="procesar_registro.php" method="POST">
 
     <div class="input-group">
@@ -131,6 +144,15 @@ body{
             <option value="jugador">Jugador</option>
             <option value="entrenador">Entrenador</option>
             <option value="equipo">Equipo</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <select name="club_id" required>
+            <option value="">Selecciona un club</option>
+            <?php foreach ($clubs as $club): ?>
+                <option value="<?= (int)$club['id'] ?>"><?= htmlspecialchars($club['nombre']) ?></option>
+            <?php endforeach; ?>
         </select>
     </div>
 

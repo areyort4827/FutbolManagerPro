@@ -3,6 +3,12 @@ session_start();
 require_once 'config/auth.php';
 
 $error = '';
+$success = '';
+
+if (isset($_SESSION['flash_success'])) {
+    $success = (string)$_SESSION['flash_success'];
+    unset($_SESSION['flash_success']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -213,6 +219,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
+        <?php if ($success): ?>
+        <div style="background:#22c55e;color:white;padding:12px;border-radius:6px;margin-bottom:20px;font-size:0.95rem;">
+            <?= htmlspecialchars($success) ?>
+        </div>
+        <?php endif; ?>
+
         <form method="POST" action="">
             <div class="input">
                 <label>Email</label>
@@ -225,7 +237,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="btn-login">Iniciar Sesión</button>
-            <button type="submit" class="btn-registrarse">Registrarse</button>
+            <a href="registro.php" class="btn-registrarse" style="display:inline-block;text-align:center;text-decoration:none;line-height:1.2;">
+                Registrarse
+            </a>
         </form>
 
     </div>

@@ -180,16 +180,13 @@ $nombre = htmlspecialchars($user['nombre']);
             <i class="fa-solid fa-gauge"></i> Dashboard
         </a>
         <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
-             <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
-        </a>        
-        <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
-            <i class="fa-solid fa-dumbbell"></i> Entrenamientos
+             <i class="fa-solid fa-solidLarge fa-people-group"></i> Jugadores
         </a>
-        <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
-            <i class="fa-solid fa-futbol"></i> Partidos
+        <a class="page <?= $paginaActual === 'crear_admin' ? 'active' : '' ?>" onclick="mostrarPagina('crear_admin')">
+            <i class="fa-solid fa-user-shield"></i> Crear Admin
         </a>
-        <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
-            <i class="fa-solid fa-chart-line"></i> Estadísticas
+        <a class="page <?= $paginaActual === 'eliminar_usuarios' ? 'active' : '' ?>" onclick="mostrarPagina('eliminar_usuarios')">
+            <i class="fa-solid fa-user-xmark"></i> Eliminar usuarios
         </a>
     </div>
     <!-- USER BOX - Icono a la izquierda + abajo del todo -->
@@ -214,14 +211,11 @@ $nombre = htmlspecialchars($user['nombre']);
         <div id="jugadores" class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
             <?php include 'jugadores.php' ?>
         </div>
-        <div id="entrenamientos" class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>">
-            <?php include 'entrenamientos.php' ?>
+        <div id="crear_admin" class="page <?= $paginaActual === 'crear_admin' ? 'active' : '' ?>">
+            <?php include 'crear_admin.php' ?>
         </div>
-        <div id="partidos" class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>">
-            <?php include 'partidos.php' ?>
-        </div>
-        <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
-            <?php include 'estadisticas.php' ?>
+        <div id="eliminar_usuarios" class="page <?= $paginaActual === 'eliminar_usuarios' ? 'active' : '' ?>">
+            <?php include 'eliminar_usuarios.php' ?>
         </div>
     </div>
 
@@ -229,3 +223,4 @@ $nombre = htmlspecialchars($user['nombre']);
 
 </body>
 </html>
+
