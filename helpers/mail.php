@@ -1,35 +1,41 @@
 <?php
 
-require_once __DIR__ . '/../PHPMailer/src/PHPMailer.php';
-require_once __DIR__ . '/../PHPMailer/src/SMTP.php';
-require_once __DIR__ . '/../PHPMailer/src/Exception.php';
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/../PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../PHPMailer/src/SMTP.php';
 
 function enviarEmail($destino, $asunto, $mensaje){
 
     $mail = new PHPMailer(true);
 
     try {
+        // Configuración del servidor
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'TU_CORREO@gmail.com';
-        $mail->Password = 'TU_PASSWORD_APP';
+        $mail->Username = 'emersoncruz712@gmail.com';
+        $mail->Password = 'vpqj kjmz jycv grtu';
+
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom('TU_CORREO@gmail.com', 'FutbolManager');
+        // Remitente
+        $mail->setFrom('emersoncruz712@gmail.com', 'FutbolManager');
+
+        // Destinatario
         $mail->addAddress($destino);
 
+        // Contenido
         $mail->isHTML(true);
         $mail->Subject = $asunto;
-        $mail->Body    = $mensaje;
+        $mail->Body = $mensaje;
 
         $mail->send();
 
     } catch (Exception $e) {
-        // ignoramos errores por ahora
+        echo "❌ Error al enviar email: " . $mail->ErrorInfo . "<br>";
     }
 }
