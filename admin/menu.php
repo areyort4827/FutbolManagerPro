@@ -3,6 +3,13 @@ session_start();
 require_once '../config/auth.php';
 
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['editar_jugador'])) {
+    $_SESSION['paginaActual'] = 'editar_jugador';
+    $_SESSION['editar_jugador_id'] = (int)$_GET['editar_jugador'];
+    header("Location: menu.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
     $_SESSION['paginaActual'] = 'jugadores';
     $_SESSION['filtroEquipoJugadores'] = (int)$_POST['equipo'];
@@ -210,6 +217,9 @@ $nombre = htmlspecialchars($user['nombre']);
         </div>
         <div id="jugadores" class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>">
             <?php include 'jugadores.php' ?>
+        </div>
+        <div id="editar_jugador" class="page <?= $paginaActual === 'editar_jugador' ? 'active' : '' ?>">
+            <?php if ($paginaActual === 'editar_jugador') include 'editar_jugador.php' ?>
         </div>
         <div id="crear_admin" class="page <?= $paginaActual === 'crear_admin' ? 'active' : '' ?>">
             <?php include 'crear_admin.php' ?>

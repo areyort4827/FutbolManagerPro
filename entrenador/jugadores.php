@@ -18,7 +18,7 @@ if ($mi_equipo_id > 0) {
     SELECT 
         jugadores.id,
         jugadores.nombre AS jugador,
-        jugadores.edad,
+        TIMESTAMPDIFF(YEAR, jugadores.fecha_nacimiento, CURDATE()) AS edad,
         jugadores.posicion,
         equipos.nombre AS equipo,
         equipos.categoria

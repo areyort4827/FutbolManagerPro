@@ -5,7 +5,7 @@ $club_id = $_SESSION['club_id'];
 $sql = "SELECT e.*, 
                eq.nombre AS nombre_equipo, 
                eq.categoria,
-               (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.equipo_id) as total_jugadores_equipo
+               (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.equipo_id AND j.eliminado = 0) as total_jugadores_equipo
         FROM entrenamientos e
         LEFT JOIN equipos eq ON e.equipo_id = eq.id
         WHERE e.club_id = :club_id
@@ -24,10 +24,9 @@ $entrenamientosConAsistencia = 0;
 foreach($entrenamientos as $e){
     $horasTotales += $e['duracion'];
     
-    if (isset($e['num_asistentes']) && $e['num_asistentes'] > 0) {
-        $asistenciaTotal += $e['num_asistentes'];
-        $entrenamientosConAsistencia++;
-    }
+    // Contar TODOS los entrenamientos (incluyendo los de 0 asistentes) para la media
+    $asistenciaTotal += (int)($e['num_asistentes'] ?? 0);
+    $entrenamientosConAsistencia++;
 }
 
 $asistenciaPromedio = $entrenamientosConAsistencia > 0 
@@ -136,6 +135,7 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
 
 .btn-editar   { background: #dcfce7; color: #16a34a; border: 1px solid #16a34a; }
 .btn-asistencia { background: #dbeafe; color: #1e40af; border: 1px solid #1e40af; }
+.btn-asistencia:disabled { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; opacity: 0.6; }
 .btn-eliminar { background: #fee2e2; color: #ef4444; border: 1px solid #ef4444; }
 
 .btn-action:hover { transform: translateY(-2px); }
@@ -253,7 +253,13 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
         </div>
 
         <div class="actions">
-            <button onclick="editarAsistencia(<?= $e['id'] ?>)" class="btn-action btn-asistencia">Asistencia</button>
+            <?php $sinJugadores = (int)($e['total_jugadores_equipo'] ?? 0) === 0; ?>
+            <button
+                onclick="<?= $sinJugadores ? 'return false' : "editarAsistencia({$e['id']}, " . (int)($e['num_asistentes'] ?? 0) . ', ' . (int)($e['total_jugadores_equipo'] ?? 0) . ')' ?>"
+                class="btn-action btn-asistencia"
+                <?= $sinJugadores ? 'disabled title="Sin jugadores en el equipo"' : '' ?>>
+                Asistencia
+            </button>
             <button onclick="editarEntrenamiento(<?= htmlspecialchars(json_encode($e)) ?>)" class="btn-action btn-editar">Editar</button>
             
             <form action="eliminar_entrenamiento.php" method="POST" style="display:inline;">
@@ -321,9 +327,12 @@ $asistenciaPromedio = $entrenamientosConAsistencia > 0
         <h3>Actualizar Asistentes</h3>
         <form method="POST" action="guardar_asistencia.php">
             <input type="hidden" name="entrenamiento_id" id="asistencia_id">
-            <label>Número de jugadores que asistieron:</label>
+            <label>Número de jugadores que asistieron: <span id="asistencia_max_label"></span></label>
             <input type="number" name="num_asistentes" id="asistencia_num" min="0" required>
-            <button type="submit" class="btn-verde">Guardar Asistencia</button>
+            <small id="asistencia_aviso" style="color:#dc2626; display:none;">
+                No puede superar el total de jugadores del equipo.
+            </small>
+            <button type="submit" class="btn-verde" id="asistencia_submit">Guardar Asistencia</button>
             <button type="button" onclick="cerrarModal('modalAsistencia')">Cancelar</button>
         </form>
     </div>
@@ -375,11 +384,31 @@ function cerrarModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
-function editarAsistencia(id) {
+function editarAsistencia(id, actual, totalJugadores) {
     document.getElementById('asistencia_id').value = id;
-    document.getElementById('asistencia_num').value = 0;
+    document.getElementById('asistencia_num').value = actual;
+    document.getElementById('asistencia_num').max = totalJugadores > 0 ? totalJugadores : '';
+    document.getElementById('asistencia_max_label').textContent =
+        totalJugadores > 0 ? '(máx. ' + totalJugadores + ')' : '';
+    document.getElementById('asistencia_aviso').style.display = 'none';
+    document.getElementById('asistencia_submit').disabled = false;
     abrirModal('modalAsistencia');
 }
+
+// Validar en tiempo real que no supere el total
+document.getElementById('asistencia_num').addEventListener('input', function() {
+    const max = parseInt(this.max);
+    const val = parseInt(this.value);
+    const aviso = document.getElementById('asistencia_aviso');
+    const btn   = document.getElementById('asistencia_submit');
+    if (max > 0 && val > max) {
+        aviso.style.display = 'block';
+        btn.disabled = true;
+    } else {
+        aviso.style.display = 'none';
+        btn.disabled = false;
+    }
+});
 
 function editarEntrenamiento(entrenamiento) {
     const data = typeof entrenamiento === 'string' ? JSON.parse(entrenamiento) : entrenamiento;

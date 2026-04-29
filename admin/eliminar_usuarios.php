@@ -31,11 +31,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_usuario_subm
             } elseif (($info['rol'] ?? '') === 'admin') {
                 $error = 'Por seguridad, no se eliminan admins desde aquí.';
             } else {
+                $pdo->beginTransaction();
+
+                // Si es entrenador, borrar primero su registro en la tabla entrenadores
+                if (($info['rol'] ?? '') === 'entrenador') {
+                    $stmtEnt = $pdo->prepare('DELETE FROM entrenadores WHERE usuario_id = :id');
+                    $stmtEnt->execute([':id' => $usuarioId]);
+                }
+
                 $stmtDel = $pdo->prepare('DELETE FROM usuarios WHERE id = :id LIMIT 1');
                 $stmtDel->execute([':id' => $usuarioId]);
+
+                $pdo->commit();
                 $success = 'Usuario eliminado correctamente.';
             }
         } catch (PDOException $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
             $error = 'Error al eliminar el usuario.';
         }
     }

@@ -1,7 +1,7 @@
 <?php
 
 $host = "localhost";
-$dbname = "futbolmanagerpro2";
+$dbname = "futbolmanagerpro3";
 $user = "root";
 $pass = "";
 
