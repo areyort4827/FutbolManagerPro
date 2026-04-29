@@ -6,29 +6,38 @@ $sqlEquipos = "SELECT id, nombre, categoria FROM equipos ORDER BY nombre ASC";
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
-// Equipo seleccionado
-$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
+// Equipo seleccionado para esta carga puntual del listado
+$equipoSeleccionado = isset($_SESSION['filtroEquipoJugadores']) ? (int)$_SESSION['filtroEquipoJugadores'] : 0;
+unset($_SESSION['filtroEquipoJugadores']);
 
-// Consulta de jugadores
+// Consulta de jugadores (incluye eliminados con LEFT JOIN)
 $sql = "
 SELECT 
     j.id,
     j.nombre AS jugador,
-    j.edad,
+    TIMESTAMPDIFF(YEAR, j.fecha_nacimiento, CURDATE()) AS edad,
     j.posicion,
-    e.nombre AS equipo,
-    e.categoria,
-    c.nombre AS club
+    COALESCE(e.nombre, 'Sin equipo') AS equipo,
+    COALESCE(e.categoria, '') AS categoria,
+    COALESCE(c.nombre, '—') AS club,
+    j.eliminado
 FROM jugadores j
-INNER JOIN equipos e ON j.equipo_id = e.id
-INNER JOIN clubes c ON e.equipo_id = c.id
+LEFT JOIN equipos e ON j.equipo_id = e.id
+LEFT JOIN clubes c ON e.equipo_id = c.id
 ";
 
-if ($equipoSeleccionado > 0) {
-    $sql .= " WHERE e.id = $equipoSeleccionado";
+$where = [];
+if ($equipoSeleccionado == -1) {
+    $where[] = "j.equipo_id IS NULL";
+} elseif ($equipoSeleccionado > 0) {
+    $where[] = "e.id = $equipoSeleccionado";
+} else {
+    // "Todos" = solo jugadores con equipo
+    $where[] = "j.eliminado = 0 AND j.equipo_id IS NOT NULL";
 }
+if (!empty($where)) $sql .= " WHERE " . implode(" AND ", $where);
 
-$sql .= " ORDER BY e.categoria ASC, j.posicion DESC";
+$sql .= " ORDER BY j.eliminado ASC, e.categoria ASC, j.posicion DESC";
 
 $resultado = $pdo->query($sql);
 $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
@@ -193,6 +202,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     .senior   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
+    .filial { background-color: #176df7; }
     </style>
 </head>
 <body>
@@ -203,7 +213,14 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <div>
                 <h2>Gestión de Jugadores</h2>
                 <span>Gestiona tu plantilla</span><br>
-                <span><?= ($equipoSeleccionado == 0) ? "Total de jugadores del club: ". count($jugadores) : "Total de jugadores del equipo: ".count($jugadores) . "/25" ?></span>
+               <span>
+                <?= ($equipoSeleccionado == 0) 
+                    ? "Total de jugadores guardados: " . count($jugadores) 
+                    : (($equipoSeleccionado == -1) 
+                        ? "Total de jugadores sin equipo: " . count($jugadores)
+                        : "Total de jugadores del equipo: " . count($jugadores) . "/25")
+                ?>
+                </span>
             </div>
 
             <form method="POST">
@@ -215,6 +232,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
                         <?= $equipo['nombre'] . " (" . $equipo['categoria'] . ")"  ?>
                     </option>
                     <?php endforeach; ?>
+                    <option value="-1" <?= $equipoSeleccionado == -1 ? 'selected' : '' ?>>Sin equipo</option>
                 </select>
             </form>
         </div>
@@ -228,14 +246,21 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
         
             <div class="action-icons">
-                <!-- Editar -->
+                <?php if (!$jugador['eliminado']): ?>
+                <!-- Editar (solo si tiene equipo) -->
                 <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar jugador">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </a>
-                
+                <?php endif; ?>
                 <!-- Eliminar -->
-                <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
-                    onclick="return confirm('¿Eliminar este jugador? Esta acción no se puede deshacer.')">
+                <?php
+                $urlEliminar = "eliminar_jugador.php?id={$jugador['id']}&definitivo=" . ($jugador['eliminado'] ? 1 : 0);
+                $msgConfirm  = $jugador['eliminado']
+                    ? "¿Borrar definitivamente a {$jugador['jugador']}? Esta acción no se puede deshacer."
+                    : "¿Eliminar a {$jugador['jugador']} del equipo? El jugador quedará como agente libre.";
+                ?>
+                <a href="<?= $urlEliminar ?>" class="deleteIcon"
+                    onclick="return confirm('<?= addslashes($msgConfirm) ?>')">
                     <i class="fa-solid fa-trash"></i>
                 </a>
             </div>
@@ -247,13 +272,17 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <p class="info">
-                <?= htmlspecialchars($jugador['edad']) ?> años<br>
+                <?= $jugador['edad'] !== null ? $jugador['edad'] . ' años' : '— años' ?><br>
                 <?= htmlspecialchars($jugador['equipo']) ?>
             </p>
 
-            <span class="categoria <?= strtolower($jugador['categoria']) ?>">
-                <?= htmlspecialchars($jugador['categoria']) ?>
-            </span>
+            <?php if ($jugador['eliminado']): ?>
+                <span class="categoria" style="background:#6b7280;">Sin equipo</span>
+            <?php elseif ($jugador['categoria']): ?>
+                <span class="categoria <?= strtolower($jugador['categoria']) ?>">
+                    <?= htmlspecialchars($jugador['categoria']) ?>
+                </span>
+            <?php endif; ?>
 
         </div>
         <?php endforeach; ?>

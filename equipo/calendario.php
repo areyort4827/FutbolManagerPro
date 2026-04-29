@@ -4,8 +4,9 @@ require_once "../config/conexion.php";
 
 $club_id = $_SESSION['club_id'] ?? 0;
 
-$mes  = isset($_GET['mes'])  ? (int)$_GET['mes']  : date('n');
-$anio = isset($_GET['anio']) ? (int)$_GET['anio'] : date('Y');
+$mes  = isset($_SESSION['calendarioMes']) ? (int)$_SESSION['calendarioMes'] : (int)date('n');
+$anio = isset($_SESSION['calendarioAnio']) ? (int)$_SESSION['calendarioAnio'] : (int)date('Y');
+unset($_SESSION['calendarioMes'], $_SESSION['calendarioAnio']);
 
 if ($mes < 1)  { $mes = 1; }
 if ($mes > 12) { $mes = 12; }
@@ -47,26 +48,73 @@ $diasEnMes = date('t', $primerDia);
 $diaInicioSemana = date('w', $primerDia);
 
 $sqlEventosMes = "
-    SELECT fecha, titulo, hora, lugar 
-    FROM entrenamientos 
-    WHERE club_id = :club_id 
-      AND YEAR(fecha) = :anio 
-      AND MONTH(fecha) = :mes
-    ORDER BY fecha, hora";
+    SELECT e.fecha, e.titulo, e.hora, e.lugar, eq.nombre AS equipo_nombre
+    FROM entrenamientos e
+    LEFT JOIN equipos eq ON e.equipo_id = eq.id
+    WHERE e.club_id = :club_id 
+      AND YEAR(e.fecha) = :anio 
+      AND MONTH(e.fecha) = :mes
+    ORDER BY e.fecha, e.hora";
 
 $stmt = $pdo->prepare($sqlEventosMes);
 $stmt->execute(['club_id' => $club_id, 'anio' => $anio, 'mes' => $mes]);
 $eventosDelMes = $stmt->fetchAll(PDO::FETCH_GROUP);
+
+// ── PARTIDOS DEL MES ──────────────────────────────────────────────────────────
+$sqlPartidosMes = "
+    SELECT p.fecha,
+           COALESCE(el.nombre, p.equipo_local)     AS nombre_local,
+           COALESCE(ev.nombre, p.equipo_visitante)  AS nombre_visitante,
+           p.resultado, p.hora
+    FROM partidos p
+    LEFT JOIN equipos el ON p.equipo_local_id    = el.id
+    LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
+    WHERE YEAR(p.fecha) = :anio AND MONTH(p.fecha) = :mes
+      AND (el.equipo_id = :club_id OR ev.equipo_id = :club_id2)
+    ORDER BY p.fecha, p.hora";
+$stmtP = $pdo->prepare($sqlPartidosMes);
+$stmtP->execute(['anio'=>$anio,'mes'=>$mes,'club_id'=>$club_id,'club_id2'=>$club_id]);
+$partidosDelMes = $stmtP->fetchAll(PDO::FETCH_GROUP);
+
+$sqlProxPartidos = "
+    SELECT p.fecha,
+           COALESCE(el.nombre, p.equipo_local)    AS nombre_local,
+           COALESCE(ev.nombre, p.equipo_visitante) AS nombre_visitante,
+           p.resultado, p.hora
+    FROM partidos p
+    LEFT JOIN equipos el ON p.equipo_local_id    = el.id
+    LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
+    WHERE p.fecha BETWEEN :inicio AND :fin
+      AND (el.equipo_id = :club_id OR ev.equipo_id = :club_id2)
+    ORDER BY p.fecha, p.hora LIMIT 6";
+$stmtPP = $pdo->prepare($sqlProxPartidos);
+$stmtPP->execute(['inicio'=>$fechaInicio,'fin'=>$fechaFin,'club_id'=>$club_id,'club_id2'=>$club_id]);
+$proximosPartidos = $stmtPP->fetchAll(PDO::FETCH_ASSOC);
+
+$totalPartidos = count(array_merge(...array_values($partidosDelMes ?: [[]])));
+$totalEntrenamientosMes = count(array_merge(...array_values($eventosDelMes ?: [[]])));
+$totalEventosMes = $totalPartidos + $totalEntrenamientosMes;
 
 $jsEventos = [];
 foreach ($eventosDelMes as $fecha => $eventos) {
     $lista = [];
     foreach ($eventos as $ev) {
         $hora = substr($ev['hora'], 0, 5);
-        $lugar = $ev['lugar'] ? ' - ' . htmlspecialchars($ev['lugar']) : '';
-        $lista[] = htmlspecialchars($ev['titulo']) . " ($hora)$lugar";
+        $lugar = $ev['lugar'] ? ' · ' . htmlspecialchars($ev['lugar']) : '';
+        $equipo_str = $ev['equipo_nombre'] ? ' · <em>' . htmlspecialchars($ev['equipo_nombre']) . '</em>' : '';
+        $lista[] = '🟢 <strong>' . htmlspecialchars($ev['titulo']) . '</strong> (' . $hora . ')' . $lugar . $equipo_str;
     }
     $jsEventos[$fecha] = implode("<br>", $lista);
+}
+foreach ($partidosDelMes as $fecha => $partidos) {
+    foreach ($partidos as $p) {
+        $hora = $p['hora'] ? ' · ' . substr($p['hora'], 0, 5) : '';
+        $resultado = $p['resultado'] ? ' · <strong>' . $p['resultado'] . '</strong>' : '';
+        $linea = '🔵 <strong>' . htmlspecialchars($p['nombre_local']) . ' vs ' . htmlspecialchars($p['nombre_visitante']) . '</strong>' . $hora . $resultado;
+        $jsEventos[$fecha] = isset($jsEventos[$fecha])
+            ? $jsEventos[$fecha] . '<br>' . $linea
+            : $linea;
+    }
 }
 ?>
 
@@ -81,7 +129,7 @@ foreach ($eventosDelMes as $fecha => $eventos) {
                 <span class="card-title">Eventos Totales</span>
                 <i class="fa-solid fa-calendar-check"></i>
             </div>
-            <div class="card-number"><?= $totalEventos ?></div>
+            <div class="card-number"><?= $totalEventosMes ?></div>
             <div class="card-subtitle">Este mes</div>
         </div>
 
@@ -102,6 +150,11 @@ foreach ($eventosDelMes as $fecha => $eventos) {
             <div class="card-number">3</div>
             <div class="card-subtitle">Programados</div>
         </div>
+    </div>
+
+    <div class="calendar-leyenda">
+        <span><span class="dot-verde"></span> Entrenamientos</span>
+        <span><span class="dot-azul"></span> Partidos</span>
     </div>
 
     <div class="calendar-main">
@@ -149,13 +202,16 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 
                 for ($dia = 1; $dia <= $diasEnMes; $dia++) {
                     $fechaActual = sprintf("%04d-%02d-%02d", $anio, $mes, $dia);
-                    $claseEvento = isset($eventosDelMes[$fechaActual]) ? 'has-event' : '';
+                    $tieneEntrenamiento = isset($eventosDelMes[$fechaActual]);
+                    $tienePartido       = isset($partidosDelMes[$fechaActual]);
+                    $claseEvento = $tienePartido ? 'has-partido' : ($tieneEntrenamiento ? 'has-event' : '');
 
                     echo "<div class='day $claseEvento' data-fecha='$fechaActual'>";
                     echo "<div class='day-number'>$dia</div>";
-                    if (isset($eventosDelMes[$fechaActual])) {
-                        echo "<div class='event-indicator'>●</div>";
-                    }
+                    echo "<div class='events-row'>";
+                    if ($tieneEntrenamiento) echo "<div class='event-indicator training-dot'></div>";
+                    if ($tienePartido)       echo "<div class='event-indicator match-dot'></div>";
+                    echo "</div>";
                     echo "</div>";
                 }
                 ?>
@@ -163,22 +219,36 @@ foreach ($eventosDelMes as $fecha => $eventos) {
         </div>
 
         <div class="next-events-box">
-            <h3>Próximos Entrenamientos</h3>
+            <h3>Próximos Eventos</h3>
             <p class="next-subtitle">Próximos 7 días</p>
 
-            <?php if (empty($proximosEventos)): ?>
-            <p class="no-events">No hay entrenamientos próximos</p>
+            <?php if (empty($proximosEventos) && empty($proximosPartidos)): ?>
+            <p class="no-events">No hay eventos próximos</p>
             <?php else: ?>
-            <?php foreach ($proximosEventos as $ev): 
-                    $hora = substr($ev['hora'] ?? '00:00', 0, 5);
-                ?>
+            <?php foreach ($proximosEventos as $ev):
+                    $hora = substr($ev['hora'] ?? '00:00', 0, 5); ?>
             <div class="event-item">
-                <div class="event-dot"></div>
+                <div class="event-dot" style="background:#16a34a;"></div>
                 <div>
                     <strong><?= htmlspecialchars($ev['evento']) ?></strong><br>
                     <small>
                         <?= date("d M", strtotime($ev['fecha'])) ?> • <?= $hora ?>
                         <?= $ev['lugar'] ? ' • ' . htmlspecialchars($ev['lugar']) : '' ?>
+                    </small>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php foreach ($proximosPartidos as $p):
+                    $hora = $p['hora'] ? substr($p['hora'],0,5) : '';
+                    $resultado = $p['resultado'] ? " [{$p['resultado']}]" : ' (pendiente)'; ?>
+            <div class="event-item">
+                <div class="event-dot" style="background:#2563eb;"></div>
+                <div>
+                    <strong><?= htmlspecialchars($p['nombre_local']) ?> vs <?= htmlspecialchars($p['nombre_visitante']) ?></strong><br>
+                    <small>
+                        <?= date("d M", strtotime($p['fecha'])) ?>
+                        <?= $hora ? ' • '.$hora : '' ?>
+                        <span style="color:<?= $p['resultado'] ? '#10b981' : '#94a3b8' ?>"><?= $resultado ?></span>
                     </small>
                 </div>
             </div>
@@ -307,7 +377,9 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 }
 
 .day:hover { background: #ecfdf5; border-color: #4ade80; }
-.day.has-event { background: #f0fdf4; border: 2px solid #10b981; }
+.day.has-event   { background: #f0fdf4; border: 2px solid #16a34a; }
+.day.has-partido { background: #dbeafe; border: 2px solid #2563eb; }
+.day.has-partido .day-number { color: #1e40af; font-weight: 700; }
 
 .day-number {
     font-size: 1.25rem;
@@ -316,12 +388,25 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 }
 
 .event-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 2px 2px 0;
+    vertical-align: middle;
+}
+
+.training-dot { background: #16a34a; }
+.match-dot    { background: #2563eb; }
+
+.events-row {
     position: absolute;
-    bottom: 10px;
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    color: #10b981;
-    font-size: 14px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
 }
 
 .next-subtitle {
@@ -338,6 +423,18 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 }
 
 .event-item:last-child { border-bottom: none; }
+
+.calendar-leyenda {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+.calendar-leyenda span { display: flex; align-items: center; gap: 6px; }
+.dot-verde { display:inline-block; width:12px; height:12px; border-radius:50%; background:#16a34a; }
+.dot-azul  { display:inline-block; width:12px; height:12px; border-radius:50%; background:#2563eb; }
 
 .event-dot {
     width: 11px;
@@ -374,7 +471,7 @@ foreach ($eventosDelMes as $fecha => $eventos) {
 const tooltip = document.getElementById('tooltip');
 const eventosJS = <?= json_encode($jsEventos) ?>;
 
-document.querySelectorAll('.day.has-event').forEach(day => {
+document.querySelectorAll('.day.has-event, .day.has-partido').forEach(day => {
     day.addEventListener('mouseover', function(e) {
         const fecha = this.getAttribute('data-fecha');
         if (eventosJS[fecha]) {

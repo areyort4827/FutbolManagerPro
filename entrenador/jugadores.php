@@ -18,7 +18,7 @@ if ($mi_equipo_id > 0) {
     SELECT 
         jugadores.id,
         jugadores.nombre AS jugador,
-        jugadores.edad,
+        TIMESTAMPDIFF(YEAR, jugadores.fecha_nacimiento, CURDATE()) AS edad,
         jugadores.posicion,
         equipos.nombre AS equipo,
         equipos.categoria
@@ -165,6 +165,7 @@ if ($mi_equipo_id > 0) {
     .senior { background-color: #3b82f6; }
     .juvenil { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
+    .filial { background-color: #176df7; }
 
     .aviso-error {
         background: #fee2e2;

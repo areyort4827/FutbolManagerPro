@@ -6,31 +6,38 @@ $sqlEquipos = "SELECT id, nombre, categoria FROM equipos WHERE equipo_id = $club
 $resultadoEquipos = $pdo->query($sqlEquipos);
 $equipos = $resultadoEquipos->fetchAll(PDO::FETCH_ASSOC);
 
-// Equipo seleccionado (por POST)
-$equipoSeleccionado = isset($_POST['equipo']) ? (int)$_POST['equipo'] : 0;
+// Equipo seleccionado para esta carga puntual del listado
+$equipoSeleccionado = isset($_SESSION['filtroEquipoJugadores']) ? (int)$_SESSION['filtroEquipoJugadores'] : 0;
+unset($_SESSION['filtroEquipoJugadores']);
 
-// Consulta de jugadores filtrada
+// Consulta de jugadores filtrada (incluye eliminados con LEFT JOIN)
 $sql = "
 SELECT 
     j.id,
     j.nombre AS jugador,
-    j.edad,
+    TIMESTAMPDIFF(YEAR, j.fecha_nacimiento, CURDATE()) AS edad,
     j.posicion,
-    e.nombre AS equipo,
-    e.categoria,
-    c.nombre AS club
+    COALESCE(e.nombre, 'Sin equipo') AS equipo,
+    COALESCE(e.categoria, '') AS categoria,
+    COALESCE(c.nombre, '—') AS club,
+    j.eliminado
 FROM jugadores j
-INNER JOIN equipos e ON j.equipo_id = e.id
-INNER JOIN clubes c ON e.equipo_id = c.id
-WHERE e.equipo_id = $club_id
+LEFT JOIN equipos e ON j.equipo_id = e.id
+LEFT JOIN clubes c ON e.equipo_id = c.id
 ";
 
-// Filtrar por equipo si se selecciona uno
-if ($equipoSeleccionado > 0) {
-    $sql .= " AND e.id = $equipoSeleccionado";
+if ($equipoSeleccionado == -1) {
+    // Antiguos jugadores: eliminados que pertenecían a este club
+    $sql .= " WHERE j.eliminado = 1 AND j.equipo_anterior_id IN (SELECT id FROM equipos WHERE equipo_id = $club_id)";
+} elseif ($equipoSeleccionado > 0) {
+    // Equipo concreto del club
+    $sql .= " WHERE e.id = $equipoSeleccionado AND e.equipo_id = $club_id";
+} else {
+    // Todos los jugadores activos del club
+    $sql .= " WHERE j.eliminado = 0 AND e.equipo_id = $club_id";
 }
 
-$sql .= " ORDER BY e.categoria ASC, j.posicion DESC";
+$sql .= " ORDER BY j.eliminado ASC, e.categoria ASC, j.posicion DESC";
 
 $resultado = $pdo->query($sql);
 $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
@@ -217,6 +224,61 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
     .senior   { background-color: #3b82f6; }
     .juvenil  { background-color: #f59e0b; }
     .infantil { background-color: #ef4444; }
+    .filial { background-color: #176df7; }
+
+    /* Botón Refichar */
+    .reficharIcon {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #2563eb;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .reficharIcon:hover { background: #dbeafe; }
+
+    /* Modal Refichar */
+    .modal-refichar {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-refichar.activo { display: flex; }
+    .modal-refichar-content {
+        background: white;
+        border-radius: 14px;
+        padding: 32px;
+        width: 360px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .modal-refichar-content h3 { margin: 0 0 6px; color: #1f2937; }
+    .modal-refichar-content p  { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
+    .modal-refichar-content select {
+        width: 100%; padding: 10px; border-radius: 8px;
+        border: 1px solid #d1d5db; font-size: 15px; margin-bottom: 20px;
+    }
+    .modal-refichar-btns { display: flex; gap: 10px; }
+    .btn-confirmar-refichar {
+        flex: 1; padding: 11px; background: #2563eb; color: white;
+        border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-confirmar-refichar:hover { background: #1d4ed8; }
+    .btn-cancelar-refichar {
+        flex: 1; padding: 11px; background: #f3f4f6; color: #374151;
+        border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
     </style>
 </head>
 
@@ -241,6 +303,7 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
                                 <?= $equipo['nombre'] . " (" . $equipo['categoria'] . ")"  ?>
                             </option>
                             <?php endforeach; ?>
+                            <option value="-1" <?= $equipoSeleccionado == -1 ? 'selected' : '' ?>>Antiguos jugadores</option>
                         </select>
                     </form>
                 </div>
@@ -255,18 +318,24 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($jugadores as $jugador): ?>
             <div class="jugadorCard">
 
-                <!-- Iconos de acción: Editar y Eliminar -->
+                <!-- Iconos de acción: Editar / Eliminar / Refichar -->
                 <div class="action-icons">
-                    <!-- Editar -->
-                    <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar jugador">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                    
-                    <!-- Eliminar -->
-                    <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
-                        onclick="return confirm('¿Eliminar este jugador? Esta acción no se puede deshacer.')">
-                        <i class="fa-solid fa-trash"></i>
-                    </a>
+                    <?php if ($jugador['eliminado']): ?>
+                        <button class="reficharIcon" title="Refichar jugador"
+                            onclick="abrirRefichar(<?= $jugador['id'] ?>, '<?= htmlspecialchars(addslashes($jugador['jugador'])) ?>')">
+                            <i class="fa-solid fa-rotate-left"></i> Refichar
+                        </button>
+                    <?php else: ?>
+                        <!-- Editar -->
+                        <a href="editar_jugador.php?id=<?= $jugador['id'] ?>" class="editIcon" title="Editar jugador">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <!-- Eliminar -->
+                        <a href="eliminar_jugador.php?id=<?= $jugador['id'] ?>" class="deleteIcon"
+                            onclick="return confirm('¿Eliminar este jugador? Esta acción no se puede deshacer.')">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Header -->
@@ -278,18 +347,62 @@ $jugadores = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                 <!-- Info -->
                 <p class="info">
-                    <?= htmlspecialchars($jugador['edad']) ?> años<br>
+                    <?= $jugador['edad'] !== null ? $jugador['edad'] . ' años' : '— años' ?><br>
                     <?= htmlspecialchars($jugador['equipo']) ?>
                 </p>
 
-                <span class="categoria <?= strtolower($jugador['categoria']) ?>">
-                    <?= htmlspecialchars($jugador['categoria']) ?>
-                </span>
+                <?php if ($jugador['eliminado']): ?>
+                    <span class="categoria" style="background:#6b7280;">Sin equipo</span>
+                <?php elseif ($jugador['categoria']): ?>
+                    <span class="categoria <?= strtolower($jugador['categoria']) ?>">
+                        <?= htmlspecialchars($jugador['categoria']) ?>
+                    </span>
+                <?php endif; ?>
 
             </div>
             <?php endforeach; ?>
         </div>
     </div>
+
+<!-- ===== MODAL REFICHAR ===== -->
+<div id="modalRefichar" class="modal-refichar">
+    <div class="modal-refichar-content">
+        <h3>Refichar jugador</h3>
+        <p id="reficharNombre" style="color:#6b7280; font-size:14px; margin:0 0 20px;"></p>
+        <form method="POST" action="refichar_jugador.php">
+            <input type="hidden" name="jugador_id" id="refichar_jugador_id">
+            <label style="font-size:14px; color:#374151; display:block; margin-bottom:6px;">Asignar a equipo:</label>
+            <select name="equipo_id" required style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:15px;margin-bottom:20px;">
+                <option value="">Selecciona un equipo</option>
+                <?php foreach ($equipos as $eq): ?>
+                <option value="<?= $eq['id'] ?>"><?= htmlspecialchars($eq['nombre']) ?> (<?= htmlspecialchars($eq['categoria']) ?>)</option>
+                <?php endforeach; ?>
+            </select>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" style="flex:1;padding:11px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                    <i class="fa-solid fa-rotate-left"></i> Confirmar fichaje
+                </button>
+                <button type="button" onclick="cerrarRefichar()" style="flex:1;padding:11px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirRefichar(id, nombre) {
+    document.getElementById('refichar_jugador_id').value = id;
+    document.getElementById('reficharNombre').textContent = '¿Refichar a ' + nombre + '?';
+    document.getElementById('modalRefichar').classList.add('activo');
+}
+function cerrarRefichar() {
+    document.getElementById('modalRefichar').classList.remove('activo');
+}
+document.getElementById('modalRefichar').addEventListener('click', function(e) {
+    if (e.target === this) cerrarRefichar();
+});
+</script>
 </body>
 
 </html>

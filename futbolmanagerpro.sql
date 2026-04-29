@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-04-2026 a las 14:18:48
+-- Tiempo de generación: 21-04-2026 a las 12:01:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -97,7 +97,7 @@ INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`,
 (11, 4, 'Sesión táctica', 'Salida de balón', '2026-04-21', '00:00:00', 0, 0, NULL, 14),
 (12, 4, 'Sesión táctica', 'Resistencia física', '2026-04-22', '00:00:00', 0, 0, NULL, 14),
 (14, 1, 'Sesión de físico', 'Preparacion', '2026-04-12', '17:55:00', 110, 0, 'Écija', 5),
-(15, 1, 'Sesión de físico', 'jajaja', '2026-04-24', '23:00:00', 200, 3, 'La Campana', 1);
+(15, 1, 'Sesión de físico', 'jajaja', '2026-04-20', '23:00:00', 200, 3, 'La Campana', 1);
 
 -- --------------------------------------------------------
 
@@ -170,42 +170,28 @@ CREATE TABLE `jugadores` (
   `nombre` varchar(100) DEFAULT NULL,
   `edad` int(11) DEFAULT NULL,
   `posicion` enum('delantero','mediocentro','defensa','portero') DEFAULT NULL,
-  `equipo_id` int(11) DEFAULT NULL,
-  `usuario_id` int(11) DEFAULT NULL
+  `equipo_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `jugadores`
 --
 
-INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`, `usuario_id`) VALUES
-(1, 'Lamine Yamal', 18, 'delantero', 1, 4),
-(2, 'Robert Lewandowski', 37, 'delantero', 1, NULL),
-(3, 'Pedri', 23, 'mediocentro', 1, NULL),
-(4, 'Vinícius Júnior', 25, 'delantero', 6, NULL),
-(5, 'Jude Bellingham', 22, 'mediocentro', 6, NULL),
-(6, 'Fede Valverde', 27, 'mediocentro', 6, NULL),
-(7, 'Antoine Griezmann', 35, 'delantero', 11, NULL),
-(8, 'Koke', 34, 'mediocentro', 11, NULL),
-(9, 'Jan Oblak', 33, 'portero', 11, NULL),
-(10, 'Pepelu', 27, 'delantero', 14, NULL),
-(11, 'Hugo Duro', 26, 'delantero', 14, NULL),
-(12, 'José Gayà', 30, 'mediocentro', 14, NULL),
-(13, 'Diego Kochen', 20, 'portero', 2, NULL),
-(15, 'Mbappe', 27, 'delantero', 6, NULL);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `notificaciones`
---
-
-CREATE TABLE `notificaciones` (
-  `id` int(11) NOT NULL,
-  `usuario_id` int(11) NOT NULL,
-  `mensaje` text NOT NULL,
-  `fecha` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `jugadores` (`id`, `nombre`, `edad`, `posicion`, `equipo_id`) VALUES
+(1, 'Lamine Yamal', 18, 'delantero', 1),
+(2, 'Robert Lewandowski', 37, 'delantero', 1),
+(3, 'Pedri', 23, 'mediocentro', 1),
+(4, 'Vinícius Júnior', 25, 'delantero', 6),
+(5, 'Jude Bellingham', 22, 'mediocentro', 6),
+(6, 'Fede Valverde', 27, 'mediocentro', 6),
+(7, 'Antoine Griezmann', 35, 'delantero', 11),
+(8, 'Koke', 34, 'mediocentro', 11),
+(9, 'Jan Oblak', 33, 'portero', 11),
+(10, 'Pepelu', 27, 'delantero', 14),
+(11, 'Hugo Duro', 26, 'delantero', 14),
+(12, 'José Gayà', 30, 'mediocentro', 14),
+(13, 'Diego Kochen', 20, 'portero', 2),
+(15, 'Mbappe', 27, 'delantero', 6);
 
 -- --------------------------------------------------------
 
@@ -257,10 +243,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) VALUES
-(1, 'Emerson Cruz', 'emersoncruz712@gmail.com', '$2y$10$xYdDL8.3k1Z2tKw5Tn.xI.9NbPQzQ1.yZLMqs1Kv8m0JOE7lCMcQa', 'entrenador', 1),
+(1, 'Emerson Cruz', 'emerson@gmail.com', 'emerson123', 'entrenador', 1),
 (2, 'Admin', 'admin@gmail.com', 'admin123', 'admin', NULL),
-(3, 'Barcelona', 'barcelona@gmail.com', 'barcelona123', 'equipo', 1),
-(4, 'Lamine Yamal', 'antonioreyesortega03@gmail.com\r\n', '1234', 'jugador', NULL);
+(3, 'Barcelona', 'barcelona@gmail.com', 'barcelona123', 'equipo', 1);
 
 --
 -- Índices para tablas volcadas
@@ -308,15 +293,7 @@ ALTER TABLE `equipos`
 --
 ALTER TABLE `jugadores`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `jugadores_id_cantera` (`equipo_id`),
-  ADD KEY `fk_jugador_usuario` (`usuario_id`);
-
---
--- Indices de la tabla `notificaciones`
---
-ALTER TABLE `notificaciones`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `usuario_id` (`usuario_id`);
+  ADD KEY `jugadores_id_cantera` (`equipo_id`);
 
 --
 -- Indices de la tabla `partidos`
@@ -372,12 +349,6 @@ ALTER TABLE `jugadores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
--- AUTO_INCREMENT de la tabla `notificaciones`
---
-ALTER TABLE `notificaciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
@@ -387,7 +358,7 @@ ALTER TABLE `partidos`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
@@ -424,14 +395,7 @@ ALTER TABLE `equipos`
 -- Filtros para la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  ADD CONSTRAINT `fk_jugador_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `jugadores_id_cantera` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
-
---
--- Filtros para la tabla `notificaciones`
---
-ALTER TABLE `notificaciones`
-  ADD CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `usuarios`
