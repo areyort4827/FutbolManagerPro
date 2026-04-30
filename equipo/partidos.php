@@ -7,7 +7,8 @@ include(__DIR__ . "/../config/conexion.php");
 /*OBTENER CLUB DEL USUARIO*/
 
 $club_id = $_SESSION['user']['club_id'] ?? 0;
-
+$error_partido = '';
+$abrir_modal = false;
 
 /* ELIMINAR PARTIDO */
 
@@ -35,12 +36,16 @@ if (isset($_POST['guardar'])) {
     $equipo_club_id = $_POST['equipo_club_id'] ?? 0;
     $rival_id = $_POST['rival'] ?? 0;
     $fecha = $_POST['fecha'] ?? '';
+    $resultado = null;
 
     /* si la fecha ya pasó → permitir resultado */
     if (!empty($fecha) && $fecha < date('Y-m-d')) {
-        $resultado = $_POST['resultado'] ?? '';
-    } else {
-        $resultado = null;
+        if (empty($_POST['resultado'])) {
+            $error_partido = "Debes ingresar el resultado del partido.";
+            $abrir_modal = true;
+        } else {
+            $resultado = trim($_POST['resultado']);
+        }
     }
 
     if ($tipo == "local") {
@@ -51,7 +56,31 @@ if (isset($_POST['guardar'])) {
         $visitante_id = $equipo_club_id;
     }
 
-    if ($local_id > 0 && $visitante_id > 0 && !empty($fecha)) {
+    if (!empty($resultado) && empty($error_partido)) {
+        if (!preg_match('/^\d+\-\d+$/', $resultado)) {
+            $error_partido = "El resultado debe tener formato 2-1";
+            $abrir_modal = true;
+        } else {
+            $partes = explode('-', $resultado);
+            $mis_goles = ($tipo == "local") ? (int)$partes[0] : (int)$partes[1];
+
+            $total_goleadores = 0;
+            if (isset($_POST['cantidad_goles']) && isset($_POST['jugador_id'])) {
+                foreach ($_POST['cantidad_goles'] as $index => $gol) {
+                    if (!empty($_POST['jugador_id'][$index])) {
+                        $total_goleadores += (int)$gol;
+                    }
+                }
+            }
+
+            if ($total_goleadores != $mis_goles) {
+                $error_partido = "Error: Tu equipo marcó $mis_goles goles, pero asignaste $total_goleadores. Deben coincidir exactamente.";
+                $abrir_modal = true;
+            }
+        }
+    }
+
+    if (empty($error_partido) && $local_id > 0 && $visitante_id > 0 && !empty($fecha)) {
 
         $sql_insert = "INSERT INTO partidos
             (equipo_local_id, equipo_visitante_id, fecha, resultado)
@@ -65,6 +94,18 @@ if (isset($_POST['guardar'])) {
             ':fecha' => $fecha,
             ':resultado' => $resultado
         ]);
+
+        $partido_id = $pdo->lastInsertId();
+
+        if (!empty($resultado) && isset($_POST['jugador_id'])) {
+            foreach ($_POST['jugador_id'] as $index => $jugador_id) {
+                $cant = (int)$_POST['cantidad_goles'][$index];
+                if ($jugador_id > 0 && $cant > 0) {
+                    $sql_gol = "INSERT INTO goles_partido (partido_id, jugador_id, cantidad_goles) VALUES (:p, :j, :c)";
+                    $pdo->prepare($sql_gol)->execute([':p' => $partido_id, ':j' => $jugador_id, ':c' => $cant]);
+                }
+            }
+        }
 
         $_SESSION['paginaActual'] = 'partidos';
 
@@ -134,8 +175,7 @@ $sql_proximos = "
         ON p.equipo_local_id = el.id
     INNER JOIN equipos ev
         ON p.equipo_visitante_id = ev.id
-    WHERE el.equipo_id = :club_id
-       OR ev.equipo_id = :club_id
+    WHERE (el.equipo_id = :club_id OR ev.equipo_id = :club_id)
     AND p.fecha >= CURDATE()
     ORDER BY p.fecha ASC
 ";
@@ -159,8 +199,7 @@ $sql_historial = "
         ON p.equipo_local_id = el.id
     INNER JOIN equipos ev
         ON p.equipo_visitante_id = ev.id
-    WHERE el.equipo_id = :club_id
-       OR ev.equipo_id = :club_id
+    WHERE (el.equipo_id = :club_id OR ev.equipo_id = :club_id)
     AND p.fecha < CURDATE()
     ORDER BY p.fecha DESC
 ";
@@ -329,6 +368,12 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
             &times;
         </span>
 
+        <?php if (!empty($error_partido)): ?>
+            <div class="error-form" style="color: #a94442; background-color: #f2dede; border: 1px solid #ebccd1; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <?= $error_partido ?>
+            </div>
+        <?php endif; ?>
+
         <h2>Añadir Partido</h2>
 
         <form method="POST">
@@ -355,6 +400,8 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 
                 <select
                     name="equipo_club_id"
+                    id="equipo_club_id"
+                    onchange="filtrarRivalYJugadores()"
                     required>
 
                     <option value="">
@@ -377,6 +424,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 
                 <select
                     name="rival"
+                    id="rival_select"
                     required>
 
                     <option value="">
@@ -384,7 +432,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                     </option>
 
                     <?php foreach ($todos_equipos as $eq): ?>
-                        <option value="<?= $eq['id'] ?>">
+                        <option value="<?= $eq['id'] ?>" class="opcion-rival">
                             <?= htmlspecialchars($eq['nombre']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -411,16 +459,47 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                     name="resultado"
                     id="resultado_partido"
                     placeholder="Se añadirá después del partido"
-                    disabled>
+                    readonly>
             </div>
+
+            <!-- ===== GOLEADORES MÚLTIPLES ===== -->
+            <div id="contenedor_goleadores" style="display: none;">
+                <div class="goleador-item">
+                    <div class="form-group">
+                        <label>Jugador que marcó</label>
+                        <select name="jugador_id[]" class="select-jugador">
+                            <option value="">Seleccionar jugador</option>
+                            <?php
+                            $stmt_jug = $pdo->prepare("SELECT j.id, j.nombre, j.equipo_id FROM jugadores j INNER JOIN equipos e ON j.equipo_id = e.id WHERE e.equipo_id = :club_id");
+                            $stmt_jug->execute([':club_id' => $club_id]);
+                            foreach ($stmt_jug->fetchAll() as $jug): ?>
+                                <option value="<?= $jug['id'] ?>" data-equipo="<?= $jug['equipo_id'] ?>" class="opcion-jugador">
+                                    <?= htmlspecialchars($jug['nombre']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad de goles</label>
+                        <input type="number" name="cantidad_goles[]" min="1" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <button
+                id="btn_agregar_goleador"
+                type="button"
+                class="boton-add"
+                style="display: none;"
+                onclick="agregarGoleador()">
+                + Añadir otro goleador
+            </button>
 
             <button
                 type="submit"
                 name="guardar"
                 class="boton-add">
-
                 Guardar Partido
-
             </button>
 
         </form>
@@ -428,5 +507,44 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
 </div>
+
+<script>
+function filtrarRivalYJugadores() {
+    let equipoSeleccionado = document.getElementById("equipo_club_id").value;
+    
+    // 1. Filtrar rivales (no puedes jugar contra ti mismo)
+    let opcionesRival = document.querySelectorAll(".opcion-rival");
+    opcionesRival.forEach(opt => {
+        if (opt.value === equipoSeleccionado) {
+            opt.style.display = "none";
+        } else {
+            opt.style.display = "block";
+        }
+    });
+
+    // 2. Filtrar jugadores (mostrar solo los del equipo seleccionado)
+    let opcionesJugador = document.querySelectorAll(".opcion-jugador");
+    opcionesJugador.forEach(opt => {
+        if (opt.getAttribute("data-equipo") === equipoSeleccionado) {
+            opt.style.display = "block";
+        } else {
+            opt.style.display = "none";
+        }
+    });
+
+    // Resetear selecciones si el equipo cambia
+    document.getElementById("rival_select").value = "";
+    document.querySelectorAll(".select-jugador").forEach(sel => sel.value = "");
+}
+</script>
+
+<?php if ($abrir_modal): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof abrirModal === "function") abrirModal();
+        if (typeof validarResultado === "function") validarResultado();
+    });
+</script>
+<?php endif; ?>
 
 <script src="../assets/js/partidos.js"></script>

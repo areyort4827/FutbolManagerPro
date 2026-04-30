@@ -1,5 +1,9 @@
 <?php
+session_start();
 require_once "../config/conexion.php";
+
+// Obtenemos el club_id del usuario desde la sesión
+$club_id = $_SESSION['user']['club_id'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -103,9 +107,14 @@ label.campo-label {
         <select name="equipo_id" required>
             <option value="">Seleccionar equipo</option>
             <?php
-            $equipos = $pdo->query("SELECT id, nombre FROM equipos ORDER BY nombre");
-            while($e = $equipos->fetch(PDO::FETCH_ASSOC)){
-                echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nombre']) . "</option>";
+            // Solo intentamos la consulta si tenemos un club_id válido
+            if ($club_id > 0) {
+                $stmt = $pdo->prepare("SELECT id, nombre FROM equipos WHERE equipo_id = :club_id ORDER BY nombre");
+                $stmt->execute([':club_id' => $club_id]);
+                
+                while($e = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    echo "<option value='{$e['id']}'>" . htmlspecialchars($e['nombre']) . "</option>";
+                }
             }
             ?>
         </select>

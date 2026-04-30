@@ -439,3 +439,16 @@ h1 {
     background: #ef4444;
     color: white;
 }
+
+
+/* ===== ERROR FORMULARIO ===== */
+
+.error-form {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    border: 1px solid #fecaca;
+}

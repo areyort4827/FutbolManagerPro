@@ -19,26 +19,89 @@ $stmt->execute([
 
 $entrenador = $stmt->fetch(PDO::FETCH_ASSOC);
 $mi_equipo_id = $entrenador['equipo_id'] ?? 0;
+$error_partido = '';
+$abrir_modal = false;
 
-
-/* ===== GUARDAR NUEVO PARTIDO ===== */
+/* ===== VALIDAR RESULTADO + GOLEADORES ===== */
 
 if (isset($_POST['guardar'])) {
 
     $tipo = $_POST['tipo_partido'] ?? 'local';
     $rival_id = $_POST['rival'] ?? 0;
     $fecha = $_POST['fecha'] ?? '';
-    $resultado = $_POST['resultado'] ?? null;
+    $resultado = null;
 
+    /* Si la fecha es futura -> NO resultado */
+    if (!empty($fecha) && $fecha < date('Y-m-d')) {
+
+        if (empty($_POST['resultado'])) {
+            $error_partido = "Debes ingresar el resultado del partido.";
+             $abrir_modal = true;
+        } else {
+            $resultado = trim($_POST['resultado']);
+        }
+    }
+
+    /* Definir local y visitante */
     if ($tipo == "local") {
         $local_id = $mi_equipo_id;
         $visitante_id = $rival_id;
+        $mis_goles = 0;
     } else {
         $local_id = $rival_id;
         $visitante_id = $mi_equipo_id;
+        $mis_goles = 0;
     }
 
-    if ($local_id > 0 && $visitante_id > 0 && !empty($fecha)) {
+    /* =====================================
+       VALIDAR RESULTADO
+    ===================================== */
+
+    if (!empty($resultado) && empty($error_partido)) {
+
+        /* validar formato tipo 2-1 */
+        if (!preg_match('/^\d+\-\d+$/', $resultado)) {
+            $error_partido = "El resultado debe tener formato 2-1";
+            $abrir_modal = true;
+        } else {
+            $partes = explode('-', $resultado);
+
+            $goles_local = (int)$partes[0];
+            $goles_visitante = (int)$partes[1];
+
+            /* Si soy local -> uso primer número */
+            if ($tipo == "local") {
+                $mis_goles = $goles_local;
+            } else {
+                $mis_goles = $goles_visitante;
+            }
+
+            /* sumar goles registrados */
+            $total_goleadores = 0;
+
+            if (isset($_POST['cantidad_goles']) && isset($_POST['jugador_id'])) {
+                foreach ($_POST['cantidad_goles'] as $index => $gol) {
+                    if (!empty($_POST['jugador_id'][$index])) {
+                        $total_goleadores += (int)$gol;
+                    }
+                }
+            }
+
+            /* validar coincidencia exacta */
+            if ($total_goleadores != $mis_goles) {
+                $error_partido = "Error: Tu equipo marcó $mis_goles goles, pero asignaste $total_goleadores. Deben coincidir exactamente.";
+                $abrir_modal = true;
+            }
+        }
+    }
+
+    /* =====================================
+       GUARDAR PARTIDO
+    ===================================== */
+
+    if (
+        empty($error_partido) && $local_id > 0 && $visitante_id > 0 && !empty($fecha)
+    ) {
 
         $sql_insert = "INSERT INTO partidos
             (equipo_local_id, equipo_visitante_id, fecha, resultado)
@@ -53,13 +116,46 @@ if (isset($_POST['guardar'])) {
             ':resultado' => $resultado
         ]);
 
+        $partido_id = $pdo->lastInsertId();
+
+        /* =====================================
+           GUARDAR GOLEADORES
+        ===================================== */
+
+        if (
+            !empty($resultado) &&
+            isset($_POST['jugador_id']) &&
+            isset($_POST['cantidad_goles'])
+        ) {
+
+            foreach ($_POST['jugador_id'] as $index => $jugador_id) {
+
+                $jugador_id = (int)$jugador_id;
+                $cantidad_goles = (int)$_POST['cantidad_goles'][$index];
+
+                if ($jugador_id > 0 && $cantidad_goles > 0) {
+
+                    $sql_gol = "INSERT INTO goles_partido
+                        (partido_id, jugador_id, cantidad_goles)
+                        VALUES (:partido_id, :jugador_id, :cantidad_goles)";
+
+                    $stmt_gol = $pdo->prepare($sql_gol);
+
+                    $stmt_gol->execute([
+                        ':partido_id' => $partido_id,
+                        ':jugador_id' => $jugador_id,
+                        ':cantidad_goles' => $cantidad_goles
+                    ]);
+                }
+            }
+        }
+
         $_SESSION['paginaActual'] = 'partidos';
 
         echo "<script>window.location.href='menu.php';</script>";
         exit();
     }
 }
-
 
 /* ===== ACTUALIZAR RESULTADO ===== */
 
@@ -318,9 +414,17 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
             &times;
         </span>
 
+        <?php if (!empty($error_partido)): ?>
+            <div class="error-form" style="color: #a94442; background-color: #f2dede; border: 1px solid #ebccd1; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <?= $error_partido ?>
+            </div>
+        <?php endif; ?>
+
+
         <h2>Añadir Partido</h2>
 
         <form method="POST">
+
 
             <div class="form-group">
                 <label>Mi equipo juega como</label>
@@ -338,7 +442,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="form-group">
-                <label id="label_local">
+                <label id="label_equipo">
                     Equipo local
                 </label>
 
@@ -361,6 +465,12 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                     id="campo_local"
                     value="<?= htmlspecialchars($nombre_mi_equipo) ?>"
                     disabled>
+
+
+                <input
+                    type="hidden"
+                    name="mi_equipo_id"
+                    value="<?= $mi_equipo_id ?>">
             </div>
 
             <div class="form-group">
@@ -417,8 +527,73 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                     name="resultado"
                     id="resultado_partido"
                     placeholder="Se añadirá después del partido"
-                    disabled>
+                    readonly>
             </div>
+
+            <!-- ===== GOLEADORES MÚLTIPLES ===== -->
+
+            <div id="contenedor_goleadores" style="display: none;">
+
+                <div class="goleador-item">
+
+                    <div class="form-group">
+                        <label>Jugador que marcó</label>
+
+                        <select name="jugador_id[]">
+
+                            <option value="">
+                                Seleccionar jugador
+                            </option>
+
+                            <?php
+                            $sql_jugadores = "
+                    SELECT id, nombre
+                    FROM jugadores
+                    WHERE equipo_id = :mi_id
+                    ORDER BY nombre ASC
+                ";
+
+                            $stmt_jugadores = $pdo->prepare($sql_jugadores);
+                            $stmt_jugadores->execute([
+                                ':mi_id' => $mi_equipo_id
+                            ]);
+
+                            foreach ($stmt_jugadores as $jugador) {
+                                echo "
+                        <option value='{$jugador['id']}'>
+                            {$jugador['nombre']}
+                        </option>
+                    ";
+                            }
+                            ?>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cantidad de goles</label>
+
+                        <input
+                            type="number"
+                            name="cantidad_goles[]"
+                            min="1"
+                            value="1">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button
+                id="btn_agregar_goleador"
+                type="button"
+                class="boton-add"
+                style="display: none;"
+                onclick="agregarGoleador()">
+
+                + Añadir otro goleador
+
+            </button>
 
             <button
                 type="submit"
@@ -434,5 +609,18 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
 </div>
+
+<?php if ($abrir_modal): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof abrirModal === "function") {
+            abrirModal();
+        }
+        if (typeof validarResultado === "function") {
+            validarResultado();
+        }
+    });
+</script>
+<?php endif; ?>
 
 <script src="../assets/js/partidos.js"></script>
