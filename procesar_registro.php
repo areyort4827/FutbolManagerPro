@@ -20,6 +20,8 @@ $password2     = trim($_POST['password2'] ?? '');
 $rolSolicitado = trim($_POST['rol']      ?? 'jugador');
 $clubId        = isset($_POST['club_id'])   ? (int)$_POST['club_id']   : 0;
 $equipoId      = isset($_POST['equipo_id']) ? (int)$_POST['equipo_id'] : 0;
+$fechaNacimiento = trim($_POST['fecha_nacimiento'] ?? '');
+$posicion        = trim($_POST['posicion'] ?? '');
 
 // Validaciones básicas
 if ($nombre === '' || $email === '' || $password === '') {
@@ -67,6 +69,32 @@ if ($rolSolicitado === 'entrenador') {
     }
 }
 
+// Si es jugador, validar que seleccionó equipo y datos de perfil
+if ($rolSolicitado === 'jugador') {
+    if (!$equipoId) {
+        volverConError('Los jugadores deben seleccionar un equipo.');
+    }
+    // Verificar que el equipo pertenece al club
+    $stmtEq = $pdo->prepare('SELECT id FROM equipos WHERE id = ? AND equipo_id = ? LIMIT 1');
+    $stmtEq->execute([$equipoId, $clubId]);
+    if (!$stmtEq->fetchColumn()) {
+        volverConError('El equipo seleccionado no pertenece al club.');
+    }
+
+    if ($fechaNacimiento === '') {
+        volverConError('Indica tu fecha de nacimiento.');
+    }
+    $dt = DateTime::createFromFormat('Y-m-d', $fechaNacimiento);
+    if (!$dt || $dt->format('Y-m-d') !== $fechaNacimiento) {
+        volverConError('La fecha de nacimiento no es válida.');
+    }
+
+    $posicionesPermitidas = ['delantero', 'mediocentro', 'defensa', 'portero'];
+    if (!in_array($posicion, $posicionesPermitidas, true)) {
+        volverConError('Selecciona una posición válida.');
+    }
+}
+
 try {
     // Comprobar email duplicado
     $stmtExiste = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email LIMIT 1');
@@ -106,6 +134,21 @@ try {
             ':nombre'     => $nombre,
             ':equipo_id'  => $equipoId,
             ':usuario_id' => $nuevoUsuarioId,
+        ]);
+    }
+
+    // Si es jugador, crear también el registro en la tabla jugadores
+    if ($rolSolicitado === 'jugador') {
+        $stmtJug = $pdo->prepare(
+            'INSERT INTO jugadores (nombre, fecha_nacimiento, posicion, equipo_id, usuario_id)
+             VALUES (:nombre, :fecha_nacimiento, :posicion, :equipo_id, :usuario_id)'
+        );
+        $stmtJug->execute([
+            ':nombre'           => $nombre,
+            ':fecha_nacimiento' => $fechaNacimiento,
+            ':posicion'         => $posicion,
+            ':equipo_id'        => $equipoId,
+            ':usuario_id'       => $nuevoUsuarioId,
         ]);
     }
 

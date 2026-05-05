@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-04-2026 a las 09:56:26
+-- Tiempo de generación: 30-04-2026 a las 14:03:40
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `futbolmanagerpro3`
 --
-CREATE DATABASE IF NOT EXISTS `futbolmanagerpro3` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `futbolmanagerpro3`;
 
 -- --------------------------------------------------------
 
@@ -29,7 +27,6 @@ USE `futbolmanagerpro3`;
 -- Estructura de tabla para la tabla `clubes`
 --
 
-DROP TABLE IF EXISTS `clubes`;
 CREATE TABLE `clubes` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL
@@ -52,7 +49,6 @@ INSERT INTO `clubes` (`id`, `nombre`) VALUES
 -- Estructura de tabla para la tabla `entrenadores`
 --
 
-DROP TABLE IF EXISTS `entrenadores`;
 CREATE TABLE `entrenadores` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL,
@@ -75,7 +71,6 @@ INSERT INTO `entrenadores` (`id`, `nombre`, `experiencia`, `equipo_id`, `usuario
 -- Estructura de tabla para la tabla `entrenamientos`
 --
 
-DROP TABLE IF EXISTS `entrenamientos`;
 CREATE TABLE `entrenamientos` (
   `id` int(11) NOT NULL,
   `club_id` int(11) NOT NULL,
@@ -94,7 +89,6 @@ CREATE TABLE `entrenamientos` (
 --
 
 INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`, `hora`, `duracion`, `num_asistentes`, `lugar`, `equipo_id`) VALUES
-(2, 1, 'Sesión táctica', 'Táctica defensiva', '2026-04-21', '00:00:00', 0, 4, 'Tenerife', 1),
 (4, 2, 'Sesión táctica', 'Transiciones defensa-ataque', '2026-04-20', '00:00:00', 0, 3, NULL, 6),
 (5, 2, 'Sesión táctica', 'Jugadas a balón parado', '2026-04-21', '00:00:00', 0, 3, NULL, 6),
 (7, 3, 'Sesión táctica', 'Presión en bloque medio', '2026-04-20', '00:00:00', 0, 0, NULL, 11),
@@ -112,7 +106,6 @@ INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`,
 -- Estructura de tabla para la tabla `entrenamiento_asistencia`
 --
 
-DROP TABLE IF EXISTS `entrenamiento_asistencia`;
 CREATE TABLE `entrenamiento_asistencia` (
   `id` int(11) NOT NULL,
   `entrenamiento_id` int(11) NOT NULL,
@@ -135,7 +128,6 @@ INSERT INTO `entrenamiento_asistencia` (`id`, `entrenamiento_id`, `jugador_id`, 
 -- Estructura de tabla para la tabla `equipos`
 --
 
-DROP TABLE IF EXISTS `equipos`;
 CREATE TABLE `equipos` (
   `id` int(11) NOT NULL,
   `equipo_id` int(11) DEFAULT NULL,
@@ -171,7 +163,6 @@ INSERT INTO `equipos` (`id`, `equipo_id`, `nombre`, `categoria`) VALUES
 -- Estructura de tabla para la tabla `estadisticas_jugador`
 --
 
-DROP TABLE IF EXISTS `estadisticas_jugador`;
 CREATE TABLE `estadisticas_jugador` (
   `id` int(11) NOT NULL,
   `jugador_id` int(11) NOT NULL,
@@ -186,10 +177,34 @@ CREATE TABLE `estadisticas_jugador` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `goles_partido`
+--
+
+CREATE TABLE `goles_partido` (
+  `id` int(11) NOT NULL,
+  `partido_id` int(11) NOT NULL,
+  `jugador_id` int(11) NOT NULL,
+  `cantidad_goles` int(11) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `goles_partido`
+--
+
+INSERT INTO `goles_partido` (`id`, `partido_id`, `jugador_id`, `cantidad_goles`) VALUES
+(9, 57, 1, 2),
+(12, 61, 1, 2),
+(13, 61, 3, 1),
+(14, 62, 25, 2),
+(15, 63, 25, 1),
+(16, 63, 26, 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `jugadores`
 --
 
-DROP TABLE IF EXISTS `jugadores`;
 CREATE TABLE `jugadores` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL,
@@ -222,7 +237,9 @@ INSERT INTO `jugadores` (`id`, `nombre`, `fecha_nacimiento`, `edad`, `posicion`,
 (21, 'Álvaro Rodríguez', '2007-06-14', NULL, 'delantero', 1, 0, NULL),
 (22, 'Antonio Reyes', '2003-07-14', 22, 'delantero', NULL, 1, 2),
 (23, 'Antonio Reyes', '2003-07-29', NULL, 'defensa', NULL, 1, 1),
-(24, 'Raphina', '2006-07-13', 19, 'delantero', 6, 0, NULL);
+(24, 'Raphina', '2006-07-13', 19, 'delantero', 6, 0, NULL),
+(25, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', 2, 0, NULL),
+(26, 'Cristiano Ronaldo', '2026-04-30', NULL, 'portero', 2, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -230,7 +247,6 @@ INSERT INTO `jugadores` (`id`, `nombre`, `fecha_nacimiento`, `edad`, `posicion`,
 -- Estructura de tabla para la tabla `partidos`
 --
 
-DROP TABLE IF EXISTS `partidos`;
 CREATE TABLE `partidos` (
   `id` int(11) NOT NULL,
   `equipo_local` varchar(100) DEFAULT NULL,
@@ -248,16 +264,11 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora`, `club_id`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
-(2, NULL, NULL, '2026-05-10', NULL, NULL, '1-1', 1, 11),
-(3, NULL, NULL, '2026-05-20', NULL, NULL, '3-3', 1, 14),
-(4, NULL, NULL, '2026-10-15', NULL, NULL, '6-5', 6, 1),
-(20, NULL, NULL, '2026-04-21', NULL, NULL, '2-1', 1, 15),
-(21, NULL, NULL, '2026-04-29', NULL, NULL, '', 1, 2),
-(22, NULL, NULL, '2026-04-30', NULL, NULL, '3-3', 15, 16),
-(23, NULL, NULL, '2026-04-21', NULL, NULL, '2-2', 1, 15),
-(24, NULL, NULL, '2026-04-21', NULL, NULL, '4-4', 3, 14),
-(25, NULL, NULL, '2026-01-15', NULL, NULL, '0-5', 1, 6),
-(26, NULL, NULL, '2026-04-30', NULL, NULL, '1-3', 6, 1);
+(52, NULL, NULL, '2026-05-10', NULL, NULL, NULL, 1, 6),
+(57, NULL, NULL, '2026-03-30', NULL, NULL, '2-2', 1, 15),
+(61, NULL, NULL, '2026-03-30', NULL, NULL, '3-1', 1, 8),
+(62, NULL, NULL, '2026-03-30', NULL, NULL, '2-2', 1, 2),
+(63, NULL, NULL, '2026-04-18', NULL, NULL, '2-2', 1, 2);
 
 -- --------------------------------------------------------
 
@@ -265,7 +276,6 @@ INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora
 -- Estructura de tabla para la tabla `usuarios`
 --
 
-DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `nombre` varchar(50) DEFAULT NULL,
@@ -336,6 +346,14 @@ ALTER TABLE `estadisticas_jugador`
   ADD KEY `partido_id` (`partido_id`);
 
 --
+-- Indices de la tabla `goles_partido`
+--
+ALTER TABLE `goles_partido`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `partido_id` (`partido_id`),
+  ADD KEY `jugador_id` (`jugador_id`);
+
+--
 -- Indices de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
@@ -397,16 +415,22 @@ ALTER TABLE `estadisticas_jugador`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `goles_partido`
+--
+ALTER TABLE `goles_partido`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -451,6 +475,13 @@ ALTER TABLE `equipos`
 ALTER TABLE `estadisticas_jugador`
   ADD CONSTRAINT `estadisticas_jugador_ibfk_1` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `estadisticas_jugador_ibfk_2` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `goles_partido`
+--
+ALTER TABLE `goles_partido`
+  ADD CONSTRAINT `goles_partido_ibfk_1` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `goles_partido_ibfk_2` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `jugadores`

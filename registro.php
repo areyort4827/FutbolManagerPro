@@ -35,6 +35,7 @@ body { min-height:100vh; background:linear-gradient(135deg,#ffffff,#ecfdf5); dis
 .toggle-pass:hover { color:#16a34a; }
 .pass-error { font-size:13px; color:#dc2626; margin-top:4px; display:none; }
 #grupo-equipo { display:none; }
+#grupo-jugador { display:none; }
 .btn-register { width:100%; padding:14px; background:#16a34a; border:none; border-radius:8px; color:white; font-size:16px; font-weight:bold; cursor:pointer; transition:0.25s; margin-top:8px; }
 .btn-register:hover { background:#15803d; transform:translateY(-2px); box-shadow:0 8px 18px rgba(22,163,74,0.35); }
 .volver { display:block; text-align:center; margin-top:20px; text-decoration:none; color:#16a34a; font-weight:600; }
@@ -100,6 +101,21 @@ body { min-height:100vh; background:linear-gradient(135deg,#ffffff,#ecfdf5); dis
         </select>
     </div>
 
+    <div id="grupo-jugador">
+        <div class="input-group">
+            <input type="date" name="fecha_nacimiento" id="fechaNacimiento" placeholder="Fecha de nacimiento">
+        </div>
+        <div class="input-group">
+            <select name="posicion" id="posicionSelect">
+                <option value="">Selecciona tu posición</option>
+                <option value="delantero">Delantero</option>
+                <option value="mediocentro">Mediocentro</option>
+                <option value="defensa">Defensa</option>
+                <option value="portero">Portero</option>
+            </select>
+        </div>
+    </div>
+
     <button type="submit" class="btn-register">Registrarse</button>
 </form>
 
@@ -122,6 +138,9 @@ const rolSelect   = document.getElementById('rolSelect');
 const clubSelect  = document.getElementById('clubSelect');
 const grupoEquipo = document.getElementById('grupo-equipo');
 const equipoSelect = document.getElementById('equipoSelect');
+const grupoJugador = document.getElementById('grupo-jugador');
+const fechaNacimiento = document.getElementById('fechaNacimiento');
+const posicionSelect = document.getElementById('posicionSelect');
 
 function checkPasswords() {
     if (pass2.value && pass1.value !== pass2.value) {
@@ -146,10 +165,17 @@ document.getElementById('formRegistro').addEventListener('submit', function(e) {
 function actualizarEquipos() {
     const clubId = parseInt(clubSelect.value);
     const esEntrenador = rolSelect.value === 'entrenador';
-    grupoEquipo.style.display = esEntrenador ? 'block' : 'none';
-    equipoSelect.required = esEntrenador;
+    const esJugador = rolSelect.value === 'jugador';
+
+    grupoEquipo.style.display = (esEntrenador || esJugador) ? 'block' : 'none';
+    equipoSelect.required = (esEntrenador || esJugador);
+
+    grupoJugador.style.display = esJugador ? 'block' : 'none';
+    fechaNacimiento.required = esJugador;
+    posicionSelect.required = esJugador;
+
     equipoSelect.innerHTML = '<option value="">Selecciona un equipo</option>';
-    if (esEntrenador && clubId && equiposPorClub[clubId]) {
+    if ((esEntrenador || esJugador) && clubId && equiposPorClub[clubId]) {
         equiposPorClub[clubId].forEach(function(eq) {
             const opt = document.createElement('option');
             opt.value = eq.id;
@@ -160,6 +186,7 @@ function actualizarEquipos() {
 }
 rolSelect.addEventListener('change', actualizarEquipos);
 clubSelect.addEventListener('change', actualizarEquipos);
+actualizarEquipos();
 </script>
 
 </body>
