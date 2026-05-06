@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-05-2026 a las 08:56:25
+-- Tiempo de generación: 06-05-2026 a las 12:13:34
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -178,8 +178,12 @@ CREATE TABLE `estadisticas_jugador` (
 --
 
 INSERT INTO `estadisticas_jugador` (`id`, `jugador_id`, `partido_id`, `goles`, `asistencias`, `minutos_jugados`, `tarjetas_amarillas`, `tarjetas_rojas`) VALUES
-(5, 28, 77, 2, 2, 0, 0, 0),
-(6, 26, 78, 2, 1, 0, 0, 0);
+(6, 26, 78, 2, 1, 0, 0, 0),
+(16, 28, 83, 2, 3, 0, 0, 0),
+(17, 1, 83, 1, 0, 0, 0, 0),
+(18, 28, 52, 2, 0, 0, 0, 0),
+(20, 1, 84, 1, 0, 0, 0, 0),
+(21, 3, 84, 0, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -193,6 +197,16 @@ CREATE TABLE `goles_partido` (
   `jugador_id` int(11) NOT NULL,
   `cantidad_goles` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `goles_partido`
+--
+
+INSERT INTO `goles_partido` (`id`, `partido_id`, `jugador_id`, `cantidad_goles`) VALUES
+(31, 83, 28, 2),
+(32, 83, 1, 1),
+(33, 52, 28, 2),
+(35, 84, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -262,11 +276,13 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora`, `club_id`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
-(52, NULL, NULL, '2026-05-10', NULL, NULL, NULL, 1, 6),
+(52, NULL, NULL, '2026-05-10', NULL, NULL, '2-2', 1, 6),
 (72, NULL, NULL, '2026-05-15', NULL, NULL, NULL, 9, 4),
-(77, NULL, NULL, '2026-04-27', NULL, NULL, '2-2', 1, 14),
 (78, NULL, NULL, '2026-04-28', NULL, NULL, '0-2', 14, 2),
-(80, NULL, NULL, '2026-04-27', NULL, NULL, '0-0', 6, 1);
+(83, NULL, NULL, '2026-04-27', NULL, NULL, '3-0', 1, 6),
+(84, NULL, NULL, '2026-05-06', NULL, NULL, '3-1', 9, 1),
+(85, NULL, NULL, '2026-05-09', NULL, NULL, NULL, 1, 15),
+(86, NULL, NULL, '2026-05-06', NULL, NULL, NULL, 1, 6);
 
 -- --------------------------------------------------------
 
@@ -414,13 +430,13 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `estadisticas_jugador`
 --
 ALTER TABLE `estadisticas_jugador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `goles_partido`
 --
 ALTER TABLE `goles_partido`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
@@ -432,7 +448,7 @@ ALTER TABLE `jugadores`
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`

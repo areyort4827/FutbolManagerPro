@@ -36,7 +36,7 @@ if (isset($_POST['guardar'])) {
 
         if (empty($_POST['resultado'])) {
             $error_partido = "Debes ingresar el resultado del partido.";
-             $abrir_modal = true;
+            $abrir_modal = true;
         } else {
             $resultado = trim($_POST['resultado']);
         }
@@ -211,7 +211,10 @@ $sql_proximos = "
         OR
         p.equipo_visitante_id = :mi_id
     )
-    AND p.fecha >= CURDATE()
+    AND (
+        p.resultado IS NULL
+        OR p.resultado = ''
+    )
     ORDER BY p.fecha ASC
 ";
 
@@ -239,7 +242,8 @@ $sql_historial = "
         OR
         p.equipo_visitante_id = :mi_id
     )
-    AND p.fecha < CURDATE()
+    AND p.resultado IS NOT NULL
+    AND p.resultado != ''
     ORDER BY p.fecha DESC
 ";
 
@@ -249,6 +253,108 @@ $stmt_historial->execute([
 ]);
 
 $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
+
+/* ===== GUARDAR ESTADÍSTICAS DE PARTIDO ===== */
+if (isset($_POST['guardar_estadisticas'])) {
+    $partido_id = (int)($_POST['partido_id'] ?? 0);
+
+
+    $stmt_fecha = $pdo->prepare("
+        SELECT fecha
+        FROM partidos
+        WHERE id = :id
+    ");
+
+    $stmt_fecha->execute([
+        ':id' => $partido_id
+    ]);
+
+    $fecha_partido = $stmt_fecha->fetchColumn();
+
+    if ($fecha_partido > date('Y-m-d')) {
+        echo "<script>
+            alert('No puedes añadir resultado antes de que se juegue el partido');
+            window.history.back();
+        </script>";
+        exit();
+    }
+
+
+
+    if ($partido_id > 0) {
+
+        // Nueva lógica de validación previa
+        $nuevo_resultado = trim($_POST['resultado_partido'] ?? '');
+        if (!preg_match('/^\d+\-\d+$/', $nuevo_resultado)) {
+            echo "<script>alert('Error: El resultado debe tener formato 0-0'); window.history.back();</script>";
+            exit;
+        }
+
+        $partes = explode('-', $nuevo_resultado);
+        $stmt_p = $pdo->prepare("SELECT equipo_local_id FROM partidos WHERE id = ?");
+        $stmt_p->execute([$partido_id]);
+        $local_id_db = $stmt_p->fetchColumn();
+        $mis_goles_resultado = ($local_id_db == $mi_equipo_id) ? (int)$partes[0] : (int)$partes[1];
+
+        $suma_goles_jugadores = 0;
+        foreach ($_POST['jugadores'] as $stats) {
+            $suma_goles_jugadores += (int)($stats['goles'] ?? 0);
+        }
+
+        if ($suma_goles_jugadores !== $mis_goles_resultado) {
+            echo "<script>alert('Error: El resultado indica $mis_goles_resultado goles para tu equipo, pero has sumado $suma_goles_jugadores en la lista de jugadores.'); window.history.back();</script>";
+            exit;
+        }
+        // Fin de nueva lógica de validación
+
+        // Borrar estadísticas previas de jugadores de este equipo en este partido
+        $jugadores_equipo = $pdo->prepare("SELECT id FROM jugadores WHERE equipo_id = :eid");
+        $jugadores_equipo->execute([':eid' => $mi_equipo_id]);
+        $ids_jugadores = array_column($jugadores_equipo->fetchAll(PDO::FETCH_ASSOC), 'id');
+
+        if (!empty($ids_jugadores)) {
+            $in = implode(',', array_map('intval', $ids_jugadores));
+            $pdo->exec("DELETE FROM estadisticas_jugador WHERE partido_id = $partido_id AND jugador_id IN ($in)");
+            $pdo->exec("DELETE FROM goles_partido WHERE partido_id = $partido_id AND jugador_id IN ($in)");
+        }
+
+        // Guardar resultado si viene
+        if ($nuevo_resultado !== '') {
+            $pdo->prepare("UPDATE partidos SET resultado = :r WHERE id = :id")
+                ->execute([':r' => $nuevo_resultado, ':id' => $partido_id]);
+        }
+
+        // Guardar estadísticas por jugador
+        $jugadores_post = $_POST['jugadores'] ?? [];
+        foreach ($jugadores_post as $jid => $stats) {
+            $jid = (int)$jid;
+            $goles       = max(0, (int)($stats['goles'] ?? 0));
+            $asistencias = max(0, (int)($stats['asistencias'] ?? 0));
+            $amarillas   = max(0, (int)($stats['amarillas'] ?? 0));
+            $rojas       = max(0, (int)($stats['rojas'] ?? 0));
+            $minutos     = max(0, (int)($stats['minutos'] ?? 0));
+
+            if ($goles + $asistencias + $amarillas + $rojas + $minutos > 0) {
+                $pdo->prepare("INSERT INTO estadisticas_jugador (jugador_id, partido_id, goles, asistencias, tarjetas_amarillas, tarjetas_rojas, minutos_jugados)
+                    VALUES (:jid, :pid, :g, :a, :am, :ro, :mi)")
+                    ->execute([':jid' => $jid, ':pid' => $partido_id, ':g' => $goles, ':a' => $asistencias, ':am' => $amarillas, ':ro' => $rojas, ':mi' => $minutos]);
+
+                if ($goles > 0) {
+                    $pdo->prepare("INSERT INTO goles_partido (partido_id, jugador_id, cantidad_goles) VALUES (:pid, :jid, :g)")
+                        ->execute([':pid' => $partido_id, ':jid' => $jid, ':g' => $goles]);
+                }
+            }
+        }
+    }
+    $_SESSION['paginaActual'] = 'partidos';
+    echo "<script>window.location.href='menu.php?pagina=partidos';</script>";
+    exit();
+}
+
+/* ===== CARGAR JUGADORES DEL EQUIPO PARA EL MODAL ===== */
+$stmt_jug_modal = $pdo->prepare("SELECT id, nombre, posicion FROM jugadores WHERE equipo_id = :eid ORDER BY nombre ASC");
+$stmt_jug_modal->execute([':eid' => $mi_equipo_id]);
+$jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="partidos-header">
@@ -278,7 +384,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
     <button
         type="button"
         class="boton-add"
-        onclick="abrirModal()">
+        onclick="abrirModalPartidos()">
         + Añadir Partido
     </button>
 
@@ -313,20 +419,40 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                         Resultado pendiente
                     </div>
 
-                    <form method="POST" style="margin-top: 12px;">
-                        <input
-                            type="hidden"
-                            name="id"
-                            value="<?= $fila['id'] ?>">
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
 
-                        <button
-                            type="submit"
-                            name="eliminar"
-                            class="btn-eliminar"
-                            onclick="return confirm('¿Eliminar este partido?')">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </form>
+
+                        <?php if ($fila['fecha'] <= date('Y-m-d')): ?>
+                            <button
+                                type="button"
+                                class="btn-stats"
+                                onclick="abrirModalStats(
+                <?= $fila['id'] ?>,
+                '<?= htmlspecialchars($fila['local'], ENT_QUOTES) ?> vs <?= htmlspecialchars($fila['visitante'], ENT_QUOTES) ?>',
+                '',
+                <?= $mi_equipo_id ?>,
+                <?= $fila['equipo_local_id'] ?>
+            )">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+
+                        <?php endif; ?>
+                        <form method="POST">
+                            <input
+                                type="hidden"
+                                name="id"
+                                value="<?= $fila['id'] ?>">
+
+                            <button
+                                type="submit"
+                                name="eliminar"
+                                class="btn-eliminar"
+                                onclick="return confirm('¿Eliminar este partido?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+
+                    </div>
 
                 </div>
 
@@ -392,7 +518,21 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                             <i class="fa-solid fa-trash"></i>
                         </button>
 
+                        <button
+                            type="button"
+                            class="btn-stats"
+                            onclick="abrirModalStats(
+                <?= $fila['id'] ?>,
+                '<?= htmlspecialchars($fila['local'], ENT_QUOTES) ?> vs <?= htmlspecialchars($fila['visitante'], ENT_QUOTES) ?>',
+                '<?= htmlspecialchars($fila['resultado'] ?? '', ENT_QUOTES) ?>',
+                <?= $mi_equipo_id ?>,
+                <?= $fila['equipo_local_id'] ?>
+            )">
+                            <i class="fa-solid fa-chart-bar"></i>
+                        </button>
+
                     </form>
+
                 </div>
 
             </div>
@@ -410,7 +550,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="modal-contenido">
 
-        <span class="cerrar" onclick="cerrarModal()">
+        <span class="cerrar" onclick="cerrarModalPartidos()">
             &times;
         </span>
 
@@ -611,16 +751,318 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <?php if ($abrir_modal): ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof abrirModal === "function") {
-            abrirModal();
-        }
-        if (typeof validarResultado === "function") {
-            validarResultado();
-        }
-    });
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof abrirModal === "function") {
+                abrirModal();
+            }
+            if (typeof validarResultado === "function") {
+                validarResultado();
+            }
+        });
+    </script>
 <?php endif; ?>
 
 <script src="../assets/js/partidos.js"></script>
+
+<!-- ===== MODAL ESTADÍSTICAS ===== -->
+<div id="modalStats" class="modal-stats-overlay" style="display:none;">
+    <div class="modal-stats-contenido">
+        <div class="modal-stats-header">
+            <div>
+                <h2 class="modal-stats-title"><i class="fa-solid fa-chart-bar"></i> Estadísticas del Partido</h2>
+                <p class="modal-stats-sub" id="stats-partido-nombre"></p>
+            </div>
+            <button type="button" class="modal-stats-cerrar" onclick="cerrarModalStats()">×</button>
+        </div>
+
+        <form method="POST" id="formStats">
+            <input type="hidden" name="guardar_estadisticas" value="1">
+            <input type="hidden" name="partido_id" id="stats-partido-id">
+
+            <div class="stats-resultado-row">
+                <label class="stats-label">Resultado del partido</label>
+                <input type="text" name="resultado_partido" id="stats-resultado" placeholder="Ej: 2-1" class="stats-resultado-input">
+            </div>
+
+            <div class="stats-table-wrap">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <th><i class="fa-solid fa-futbol"></i> Goles</th>
+                            <th><i class="fa-solid fa-handshake-simple"></i> Asistencias</th>
+                            <th><i class="fa-solid fa-square" style="color:#eab308"></i> Amarillas</th>
+                            <th><i class="fa-solid fa-square" style="color:#ef4444"></i> Rojas</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($jugadores_modal as $jug): ?>
+                            <tr>
+                                <td class="stats-jugador-nombre">
+                                    <?= htmlspecialchars($jug['nombre']) ?>
+                                    <span class="stats-posicion"><?= htmlspecialchars($jug['posicion']) ?></span>
+                                </td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][goles]" min="0" value="0" class="stats-num-input" data-jugador="<?= $jug['id'] ?>"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][asistencias]" min="0" value="0" class="stats-num-input"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][amarillas]" min="0" max="2" value="0" class="stats-num-input stats-amarilla"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][rojas]" min="0" max="1" value="0" class="stats-num-input stats-roja"></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="stats-footer">
+                <button type="button" class="stats-btn-cancelar" onclick="cerrarModalStats()">Cancelar</button>
+                <button type="submit" class="stats-btn-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Estadísticas</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .modal-stats-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .modal-stats-contenido {
+        background: white;
+        border-radius: 18px;
+        width: 100%;
+        max-width: 820px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-stats-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 22px 24px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .modal-stats-title {
+        margin: 0;
+        font-size: 20px;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-stats-title i {
+        color: #4f46e5;
+    }
+
+    .modal-stats-sub {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .modal-stats-cerrar {
+        background: #f1f5f9;
+        border: none;
+        border-radius: 10px;
+        width: 34px;
+        height: 34px;
+        font-size: 20px;
+        cursor: pointer;
+        color: #475569;
+        line-height: 34px;
+        text-align: center;
+        transition: 0.15s;
+        flex-shrink: 0;
+    }
+
+    .modal-stats-cerrar:hover {
+        background: #e2e8f0;
+    }
+
+    .stats-resultado-row {
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stats-label {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .stats-resultado-input {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        font-size: 16px;
+        font-weight: 700;
+        width: 120px;
+        transition: 0.2s;
+    }
+
+    .stats-resultado-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .stats-table-wrap {
+        padding: 0 24px;
+        overflow-x: auto;
+    }
+
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    .stats-table th {
+        padding: 10px 8px;
+        text-align: center;
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 2px solid #e5e7eb;
+        background: #f8fafc;
+    }
+
+    .stats-table th:first-child {
+        text-align: left;
+    }
+
+    .stats-table td {
+        padding: 8px;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: center;
+    }
+
+    .stats-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .stats-table tr:hover td {
+        background: #f8fafc;
+    }
+
+    .stats-jugador-nombre {
+        text-align: left !important;
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 14px;
+    }
+
+    .stats-posicion {
+        display: block;
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 400;
+        text-transform: capitalize;
+    }
+
+    .stats-num-input {
+        width: 58px;
+        padding: 7px 4px;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        transition: 0.15s;
+    }
+
+    .stats-num-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    .stats-num-input:not([value="0"]) {
+        border-color: #c7d2fe;
+        background: #eef2ff;
+    }
+
+    .stats-amarilla:focus {
+        border-color: #eab308;
+        box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15);
+    }
+
+    .stats-roja:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+
+    .stats-minutos {
+        width: 68px !important;
+    }
+
+    .stats-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-radius: 0 0 18px 18px;
+    }
+
+    .stats-btn-cancelar {
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #64748b;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+
+    .stats-btn-cancelar:hover {
+        background: #f8fafc;
+    }
+
+    .stats-btn-guardar {
+        padding: 10px 24px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(145deg, #6366f1, #4f46e5);
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.15s;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .stats-btn-guardar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    }
+</style>

@@ -12,13 +12,21 @@ if (!isset($_SESSION['user']) || (($_SESSION['user']['rol'] ?? '') !== 'admin'))
 $error = '';
 $success = '';
 
+if (isset($_SESSION['admin_creado_ok'])) {
+    $success = $_SESSION['admin_creado_ok'];
+    unset($_SESSION['admin_creado_ok']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_admin_submit'])) {
     $nombre = trim($_POST['nombre'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
+    $password2 = trim($_POST['password2'] ?? '');
 
-    if ($nombre === '' || $email === '' || $password === '') {
+    if ($nombre === '' || $email === '' || $password === '' || $password2 === '') {
         $error = 'Rellena todos los campos.';
+    } elseif ($password !== $password2) {
+        $error = 'Las contraseñas no coinciden.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'El email no es válido.';
     } else {
@@ -43,7 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_admin_submit'])
                         ':rol' => 'admin',
                         ':club_id' => null,
                     ]);
-                    $success = 'Admin creado correctamente.';
+                    $_SESSION['admin_creado_ok'] = 'Admin creado correctamente.';
+                    echo "<script>window.location.href='menu.php?pagina=crear_admin';</script>";
+                    exit;
                     
                 }
             }
@@ -214,6 +224,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_admin_submit'])
             <div class="field">
                 <label>Contraseña</label>
                 <input type="password" name="password" placeholder="Contraseña segura" required>
+            </div>
+            <div class="field">
+                <label>Repetir contraseña</label>
+                <input type="password" name="password2" placeholder="Repite la contraseña" required>
             </div>
             <button class="btn-primary" type="submit">Crear Admin</button>
         </form>
