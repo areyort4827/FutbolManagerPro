@@ -326,7 +326,7 @@ if (isset($_POST['guardar_estadisticas'])) {
 
         // Guardar estadísticas por jugador
         $jugadores_post = $_POST['jugadores'] ?? [];
-        foreach ($jugadores_post as $jid => $stats) {
+       foreach ($jugadores_post as $jid => $stats) {
             $jid = (int)$jid;
             $goles       = max(0, (int)($stats['goles'] ?? 0));
             $asistencias = max(0, (int)($stats['asistencias'] ?? 0));
@@ -794,7 +794,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                             <th><i class="fa-solid fa-handshake-simple"></i> Asistencias</th>
                             <th><i class="fa-solid fa-square" style="color:#eab308"></i> Amarillas</th>
                             <th><i class="fa-solid fa-square" style="color:#ef4444"></i> Rojas</th>
-
+                             <th><i class="fa-regular fa-clock"></i> Minutos</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -808,6 +808,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                                 <td><input type="number" name="jugadores[<?= $jug['id'] ?>][asistencias]" min="0" value="0" class="stats-num-input"></td>
                                 <td><input type="number" name="jugadores[<?= $jug['id'] ?>][amarillas]" min="0" max="2" value="0" class="stats-num-input stats-amarilla"></td>
                                 <td><input type="number" name="jugadores[<?= $jug['id'] ?>][rojas]" min="0" max="1" value="0" class="stats-num-input stats-roja"></td>
+                                 <td><input type="number" name="jugadores[<?= $jug['id'] ?>][minutos]" min="0" max="120" value="0" class="stats-num-input stats-minutos"></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

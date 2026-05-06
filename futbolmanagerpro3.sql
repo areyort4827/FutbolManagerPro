@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-05-2026 a las 12:13:34
+-- Tiempo de generación: 06-05-2026 a las 15:11:59
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -178,12 +178,13 @@ CREATE TABLE `estadisticas_jugador` (
 --
 
 INSERT INTO `estadisticas_jugador` (`id`, `jugador_id`, `partido_id`, `goles`, `asistencias`, `minutos_jugados`, `tarjetas_amarillas`, `tarjetas_rojas`) VALUES
-(6, 26, 78, 2, 1, 0, 0, 0),
 (16, 28, 83, 2, 3, 0, 0, 0),
 (17, 1, 83, 1, 0, 0, 0, 0),
-(18, 28, 52, 2, 0, 0, 0, 0),
-(20, 1, 84, 1, 0, 0, 0, 0),
-(21, 3, 84, 0, 1, 0, 0, 0);
+(45, 1, 84, 1, 0, 0, 0, 0),
+(46, 28, 87, 1, 3, 0, 0, 0),
+(47, 20, 87, 2, 0, 0, 0, 0),
+(48, 26, 89, 2, 0, 0, 0, 0),
+(50, 26, 90, 2, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -205,8 +206,11 @@ CREATE TABLE `goles_partido` (
 INSERT INTO `goles_partido` (`id`, `partido_id`, `jugador_id`, `cantidad_goles`) VALUES
 (31, 83, 28, 2),
 (32, 83, 1, 1),
-(33, 52, 28, 2),
-(35, 84, 1, 1);
+(51, 84, 1, 1),
+(52, 87, 28, 1),
+(53, 87, 20, 2),
+(54, 89, 26, 2),
+(56, 90, 26, 2);
 
 -- --------------------------------------------------------
 
@@ -276,13 +280,13 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora`, `club_id`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
-(52, NULL, NULL, '2026-05-10', NULL, NULL, '2-2', 1, 6),
-(72, NULL, NULL, '2026-05-15', NULL, NULL, NULL, 9, 4),
-(78, NULL, NULL, '2026-04-28', NULL, NULL, '0-2', 14, 2),
 (83, NULL, NULL, '2026-04-27', NULL, NULL, '3-0', 1, 6),
-(84, NULL, NULL, '2026-05-06', NULL, NULL, '3-1', 9, 1),
+(84, NULL, NULL, '2026-05-06', NULL, NULL, '1-1', 9, 1),
 (85, NULL, NULL, '2026-05-09', NULL, NULL, NULL, 1, 15),
-(86, NULL, NULL, '2026-05-06', NULL, NULL, NULL, 1, 6);
+(87, NULL, NULL, '2026-05-06', NULL, NULL, '3-0', 1, 6),
+(88, NULL, NULL, '2026-05-07', NULL, NULL, NULL, 2, 14),
+(89, NULL, NULL, '2026-05-06', NULL, NULL, '2-2', 2, 11),
+(90, NULL, NULL, '2026-05-06', NULL, NULL, '2-0', 2, 6);
 
 -- --------------------------------------------------------
 
@@ -430,13 +434,13 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `estadisticas_jugador`
 --
 ALTER TABLE `estadisticas_jugador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT de la tabla `goles_partido`
 --
 ALTER TABLE `goles_partido`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
@@ -448,7 +452,7 @@ ALTER TABLE `jugadores`
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
