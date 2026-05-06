@@ -23,7 +23,7 @@ $paginaActual = $_SESSION['paginaActual'] ?? 'dashboard';
 unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit;
 }
 
@@ -204,6 +204,9 @@ $nombre = htmlspecialchars($user['nombre']);
         <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
             <i class="fa-solid fa-calendar"></i> Calendario
         </a>
+        <a class="page <?= $paginaActual === 'fichajes' ? 'active' : '' ?>" onclick="mostrarPagina('fichajes')">
+            <i class="fa-solid fa-handshake"></i> Fichajes
+        </a>
     </div>
 
     <!-- USER BOX - Icono a la izquierda + abajo del todo -->
@@ -239,6 +242,9 @@ $nombre = htmlspecialchars($user['nombre']);
         </div>
         <div id="estadisticas" class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>">
             <?php include 'estadisticas.php' ?>
+        </div>
+        <div id="fichajes" class="page <?= $paginaActual === 'fichajes' ? 'active' : '' ?>">
+            <?php include 'fichajes.php' ?>
         </div>
     </div>
 

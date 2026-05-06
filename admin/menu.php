@@ -21,7 +21,7 @@ $paginaActual = $_SESSION['paginaActual'] ?? ($_GET['pagina'] ?? 'dashboard');
 unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit;
 }
 
