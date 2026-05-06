@@ -224,4 +224,3 @@ document.addEventListener('click', function (e) {
     if (box) box.style.display = 'none';
 });
 </script>
-

@@ -1,24 +1,49 @@
-<?php
-// Obtener total de jugadores del club
-$club_id = $_SESSION['club_id'];
-$sqlTotalJugadores = "SELECT COUNT(*) as total FROM jugadores j 
-                      INNER JOIN equipos e ON j.equipo_id = e.id 
-                      WHERE e.equipo_id = $club_id";
-$resultadoTotal = $pdo->query($sqlTotalJugadores);
-$totalJugadores = $resultadoTotal->fetch(PDO::FETCH_ASSOC)['total'];
+﻿<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once '../config/conexion.php';
 
-// Total de entrenamientos
-$sqlTotalEntrenamientos = "
-    SELECT COUNT(*) as total 
-    FROM entrenamientos
-    WHERE club_id = $club_id
-";
-$resultadoEntrenamientos = $pdo->query($sqlTotalEntrenamientos);
-$totalEntrenamientos = $resultadoEntrenamientos->fetch(PDO::FETCH_ASSOC)['total'];
+$club_id = (int)($_SESSION['club_id'] ?? 0);
 
-// Otros datos estáticos de ejemplo
-$totalPartidos = 12;
-$totalVictorias = 4;
+// Jugadores del club (de todos sus equipos)
+$stJug = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM jugadores j
+    INNER JOIN equipos e ON j.equipo_id = e.id
+    WHERE e.equipo_id = :club_id
+      AND (j.eliminado = 0 OR j.eliminado IS NULL)
+");
+$stJug->execute([':club_id' => $club_id]);
+$totalJugadores = (int)$stJug->fetchColumn();
+
+// Entrenamientos del club
+$stEnt = $pdo->prepare("SELECT COUNT(*) FROM entrenamientos WHERE club_id = :club_id");
+$stEnt->execute([':club_id' => $club_id]);
+$totalEntrenamientos = (int)$stEnt->fetchColumn();
+
+// Partidos programados del club (si `partidos.club_id` está relleno)
+$stPart = $pdo->prepare("SELECT COUNT(*) FROM partidos WHERE club_id = :club_id AND fecha >= CURDATE()");
+$stPart->execute([':club_id' => $club_id]);
+$totalPartidos = (int)$stPart->fetchColumn();
+
+// Victorias recientes (últimos 30 días) de equipos del club (según resultado)
+$stVic = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM partidos p
+    LEFT JOIN equipos el ON p.equipo_local_id = el.id
+    LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
+    WHERE p.club_id = :club_id
+      AND p.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+      AND p.resultado IS NOT NULL AND p.resultado != ''
+      AND (
+        (el.equipo_id = :club_id2 AND CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED))
+        OR
+        (ev.equipo_id = :club_id3 AND CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED))
+      )
+");
+$stVic->execute([':club_id' => $club_id, ':club_id2' => $club_id, ':club_id3' => $club_id]);
+$totalVictorias = (int)$stVic->fetchColumn();
 ?>
 <style>
 .dashboard-grid {
@@ -79,7 +104,7 @@ $totalVictorias = 4;
     <div class="box">
         <i class="fa-solid fa-futbol"></i>
         <h3>Partidos</h3>
-        <p>12 programados</p>
+        <p><?= (int)$totalPartidos ?> programados</p>
         <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
     </div>
     <div class="box">
@@ -91,7 +116,7 @@ $totalVictorias = 4;
     <div class="box">
         <i class="fa-solid fa-trophy"></i>
         <h3>Victorias</h3>
-        <p>4 recientes</p>
+        <p><?= (int)$totalVictorias ?> recientes</p>
         <div class="bar-container"><div class="bar-fill" style="width: 70%;"></div></div>
     </div>
 </div>

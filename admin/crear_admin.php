@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_admin_submit'])
                         ':club_id' => null,
                     ]);
                     $success = 'Admin creado correctamente.';
+                    
                 }
             }
         } catch (PDOException $e) {

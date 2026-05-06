@@ -42,6 +42,7 @@ $nombre = htmlspecialchars($user['nombre']);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -175,51 +176,93 @@ $nombre = htmlspecialchars($user['nombre']);
         .page.active {
             display: block;
         }
+
+        .modal-contenido {
+            background: white;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 18px;
+            padding: 32px;
+            position: relative;
+            /* Esto permite que el modal sea desplazable si hay muchos jugadores */
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Contenedor principal de cada jugador */
+        .goleador-item {
+            background: #f9fafb;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* El nombre del jugador ocupa toda la fila, y debajo van Goles y Asistencias */
+        .goleador-item .form-group:first-child {
+            flex: 1 1 100%;
+            margin-bottom: 5px;
+        }
+
+        /* Goles y Asistencias comparten la misma fila, cada uno ocupando la mitad del espacio disponible */
+        .goleador-item .form-group:not(:first-child) {
+            flex: 1;
+            /* Permite que ambos campos se expandan para llenar el espacio disponible */
+            min-width: 100px;
+        }
+
+        .goleador-item .form-group {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-    <div class="logo">
-        FutbolManager Pro
-    </div>
-
-    <div class="menu">
-        <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
-            <i class="fa-solid fa-gauge"></i> Dashboard
-        </a>
-        <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
-             <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
-        </a>        
-        <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
-            <i class="fa-solid fa-dumbbell"></i> Entrenamientos
-        </a>
-        <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
-            <i class="fa-solid fa-futbol"></i> Partidos
-        </a>
-        <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
-            <i class="fa-solid fa-chart-line"></i> Estadísticas
-        </a>
-        <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
-            <i class="fa-solid fa-calendar"></i> Calendario
-        </a>
-    </div>
-
-    <!-- USER BOX - Icono a la izquierda + abajo del todo -->
-    <div class="user-box">
-        <i class="fa-solid fa-circle-user"></i>
-        <div class="user-info">
-            <strong><?= strtoupper($nombre) ?></strong>
-            <div class="role"><?= strtoupper($role) ?></div>
+    <div class="sidebar">
+        <div class="logo">
+            FutbolManager Pro
         </div>
-    </div>
 
-    <!-- Cerrar Sesión -->
-    <a href="../logout.php" class="logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
-    </a>
-</div>
+        <div class="menu">
+            <a class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>" onclick="mostrarPagina('dashboard')">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+            <a class="page <?= $paginaActual === 'jugadores' ? 'active' : '' ?>" onclick="mostrarPagina('jugadores')">
+                <i class="fa-solid fa-solidLarge fa-people-group">‌</i> Jugadores
+            </a>
+            <a class="page <?= $paginaActual === 'entrenamientos' ? 'active' : '' ?>" onclick="mostrarPagina('entrenamientos')">
+                <i class="fa-solid fa-dumbbell"></i> Entrenamientos
+            </a>
+            <a class="page <?= $paginaActual === 'partidos' ? 'active' : '' ?>" onclick="mostrarPagina('partidos')">
+                <i class="fa-solid fa-futbol"></i> Partidos
+            </a>
+            <a class="page <?= $paginaActual === 'estadisticas' ? 'active' : '' ?>" onclick="mostrarPagina('estadisticas')">
+                <i class="fa-solid fa-chart-line"></i> Estadísticas
+            </a>
+            <a class="page <?= $paginaActual === 'calendario' ? 'active' : '' ?>" onclick="mostrarPagina('calendario')">
+                <i class="fa-solid fa-calendar"></i> Calendario
+            </a>
+        </div>
+
+        <!-- USER BOX - Icono a la izquierda + abajo del todo -->
+        <div class="user-box">
+            <i class="fa-solid fa-circle-user"></i>
+            <div class="user-info">
+                <strong><?= strtoupper($nombre) ?></strong>
+                <div class="role"><?= strtoupper($role) ?></div>
+            </div>
+        </div>
+
+        <!-- Cerrar Sesión -->
+        <a href="../logout.php" class="logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </a>
+    </div>
 
     <div class="main">
         <div id="dashboard" class="page <?= $paginaActual === 'dashboard' ? 'active' : '' ?>">
@@ -245,4 +288,5 @@ $nombre = htmlspecialchars($user['nombre']);
     <script src="../script.js"></script>
 
 </body>
+
 </html>

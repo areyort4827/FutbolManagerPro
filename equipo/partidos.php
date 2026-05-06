@@ -99,10 +99,22 @@ if (isset($_POST['guardar'])) {
 
         if (!empty($resultado) && isset($_POST['jugador_id'])) {
             foreach ($_POST['jugador_id'] as $index => $jugador_id) {
-                $cant = (int)$_POST['cantidad_goles'][$index];
-                if ($jugador_id > 0 && $cant > 0) {
-                    $sql_gol = "INSERT INTO goles_partido (partido_id, jugador_id, cantidad_goles) VALUES (:p, :j, :c)";
-                    $pdo->prepare($sql_gol)->execute([':p' => $partido_id, ':j' => $jugador_id, ':c' => $cant]);
+                $jugador_id = (int)$jugador_id;
+                $goles = (int)$_POST['cantidad_goles'][$index];
+                $asistencias = (int)$_POST['asistencias'][$index]; // Captura el nuevo input
+
+                if ($jugador_id > 0 && ($goles > 0 || $asistencias > 0)) {
+                    // IMPORTANTE: Cambiamos goles_partido por estadisticas_jugador
+                    $sql_stats = "INSERT INTO estadisticas_jugador 
+                            (partido_id, jugador_id, goles, asistencias) 
+                            VALUES (:p, :j, :g, :a)";
+
+                    $pdo->prepare($sql_stats)->execute([
+                        ':p' => $partido_id,
+                        ':j' => $jugador_id,
+                        ':g' => $goles,
+                        ':a' => $asistencias
+                    ]);
                 }
             }
         }
@@ -239,7 +251,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
     <button
         type="button"
         class="boton-add"
-        onclick="abrirModal()">
+        onclick="abrirModalPartidos()">
         + Añadir Partido
     </button>
 
@@ -364,7 +376,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="modal-contenido">
 
-        <span class="cerrar" onclick="cerrarModal()">
+        <span class="cerrar" onclick="cerrarModalPartidos()">
             &times;
         </span>
 
@@ -480,8 +492,12 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Cantidad de goles</label>
-                        <input type="number" name="cantidad_goles[]" min="1" value="1">
+                        <label>Goles</label>
+                        <input type="number" name="cantidad_goles[]" min="0" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Asistencias</label>
+                        <input type="number" name="asistencias[]" min="0" value="0">
                     </div>
                 </div>
             </div>
@@ -509,42 +525,42 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-function filtrarRivalYJugadores() {
-    let equipoSeleccionado = document.getElementById("equipo_club_id").value;
-    
-    // 1. Filtrar rivales (no puedes jugar contra ti mismo)
-    let opcionesRival = document.querySelectorAll(".opcion-rival");
-    opcionesRival.forEach(opt => {
-        if (opt.value === equipoSeleccionado) {
-            opt.style.display = "none";
-        } else {
-            opt.style.display = "block";
-        }
-    });
+    function filtrarRivalYJugadores() {
+        let equipoSeleccionado = document.getElementById("equipo_club_id").value;
 
-    // 2. Filtrar jugadores (mostrar solo los del equipo seleccionado)
-    let opcionesJugador = document.querySelectorAll(".opcion-jugador");
-    opcionesJugador.forEach(opt => {
-        if (opt.getAttribute("data-equipo") === equipoSeleccionado) {
-            opt.style.display = "block";
-        } else {
-            opt.style.display = "none";
-        }
-    });
+        // 1. Filtrar rivales (no puedes jugar contra ti mismo)
+        let opcionesRival = document.querySelectorAll(".opcion-rival");
+        opcionesRival.forEach(opt => {
+            if (opt.value === equipoSeleccionado) {
+                opt.style.display = "none";
+            } else {
+                opt.style.display = "block";
+            }
+        });
 
-    // Resetear selecciones si el equipo cambia
-    document.getElementById("rival_select").value = "";
-    document.querySelectorAll(".select-jugador").forEach(sel => sel.value = "");
-}
+        // 2. Filtrar jugadores (mostrar solo los del equipo seleccionado)
+        let opcionesJugador = document.querySelectorAll(".opcion-jugador");
+        opcionesJugador.forEach(opt => {
+            if (opt.getAttribute("data-equipo") === equipoSeleccionado) {
+                opt.style.display = "block";
+            } else {
+                opt.style.display = "none";
+            }
+        });
+
+        // Resetear selecciones si el equipo cambia
+        document.getElementById("rival_select").value = "";
+        document.querySelectorAll(".select-jugador").forEach(sel => sel.value = "");
+    }
 </script>
 
 <?php if ($abrir_modal): ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof abrirModal === "function") abrirModal();
-        if (typeof validarResultado === "function") validarResultado();
-    });
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof abrirModal === "function") abrirModal();
+            if (typeof validarResultado === "function") validarResultado();
+        });
+    </script>
 <?php endif; ?>
 
 <script src="../assets/js/partidos.js"></script>
