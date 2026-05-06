@@ -13,6 +13,11 @@ $error = '';
 $success = '';
 $miId = (int)($_SESSION['user']['id'] ?? 0);
 
+if (isset($_SESSION['usuario_eliminado_ok'])) {
+    $success = $_SESSION['usuario_eliminado_ok'];
+    unset($_SESSION['usuario_eliminado_ok']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_usuario_submit'])) {
     $usuarioId = (int)($_POST['usuario_id'] ?? 0);
 
@@ -43,7 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_usuario_subm
                 $stmtDel->execute([':id' => $usuarioId]);
 
                 $pdo->commit();
-                $success = 'Usuario eliminado correctamente.';
+                $_SESSION['usuario_eliminado_ok'] = 'Usuario eliminado correctamente.';
+                echo "<script>window.location.href='menu.php?pagina=eliminar_usuarios';</script>";
+                exit;
             }
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();
