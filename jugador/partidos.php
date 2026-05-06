@@ -56,47 +56,243 @@ function resultadoRelativo($resultado, $localId, $visitanteId, $miEquipo) {
 ?>
 
 <style>
-.partidos-wrapper { padding: 20px; font-family: 'Inter', sans-serif; }
-.partidos-wrapper h2 { font-size: 22px; margin: 0 0 20px; color: #1f2937; }
-.tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; }
-.tab-btn { background: none; border: none; padding: 10px 20px; font-size: 15px; cursor: pointer; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: .2s; font-weight: 500; }
-.tab-btn.active { color: #16a34a; border-bottom-color: #16a34a; font-weight: 700; }
-.tab-panel { display: none; } .tab-panel.active { display: block; }
+.partidos-wrapper {
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.partidos-wrapper h2 {
+    font-size: 22px;
+    margin: 0 0 20px;
+    color: #1f2937;
+}
+
+.tabs-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #6b7280;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: .2s;
+    font-weight: 500;
+}
+
+.tab-btn.active {
+    color: #16a34a;
+    border-bottom-color: #16a34a;
+    font-weight: 700;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
 
 /* Cards próximos */
-#proximos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-.partido-card {
-    background: white; border-radius: 14px; padding: 22px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08); border-left: 5px solid #2563eb;
+#proximos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
 }
-.partido-card .equipos { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; }
-.equipo-nombre { font-weight: 600; font-size: 15px; color: #1f2937; flex: 1; text-align: center; }
-.vs { font-size: 12px; color: #9ca3af; font-weight: 600; padding: 0 6px; }
-.partido-card .info { font-size: 13px; color: #6b7280; display: flex; gap: 14px; flex-wrap: wrap; }
-.partido-card .info span { display: flex; align-items: center; gap: 5px; }
-.badge-local { display: inline-block; background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
-.badge-visit { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+
+.partido-card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #2563eb;
+}
+
+.partido-card .equipos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+}
+
+.equipo-nombre {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1f2937;
+    flex: 1;
+    text-align: center;
+}
+
+.vs {
+    font-size: 12px;
+    color: #9ca3af;
+    font-weight: 600;
+    padding: 0 6px;
+}
+
+.partido-card .info {
+    font-size: 13px;
+    color: #6b7280;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.partido-card .info span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-local {
+    display: inline-block;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.badge-visit {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
 
 /* Tabla historial */
-.tabla-wrapper { background: white; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.07); overflow: hidden; }
-.tabla { width: 100%; border-collapse: collapse; }
-.tabla th { background: #16a34a; color: white; padding: 13px 15px; text-align: left; font-size: 13px; }
-.tabla td { padding: 13px 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #374151; }
-.tabla tr:last-child td { border-bottom: none; }
-.tabla tr:hover td { background: #f0fdf4; }
-.resultado.victoria { color: #16a34a; font-weight: 700; }
-.resultado.empate   { color: #eab308; font-weight: 700; }
-.resultado.derrota  { color: #ef4444; font-weight: 700; }
-.res-badge { display: inline-block; width: 26px; height: 26px; border-radius: 50%; text-align: center; line-height: 26px; font-size: 11px; font-weight: 800; color: white; margin-right: 6px; }
-.res-badge.victoria { background: #16a34a; }
-.res-badge.empate   { background: #eab308; }
-.res-badge.derrota  { background: #ef4444; }
-.no-data { text-align: center; color: #94a3b8; padding: 50px; grid-column: 1/-1; }
-.stats-form { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; }
-.stats-form input[type=number]{ width:70px; padding:6px 8px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; }
-.stats-form button{ padding:7px 10px; border:0; border-radius:8px; background:#16a34a; color:#fff; font-weight:700; cursor:pointer; }
-.stats-form button:hover{ background:#15803d; }
-.stats-check{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#374151; }
+.tabla-wrapper {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla th {
+    background: #16a34a;
+    color: white;
+    padding: 13px 15px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.tabla td {
+    padding: 13px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #374151;
+}
+
+.tabla tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla tr:hover td {
+    background: #f0fdf4;
+}
+
+.resultado.victoria {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.resultado.empate {
+    color: #eab308;
+    font-weight: 700;
+}
+
+.resultado.derrota {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.res-badge {
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 26px;
+    font-size: 11px;
+    font-weight: 800;
+    color: white;
+    margin-right: 6px;
+}
+
+.res-badge.victoria {
+    background: #16a34a;
+}
+
+.res-badge.empate {
+    background: #eab308;
+}
+
+.res-badge.derrota {
+    background: #ef4444;
+}
+
+.no-data {
+    text-align: center;
+    color: #94a3b8;
+    padding: 50px;
+    grid-column: 1/-1;
+}
+
+.stats-form {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.stats-form input[type=number] {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.stats-form button {
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: #16a34a;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.stats-form button:hover {
+    background: #15803d;
+}
+
+.stats-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #374151;
+}
 </style>
 
 <div class="partidos-wrapper">
@@ -115,32 +311,32 @@ function resultadoRelativo($resultado, $localId, $visitanteId, $miEquipo) {
     <div id="tab-proximos" class="tab-panel active">
         <div id="proximos-grid">
             <?php if (empty($proximos)): ?>
-                <p class="no-data">No hay partidos próximos programados.</p>
+            <p class="no-data">No hay partidos próximos programados.</p>
             <?php else: ?>
-                <?php foreach ($proximos as $p): ?>
-                <?php $esLocal = ($p['equipo_local_id'] == $mi_equipo_id); ?>
-                <div class="partido-card">
-                    <div class="equipos">
-                        <div class="equipo-nombre">
-                            <?= htmlspecialchars($p['local']) ?>
-                            <?php if ($esLocal): ?><br><span class="badge-local">LOCAL</span><?php endif; ?>
-                        </div>
-                        <div class="vs">VS</div>
-                        <div class="equipo-nombre">
-                            <?= htmlspecialchars($p['visitante']) ?>
-                            <?php if (!$esLocal): ?><br><span class="badge-visit">VISITANTE</span><?php endif; ?>
-                        </div>
+            <?php foreach ($proximos as $p): ?>
+            <?php $esLocal = ($p['equipo_local_id'] == $mi_equipo_id); ?>
+            <div class="partido-card">
+                <div class="equipos">
+                    <div class="equipo-nombre">
+                        <?= htmlspecialchars($p['local']) ?>
+                        <?php if ($esLocal): ?><br><span class="badge-local">LOCAL</span><?php endif; ?>
                     </div>
-                    <div class="info">
-                        <span><i class="fa-solid fa-calendar" style="color:#2563eb;"></i>
-                              <?= date('d/m/Y', strtotime($p['fecha'])) ?></span>
-                        <?php if (!empty($p['lugar'])): ?>
-                        <span><i class="fa-solid fa-location-dot" style="color:#2563eb;"></i>
-                              <?= htmlspecialchars($p['lugar']) ?></span>
-                        <?php endif; ?>
+                    <div class="vs">VS</div>
+                    <div class="equipo-nombre">
+                        <?= htmlspecialchars($p['visitante']) ?>
+                        <?php if (!$esLocal): ?><br><span class="badge-visit">VISITANTE</span><?php endif; ?>
                     </div>
                 </div>
-                <?php endforeach; ?>
+                <div class="info">
+                    <span><i class="fa-solid fa-calendar" style="color:#2563eb;"></i>
+                        <?= date('d/m/Y', strtotime($p['fecha'])) ?></span>
+                    <?php if (!empty($p['lugar'])): ?>
+                    <span><i class="fa-solid fa-location-dot" style="color:#2563eb;"></i>
+                        <?= htmlspecialchars($p['lugar']) ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>
@@ -148,8 +344,8 @@ function resultadoRelativo($resultado, $localId, $visitanteId, $miEquipo) {
     <!-- HISTORIAL -->
     <div id="tab-historial" class="tab-panel">
         <?php if (empty($historial)): ?>
-            <div class="no-data"><i class="fa-solid fa-futbol" style="font-size:2rem;display:block;margin-bottom:10px;"></i>
-                No hay partidos jugados aún.</div>
+        <div class="no-data"><i class="fa-solid fa-futbol" style="font-size:2rem;display:block;margin-bottom:10px;"></i>
+            No hay partidos jugados aún.</div>
         <?php else: ?>
         <div class="tabla-wrapper">
             <table class="tabla">
@@ -177,24 +373,9 @@ function resultadoRelativo($resultado, $localId, $visitanteId, $miEquipo) {
                         </td>
                         <td style="text-align:center;font-weight:600;color:#16a34a;"><?= $p['mis_goles'] ?? '—' ?></td>
                         <td style="text-align:center;"><?= $p['mis_asistencias'] ?? '—' ?></td>
-                        <td style="text-align:center;"><?= $p['minutos_jugados'] ? $p['minutos_jugados']."'" : '—' ?></td>
-                        <td style="text-align:center;">
-                            <form class="stats-form" action="guardar_estadisticas.php" method="POST">
-                                <input type="hidden" name="partido_id" value="<?= (int)$p['id'] ?>">
-                                <input type="number" name="goles" min="0" value="<?= (int)($p['mis_goles'] ?? 0) ?>" title="Mis goles">
-                                <input type="number" name="asistencias" min="0" value="<?= (int)($p['mis_asistencias'] ?? 0) ?>" title="Mis asistencias">
-                                <input type="number" name="minutos_jugados" min="0" value="<?= (int)($p['minutos_jugados'] ?? 0) ?>" title="Minutos jugados">
-                                <label class="stats-check" title="Tarjeta amarilla">
-                                    <input type="checkbox" name="tarjeta_amarilla" <?= ((int)($p['tarjetas_amarillas'] ?? 0) === 1) ? 'checked' : '' ?>>
-                                    Amar.
-                                </label>
-                                <label class="stats-check" title="Tarjeta roja">
-                                    <input type="checkbox" name="tarjeta_roja" <?= ((int)($p['tarjetas_rojas'] ?? 0) === 1) ? 'checked' : '' ?>>
-                                    Roja
-                                </label>
-                                <button type="submit">Guardar</button>
-                            </form>
+                        <td style="text-align:center;"><?= $p['minutos_jugados'] ? $p['minutos_jugados']."'" : '—' ?>
                         </td>
+                       
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

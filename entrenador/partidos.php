@@ -332,7 +332,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
     <button
         type="button"
         class="boton-add"
-        onclick="abrirModal()">
+        onclick="abrirModalPartidos()">
         + Añadir Partido
     </button>
 
@@ -471,7 +471,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="modal-contenido">
 
-        <span class="cerrar" onclick="cerrarModal()">
+        <span class="cerrar" onclick="cerrarModalPartidos()">
             &times;
         </span>
 

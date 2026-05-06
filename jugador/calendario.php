@@ -379,8 +379,8 @@ foreach ($partidosDelMes as $fecha => $parts) {
         <div class="stat-card">
             <div class="card-top"><span class="card-title">Eventos este mes</span><i
                     class="fa-solid fa-calendar-check"></i></div>
-            <div class="card-number"><?= $totalEventos ?></div>
-            <div class="card-subtitle">Entrenamientos</div>
+            <div class="card-number"><?= $totalEventos + $totalPartidos ?></div>
+            <div class="card-subtitle">Partidos + entrenamientos</div>
         </div>
         <div class="stat-card">
             <div class="card-top"><span class="card-title">Partidos este mes</span><i class="fa-solid fa-futbol"></i>
@@ -391,8 +391,8 @@ foreach ($partidosDelMes as $fecha => $parts) {
         <div class="stat-card">
             <div class="card-top"><span class="card-title">Total entrenamientos</span><i
                     class="fa-solid fa-dumbbell"></i></div>
-            <div class="card-number"><?= $totalEntrenamientos ?></div>
-            <div class="card-subtitle">De mi equipo</div>
+            <div class="card-number"><?= $totalEventos ?></div>
+            <div class="card-subtitle">Este mes</div>
         </div>
     </div>
 
