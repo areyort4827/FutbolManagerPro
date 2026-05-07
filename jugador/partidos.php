@@ -113,7 +113,6 @@ function resultadoRelativo($resultado, $localId, $visitanteId, $miEquipo) {
     border-radius: 14px;
     padding: 22px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid #2563eb;
 }
 
 .partido-card .equipos {
