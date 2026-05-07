@@ -3,29 +3,38 @@ require_once "../config/conexion.php";
 
 $club_id = $_SESSION['club_id'] ?? 0;
 
-// ── Partidos: totales, victorias, empates, derrotas ──────────────────────────
+// Obtener el equipo_id del entrenador logueado
+$usuario_id = $_SESSION['user']['id'] ?? 0;
+$stmtEnt = $pdo->prepare("SELECT equipo_id FROM entrenadores WHERE usuario_id = :id LIMIT 1");
+$stmtEnt->execute([':id' => $usuario_id]);
+$entrenadorData = $stmtEnt->fetch(PDO::FETCH_ASSOC);
+$mi_equipo_id = (int)($entrenadorData['equipo_id'] ?? 0);
+
+// ── Partidos: totales, victorias, empates, derrotas (solo del equipo del entrenador) ──
 $sqlPartidos = "
     SELECT COUNT(*) AS total,
            SUM(CASE
-               WHEN p.equipo_local_id IN (SELECT id FROM equipos WHERE equipo_id = :club_id)
+               WHEN p.equipo_local_id = :equipo_id
                     AND CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED)
                       > CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED) THEN 1
-               WHEN p.equipo_visitante_id IN (SELECT id FROM equipos WHERE equipo_id = :club_id2)
+               WHEN p.equipo_visitante_id = :equipo_id2
                     AND CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED)
                       > CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED) THEN 1
                ELSE 0 END) AS victorias,
            SUM(CASE WHEN SUBSTRING_INDEX(p.resultado,'-',1) = SUBSTRING_INDEX(p.resultado,'-',-1) THEN 1 ELSE 0 END) AS empates,
-           SUM(CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED)) AS goles_local_total,
-           SUM(CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED)) AS goles_visitante_total
+           SUM(CASE WHEN p.equipo_local_id = :equipo_id3 THEN CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED)
+                    ELSE CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED) END) AS goles_favor,
+           SUM(CASE WHEN p.equipo_local_id = :equipo_id4 THEN CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED)
+                    ELSE CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED) END) AS goles_contra
     FROM partidos p
     WHERE p.resultado IS NOT NULL AND p.resultado != ''
-      AND (p.equipo_local_id IN (SELECT id FROM equipos WHERE equipo_id = :club_id3)
-        OR p.equipo_visitante_id IN (SELECT id FROM equipos WHERE equipo_id = :club_id4))";
+      AND (p.equipo_local_id = :equipo_id5 OR p.equipo_visitante_id = :equipo_id6)";
 
 $stmtP = $pdo->prepare($sqlPartidos);
 $stmtP->execute([
-    ':club_id' => $club_id, ':club_id2' => $club_id,
-    ':club_id3' => $club_id, ':club_id4' => $club_id
+    ':equipo_id'  => $mi_equipo_id, ':equipo_id2' => $mi_equipo_id,
+    ':equipo_id3' => $mi_equipo_id, ':equipo_id4' => $mi_equipo_id,
+    ':equipo_id5' => $mi_equipo_id, ':equipo_id6' => $mi_equipo_id,
 ]);
 $statsPartidos = $stmtP->fetch(PDO::FETCH_ASSOC);
 
@@ -35,17 +44,17 @@ $empates   = $total > 0 ? $total - $victorias - max(0, $total - $victorias - (in
 $empates   = (int)($statsPartidos['empates'] ?? 0);
 $derrotas  = $total - $victorias - $empates;
 $pct_victorias = $total > 0 ? round($victorias / $total * 100) : 0;
-$goles_favor   = (int)($statsPartidos['goles_local_total'] ?? 0);
-$goles_contra  = (int)($statsPartidos['goles_visitante_total'] ?? 0);
+$goles_favor   = (int)($statsPartidos['goles_favor'] ?? 0);
+$goles_contra  = (int)($statsPartidos['goles_contra'] ?? 0);
 $diferencia_goles = $goles_favor - $goles_contra;
 
 // ── Asistencia media a entrenamientos ────────────────────────────────────────
 $sqlAsist = "
-    SELECT ROUND(AVG(e.num_asistentes), 1) AS media
+    SELECT ROUND(SUM(e.num_asistentes) / COUNT(*), 1) AS media
     FROM entrenamientos e
-    WHERE e.club_id = :club_id AND e.num_asistentes > 0";
+    WHERE e.equipo_id = :equipo_id";
 $stmtA = $pdo->prepare($sqlAsist);
-$stmtA->execute([':club_id' => $club_id]);
+$stmtA->execute([':equipo_id' => $mi_equipo_id]);
 $asistencia_media = $stmtA->fetchColumn() ?? 'N/A';
 
 // ── Rendimiento mensual (últimos 6 meses) ────────────────────────────────────
@@ -63,22 +72,20 @@ for ($i = 5; $i >= 0; $i--) {
     $sqlMes = "
         SELECT
             SUM(CASE
-                WHEN eq_local.equipo_id = :club AND
+                WHEN p.equipo_local_id = :eq1 AND
                      CAST(SUBSTRING_INDEX(resultado,'-',1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(resultado,'-',-1) AS UNSIGNED) THEN 1
-                WHEN eq_vis.equipo_id = :club2 AND
+                WHEN p.equipo_visitante_id = :eq2 AND
                      CAST(SUBSTRING_INDEX(resultado,'-',-1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(resultado,'-',1) AS UNSIGNED) THEN 1
                 ELSE 0 END) AS v,
             SUM(CASE WHEN SUBSTRING_INDEX(resultado,'-',1) = SUBSTRING_INDEX(resultado,'-',-1) THEN 1 ELSE 0 END) AS e,
             COUNT(*) AS t
         FROM partidos p
-        LEFT JOIN equipos eq_local ON p.equipo_local_id = eq_local.id
-        LEFT JOIN equipos eq_vis   ON p.equipo_visitante_id = eq_vis.id
         WHERE MONTH(p.fecha) = :mes AND YEAR(p.fecha) = :anio
           AND p.resultado IS NOT NULL AND p.resultado != ''
-          AND (eq_local.equipo_id = :club3 OR eq_vis.equipo_id = :club4)";
+          AND (p.equipo_local_id = :eq3 OR p.equipo_visitante_id = :eq4)";
 
     $s = $pdo->prepare($sqlMes);
-    $s->execute([':club'=>$club_id,':club2'=>$club_id,':club3'=>$club_id,':club4'=>$club_id,':mes'=>$mes,':anio'=>$anio]);
+    $s->execute([':eq1'=>$mi_equipo_id,':eq2'=>$mi_equipo_id,':eq3'=>$mi_equipo_id,':eq4'=>$mi_equipo_id,':mes'=>$mes,':anio'=>$anio]);
     $r = $s->fetch(PDO::FETCH_ASSOC);
     $v = (int)($r['v'] ?? 0);
     $e = (int)($r['e'] ?? 0);
@@ -99,16 +106,16 @@ for ($i = 5; $i >= 0; $i--) {
 
     $sqlG = "
         SELECT
-            SUM(CAST(SUBSTRING_INDEX(resultado,'-',1)  AS UNSIGNED)) AS gf,
-            SUM(CAST(SUBSTRING_INDEX(resultado,'-',-1) AS UNSIGNED)) AS gc
+            SUM(CASE WHEN p.equipo_local_id = :eq1 THEN CAST(SUBSTRING_INDEX(resultado,'-',1) AS UNSIGNED)
+                     ELSE CAST(SUBSTRING_INDEX(resultado,'-',-1) AS UNSIGNED) END) AS gf,
+            SUM(CASE WHEN p.equipo_local_id = :eq2 THEN CAST(SUBSTRING_INDEX(resultado,'-',-1) AS UNSIGNED)
+                     ELSE CAST(SUBSTRING_INDEX(resultado,'-',1) AS UNSIGNED) END) AS gc
         FROM partidos p
-        LEFT JOIN equipos eq_local ON p.equipo_local_id = eq_local.id
-        LEFT JOIN equipos eq_vis   ON p.equipo_visitante_id = eq_vis.id
         WHERE MONTH(p.fecha) = :mes AND YEAR(p.fecha) = :anio
           AND p.resultado IS NOT NULL AND p.resultado != ''
-          AND (eq_local.equipo_id = :club OR eq_vis.equipo_id = :club2)";
+          AND (p.equipo_local_id = :eq3 OR p.equipo_visitante_id = :eq4)";
     $sg = $pdo->prepare($sqlG);
-    $sg->execute([':club'=>$club_id,':club2'=>$club_id,':mes'=>$mes,':anio'=>$anio]);
+    $sg->execute([':eq1'=>$mi_equipo_id,':eq2'=>$mi_equipo_id,':eq3'=>$mi_equipo_id,':eq4'=>$mi_equipo_id,':mes'=>$mes,':anio'=>$anio]);
     $rg = $sg->fetch(PDO::FETCH_ASSOC);
     $data_goles_favor[]  = (int)($rg['gf'] ?? 0);
     $data_goles_contra[] = (int)($rg['gc'] ?? 0);
@@ -121,13 +128,12 @@ $sqlGoleadores = "
            SUM(ej.asistencias) AS total_asistencias
     FROM estadisticas_jugador ej
     JOIN jugadores j ON ej.jugador_id = j.id
-    JOIN equipos eq ON j.equipo_id = eq.id
-    WHERE eq.equipo_id = :club_id
+    WHERE j.equipo_id = :equipo_id
     GROUP BY j.id, j.nombre, j.posicion
     ORDER BY total_goles DESC
     LIMIT 5";
 $stmtG = $pdo->prepare($sqlGoleadores);
-$stmtG->execute([':club_id' => $club_id]);
+$stmtG->execute([':equipo_id' => $mi_equipo_id]);
 $goleadores = $stmtG->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>

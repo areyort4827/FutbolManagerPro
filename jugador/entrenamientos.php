@@ -237,21 +237,15 @@ $pct_asistencia = $totalEntrenamientos > 0 ? round($totalAsistidos / $totalEntre
                 <?php foreach ($entrenamientos as $e): ?>
                 <?php
                     $claseT = 'tactica';
-                    $icono  = 'fa-clipboard-list';
-                    if (str_contains($e['titulo'], 'técnica'))     { $claseT = 'tecnica';    $icono = 'fa-futbol'; }
-                    if (str_contains($e['titulo'], 'pre-partido')) { $claseT = 'pre-partido'; $icono = 'fa-flag-checkered'; }
-                    if (str_contains($e['titulo'], 'físico'))      { $claseT = 'fisico';      $icono = 'fa-dumbbell'; }
+                    if (str_contains($e['titulo'], 'técnica'))     $claseT = 'tecnica';
+                    if (str_contains($e['titulo'], 'pre-partido')) $claseT = 'pre-partido';
+                    if (str_contains($e['titulo'], 'físico'))      $claseT = 'fisico';
                     $esProximo = !empty($e['fecha']) && $e['fecha'] >= $hoy;
                 ?>
                 <tr>
                     <td><?= date('d/m/Y', strtotime($e['fecha'])) ?></td>
                     <td><?= date('H:i', strtotime($e['hora'])) ?>h</td>
-                    <td>
-                        <span class="badge-titulo <?= $claseT ?>">
-                            <i class="fa-solid <?= $icono ?>"></i>
-                            <?= htmlspecialchars($e['titulo']) ?>
-                        </span>
-                    </td>
+                    <td><span class="badge-titulo <?= $claseT ?>"><?= htmlspecialchars($e['titulo']) ?></span></td>
                     <td><?= htmlspecialchars($e['lugar'] ?? 'â€”') ?></td>
                     <td><?= $e['duracion'] > 0 ? $e['duracion'] . ' min' : 'â€”' ?></td>
                     <td>

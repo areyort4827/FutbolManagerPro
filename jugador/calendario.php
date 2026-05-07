@@ -403,30 +403,16 @@ foreach ($partidosDelMes as $fecha => $parts) {
 
     <div class="calendar-main">
         <div class="calendar-box">
-             <div class="calendar-header">
+            <div class="calendar-header">
                 <?php
-                $mesAnterior = $mes - 1;
-                $anioAnterior = $anio;
-                if ($mesAnterior < 1) {
-                    $mesAnterior = 12;
-                    $anioAnterior = $anio - 1;
-                }
-
-                $mesSiguiente = $mes + 1;
-                $anioSiguiente = $anio;
-                if ($mesSiguiente > 12) {
-                    $mesSiguiente = 1;
-                    $anioSiguiente = $anio + 1;
-                }
+                $mA = $mes-1; $aA = $anio;
+                if ($mA<1){$mA=12;$aA--;}
+                $mS = $mes+1; $aS = $anio;
+                if ($mS>12){$mS=1;$aS++;}
                 ?>
-
-                <a href="menu.php?pagina=calendario&mes=<?= $mesAnterior ?>&anio=<?= $anioAnterior ?>" 
-                   class="btn-nav">&lt;</a>
-
-                <h2><?= date("F Y", $primerDia) ?></h2>
-
-                <a href="menu.php?pagina=calendario&mes=<?= $mesSiguiente ?>&anio=<?= $anioSiguiente ?>" 
-                   class="btn-nav">&gt;</a>
+                <a href="menu.php?pagina=calendario&mes=<?= $mA ?>&anio=<?= $aA ?>" class="btn-nav">&lt;</a>
+                <h2><?= ucfirst(strftime('%B %Y', $primerDia)) ?></h2>
+                <a href="menu.php?pagina=calendario&mes=<?= $mS ?>&anio=<?= $aS ?>" class="btn-nav">&gt;</a>
             </div>
 
             <div class="calendar-grid">

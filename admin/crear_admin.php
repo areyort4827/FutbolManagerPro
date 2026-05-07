@@ -213,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_admin_submit'])
 
         <form method="POST" action="">
             <input type="hidden" name="crear_admin_submit" value="1">
+            <input type="hidden" name="pagina" value="crear_admin">
             <div class="field">
                 <label>Nombre</label>
                 <input type="text" name="nombre" placeholder="Ej: Admin Secundario" required>

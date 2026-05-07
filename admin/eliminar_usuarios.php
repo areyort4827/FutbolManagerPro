@@ -44,6 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_usuario_subm
                     $stmtEnt->execute([':id' => $usuarioId]);
                 }
 
+                // Si es jugador, eliminarlo completamente de la base de datos
+                if (($info['rol'] ?? '') === 'jugador') {
+                    // Primero borrar estadísticas y goles relacionados
+                    $stmtJugId = $pdo->prepare('SELECT id FROM jugadores WHERE usuario_id = :id');
+                    $stmtJugId->execute([':id' => $usuarioId]);
+                    $jugadorId = $stmtJugId->fetchColumn();
+                    if ($jugadorId) {
+                        $pdo->prepare('DELETE FROM estadisticas_jugador WHERE jugador_id = :jid')->execute([':jid' => $jugadorId]);
+                        $pdo->prepare('DELETE FROM goles_partido WHERE jugador_id = :jid')->execute([':jid' => $jugadorId]);
+                        $pdo->prepare('DELETE FROM entrenamiento_asistencia WHERE jugador_id = :jid')->execute([':jid' => $jugadorId]);
+                        $pdo->prepare('DELETE FROM jugadores WHERE id = :jid')->execute([':jid' => $jugadorId]);
+                    }
+                }
+
                 $stmtDel = $pdo->prepare('DELETE FROM usuarios WHERE id = :id LIMIT 1');
                 $stmtDel->execute([':id' => $usuarioId]);
 

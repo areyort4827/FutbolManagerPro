@@ -5,6 +5,7 @@ require_once '../config/auth.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
     $_SESSION['paginaActual'] = 'jugadores';
 }
+
 // Navegación por query param (para calendario con mes/año)
 if (isset($_GET['pagina'])) {
     $_SESSION['paginaActual'] = $_GET['pagina'];

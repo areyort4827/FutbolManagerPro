@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-04-2026 a las 14:03:40
+-- Tiempo de generación: 06-05-2026 a las 15:11:59
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -96,8 +96,7 @@ INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`,
 (9, 3, 'Sesión táctica', 'Contragolpe explosivo', '2026-04-22', '00:00:00', 0, 5, NULL, 11),
 (11, 4, 'Sesión táctica', 'Salida de balón', '2026-04-21', '00:00:00', 0, 0, NULL, 14),
 (12, 4, 'Sesión táctica', 'Resistencia física', '2026-04-22', '00:00:00', 0, 0, NULL, 14),
-(14, 1, 'Sesión de físico', 'Preparacion', '2026-04-12', '17:55:00', 110, 0, 'Écija', 5),
-(15, 1, 'Sesión de físico', 'jajaja', '2026-04-20', '23:00:00', 200, 2, 'La Campana', 1),
+(15, 1, 'Sesión de físico', 'jajaja', '2026-05-12', '23:00:00', 200, 2, 'La Campana', 1),
 (18, 1, 'Sesión técnica', '', '2026-04-30', '10:48:00', 30, 0, 'Pabellon alcarrachela', 1);
 
 -- --------------------------------------------------------
@@ -174,6 +173,19 @@ CREATE TABLE `estadisticas_jugador` (
   `tarjetas_rojas` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `estadisticas_jugador`
+--
+
+INSERT INTO `estadisticas_jugador` (`id`, `jugador_id`, `partido_id`, `goles`, `asistencias`, `minutos_jugados`, `tarjetas_amarillas`, `tarjetas_rojas`) VALUES
+(16, 28, 83, 2, 3, 0, 0, 0),
+(17, 1, 83, 1, 0, 0, 0, 0),
+(45, 1, 84, 1, 0, 0, 0, 0),
+(46, 28, 87, 1, 3, 0, 0, 0),
+(47, 20, 87, 2, 0, 0, 0, 0),
+(48, 26, 89, 2, 0, 0, 0, 0),
+(50, 26, 90, 2, 1, 0, 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -192,12 +204,13 @@ CREATE TABLE `goles_partido` (
 --
 
 INSERT INTO `goles_partido` (`id`, `partido_id`, `jugador_id`, `cantidad_goles`) VALUES
-(9, 57, 1, 2),
-(12, 61, 1, 2),
-(13, 61, 3, 1),
-(14, 62, 25, 2),
-(15, 63, 25, 1),
-(16, 63, 26, 1);
+(31, 83, 28, 2),
+(32, 83, 1, 1),
+(51, 84, 1, 1),
+(52, 87, 28, 1),
+(53, 87, 20, 2),
+(54, 89, 26, 2),
+(56, 90, 26, 2);
 
 -- --------------------------------------------------------
 
@@ -213,33 +226,36 @@ CREATE TABLE `jugadores` (
   `posicion` enum('delantero','mediocentro','defensa','portero') DEFAULT NULL,
   `equipo_id` int(11) DEFAULT NULL,
   `eliminado` tinyint(1) NOT NULL DEFAULT 0,
-  `equipo_anterior_id` int(11) DEFAULT NULL
+  `equipo_anterior_id` int(11) DEFAULT NULL,
+  `usuario_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `jugadores`
 --
 
-INSERT INTO `jugadores` (`id`, `nombre`, `fecha_nacimiento`, `edad`, `posicion`, `equipo_id`, `eliminado`, `equipo_anterior_id`) VALUES
-(1, 'Lamine Yamal', '2008-04-27', 18, 'delantero', 1, 0, NULL),
-(2, 'Robert Lewandowski', '1989-04-27', 37, 'delantero', NULL, 1, 1),
-(3, 'Pedri', '2002-06-13', 23, 'mediocentro', 1, 0, NULL),
-(4, 'Vinícius Júnior', '2001-04-27', 25, 'delantero', 6, 0, NULL),
-(6, 'Fede Valverde', '2001-07-28', 24, 'mediocentro', 6, 0, NULL),
-(7, 'Antoine Griezmann', '1991-04-27', 35, 'delantero', 11, 0, NULL),
-(10, 'Pepelu', '1999-04-27', 27, 'delantero', NULL, 1, 14),
-(11, 'Hugo Duro', '2000-04-27', 26, 'delantero', NULL, 1, 14),
-(12, 'José Gayà', '1996-04-27', 30, 'mediocentro', NULL, 1, 14),
-(13, 'Diego Kochen', '2006-04-27', 20, 'portero', NULL, 1, 9),
-(15, 'Mbappe', '1999-04-27', 27, 'delantero', 6, 0, NULL),
-(19, 'Antonio Reyes', '2010-07-14', NULL, 'delantero', NULL, 1, 3),
-(20, 'Raphina', '2000-07-14', NULL, 'delantero', 1, 0, NULL),
-(21, 'Álvaro Rodríguez', '2007-06-14', NULL, 'delantero', 1, 0, NULL),
-(22, 'Antonio Reyes', '2003-07-14', 22, 'delantero', NULL, 1, 2),
-(23, 'Antonio Reyes', '2003-07-29', NULL, 'defensa', NULL, 1, 1),
-(24, 'Raphina', '2006-07-13', 19, 'delantero', 6, 0, NULL),
-(25, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', 2, 0, NULL),
-(26, 'Cristiano Ronaldo', '2026-04-30', NULL, 'portero', 2, 0, NULL);
+INSERT INTO `jugadores` (`id`, `nombre`, `fecha_nacimiento`, `edad`, `posicion`, `equipo_id`, `eliminado`, `equipo_anterior_id`, `usuario_id`) VALUES
+(1, 'Lamine Yamal', '2008-04-27', 18, 'delantero', 1, 0, NULL, NULL),
+(2, 'Robert Lewandowski', '1989-04-27', 37, 'delantero', NULL, 1, 1, NULL),
+(3, 'Pedri', '2002-06-13', 23, 'mediocentro', 1, 0, NULL, NULL),
+(4, 'Vinícius Júnior', '2001-04-27', 25, 'delantero', 6, 0, NULL, NULL),
+(6, 'Fede Valverde', '2001-07-28', 24, 'mediocentro', 6, 0, NULL, NULL),
+(7, 'Antoine Griezmann', '1991-04-27', 35, 'delantero', 11, 0, NULL, NULL),
+(10, 'Pepelu', '1999-04-27', 27, 'delantero', NULL, 1, 14, NULL),
+(11, 'Hugo Duro', '2000-04-27', 26, 'delantero', NULL, 1, 14, NULL),
+(12, 'José Gayà', '1996-04-27', 30, 'mediocentro', NULL, 1, 14, NULL),
+(13, 'Diego Kochen', '2006-04-27', 20, 'portero', NULL, 1, 9, NULL),
+(15, 'Mbappe', '1999-04-27', 27, 'delantero', 6, 0, NULL, NULL),
+(19, 'Antonio Reyes', '2010-07-14', NULL, 'delantero', NULL, 1, 3, NULL),
+(20, 'Raphina', '2000-07-14', NULL, 'delantero', 1, 0, NULL, NULL),
+(21, 'Álvaro Rodríguez', '2007-06-14', NULL, 'delantero', 1, 0, NULL, NULL),
+(22, 'Antonio Reyes', '2003-07-14', 22, 'delantero', NULL, 1, 2, NULL),
+(23, 'Antonio Reyes', '2003-07-29', NULL, 'defensa', NULL, 1, 1, NULL),
+(24, 'Raphina', '2006-07-13', 19, 'delantero', 6, 0, NULL, NULL),
+(25, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', NULL, 1, 2, NULL),
+(26, 'Cristiano Ronaldo', '2026-04-30', NULL, 'portero', 2, 0, NULL, NULL),
+(27, 'Carlos Pavon', '1986-06-19', NULL, 'delantero', 1, 0, NULL, NULL),
+(28, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', 1, 0, NULL, 13);
 
 -- --------------------------------------------------------
 
@@ -264,11 +280,13 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora`, `club_id`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
-(52, NULL, NULL, '2026-05-10', NULL, NULL, NULL, 1, 6),
-(57, NULL, NULL, '2026-03-30', NULL, NULL, '2-2', 1, 15),
-(61, NULL, NULL, '2026-03-30', NULL, NULL, '3-1', 1, 8),
-(62, NULL, NULL, '2026-03-30', NULL, NULL, '2-2', 1, 2),
-(63, NULL, NULL, '2026-04-18', NULL, NULL, '2-2', 1, 2);
+(83, NULL, NULL, '2026-04-27', NULL, NULL, '3-0', 1, 6),
+(84, NULL, NULL, '2026-05-06', NULL, NULL, '1-1', 9, 1),
+(85, NULL, NULL, '2026-05-09', NULL, NULL, NULL, 1, 15),
+(87, NULL, NULL, '2026-05-06', NULL, NULL, '3-0', 1, 6),
+(88, NULL, NULL, '2026-05-07', NULL, NULL, NULL, 2, 14),
+(89, NULL, NULL, '2026-05-06', NULL, NULL, '2-2', 2, 11),
+(90, NULL, NULL, '2026-05-06', NULL, NULL, '2-0', 2, 6);
 
 -- --------------------------------------------------------
 
@@ -294,7 +312,10 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) V
 (2, 'Admin', 'admin@gmail.com', '$2y$10$5np9QVsD6B8x/1at6tiOXu.rJ6DCVDprAFMQRZsmEcnRme2LoJD1y', 'admin', NULL),
 (3, 'Barcelona', 'barcelona@gmail.com', '$2y$10$bUJ3.Cm9DqdgZ6vhS3EBs.9waJUw2/ho97AiEKCog2bJrdN97B/bS', 'equipo', 1),
 (4, 'Carlo Ancelotti', 'madrid@gmail.com', '$2y$10$HSIQ0u6FnvNKLCudzEWUx.ffkZfderZfyIic6fGcyBz3w9IH3tNcq', 'entrenador', 2),
-(5, 'Real Madrid CF', 'madrid2@gmail.com', '$2y$10$zlb4yXY9nX15d0LwEgI5Y.vjZ2wapQRHKCewRpK7TtSVzIj2NLnyy', 'equipo', 2);
+(5, 'Real Madrid CF', 'madrid2@gmail.com', '$2y$10$zlb4yXY9nX15d0LwEgI5Y.vjZ2wapQRHKCewRpK7TtSVzIj2NLnyy', 'equipo', 2),
+(7, 'Jeferson', 'jeferson@gmail.com', '$2y$10$GrVQ5BX7IB8zWQu8kcJCBe.SqKwYveQY6r5igA3mu8DYOTSt/pvyu', 'jugador', 1),
+(8, 'Barcelona benjamin', 'barcelonabenjamin@gmail.com', '$2y$10$Fw6B9QLCc5pkM7P2FPov0OX9xDnQk2FweRtSWgyKzY8Cm54XEdO.e', 'equipo', 1),
+(13, 'Emerson Cruz', 'emersoncruz712@gmail.com', '$2y$10$lohUgeA9abgq3Owi0yRIm.wY00qSDaUS3jGuZ.lxB0Ba3OcAsl4hi', 'jugador', 1);
 
 --
 -- Índices para tablas volcadas
@@ -358,7 +379,8 @@ ALTER TABLE `goles_partido`
 --
 ALTER TABLE `jugadores`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `jugadores_id_cantera` (`equipo_id`);
+  ADD KEY `jugadores_id_cantera` (`equipo_id`),
+  ADD KEY `fk_jugador_usuario` (`usuario_id`);
 
 --
 -- Indices de la tabla `partidos`
@@ -412,31 +434,31 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `estadisticas_jugador`
 --
 ALTER TABLE `estadisticas_jugador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT de la tabla `goles_partido`
 --
 ALTER TABLE `goles_partido`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Restricciones para tablas volcadas
@@ -487,6 +509,7 @@ ALTER TABLE `goles_partido`
 -- Filtros para la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
+  ADD CONSTRAINT `fk_jugador_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `jugadores_id_cantera` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
 
 --

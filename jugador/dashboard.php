@@ -181,9 +181,11 @@ if ($mi_equipo_id > 0) {
     border-radius: 14px;
     padding: 22px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+    border-left: 5px solid #16a34a
 }
 
 .evento-card.partido {
+    border-left-color: #2563eb
 }
 
 .evento-card .ev-badge {

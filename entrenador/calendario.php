@@ -99,8 +99,10 @@ $stmtPP = $pdo->prepare($sqlProxPartidos);
 $stmtPP->execute(['inicio' => $fechaInicio, 'fin' => $fechaFin, 'club_id' => $club_id, 'club_id2' => $club_id]);
 $proximosPartidos = $stmtPP->fetchAll(PDO::FETCH_ASSOC);
 
-// Contar partidos del mes para tarjeta estadística
+// Contar partidos y entrenamientos del mes para tarjetas estadísticas
 $totalPartidos = count(array_merge(...array_values($partidosDelMes ?: [[]])));
+$totalEntrenamientosMes = count(array_merge(...array_values($eventosDelMes ?: [[]])));
+$totalEventosMes = $totalPartidos + $totalEntrenamientosMes;
 
 $jsEventos = [];
 foreach ($eventosDelMes as $fecha => $eventos) {
@@ -136,7 +138,7 @@ foreach ($partidosDelMes as $fecha => $partidos) {
                 <span class="card-title">Eventos Totales</span>
                 <i class="fa-solid fa-calendar-check"></i>
             </div>
-            <div class="card-number"><?= $totalEventos ?></div>
+            <div class="card-number"><?= $totalEventosMes ?></div>
             <div class="card-subtitle">Este mes</div>
         </div>
 
@@ -145,8 +147,8 @@ foreach ($partidosDelMes as $fecha => $partidos) {
                 <span class="card-title">Entrenamientos</span>
                 <i class="fa-solid fa-dumbbell"></i>
             </div>
-            <div class="card-number"><?= $totalEntrenamientos ?></div>
-            <div class="card-subtitle">Programados</div>
+            <div class="card-number"><?= $totalEntrenamientosMes ?></div>
+            <div class="card-subtitle">Este mes</div>
         </div>
 
         <div class="stat-card">
