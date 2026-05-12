@@ -97,12 +97,12 @@ function abrirModalStats(partidoId, nombre, resultado, miEquipoId, localId, visi
     if (visitanteId !== null) {
         document.getElementById('formStats').dataset.localId = localId;
         document.getElementById('formStats').dataset.visitanteId = visitanteId;
-    } 
+    }
 
     document.getElementById('formStats').dataset.rol = (miEquipoId == localId) ? 'local' : 'visitante';
 
     const equipoLocal = localId;
-    const equipoVisitante = (visitanteId !== null) ? visitanteId : null; 
+    const equipoVisitante = (visitanteId !== null) ? visitanteId : null;
 
     document.querySelectorAll('.fila-jugador-stats').forEach(fila => {
         const idEq = fila.dataset.equipoId;
@@ -129,7 +129,9 @@ function abrirModalStats(partidoId, nombre, resultado, miEquipoId, localId, visi
 
     /* detectar si estamos en equipos o entrenador */
     let esVistaEquipos = window.location.pathname.includes('/equipo/');
-    let parametro = '&equipo_id=' + miEquipoId;
+    let parametro = esVistaEquipos
+        ? '&club_id=' + miEquipoId
+        : '&equipo_id=' + miEquipoId;
 
     fetch('../get_estadisticas.php?partido_id=' + partidoId + parametro)
         .then(r => r.json())
@@ -228,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (formStats) {
         formStats.onsubmit = function (e) {
             let resultado = document.getElementById("stats-resultado").value;
-            
+
             let miId = formStats.dataset.miIdActual;
             let localId = formStats.dataset.localIdActual;
 
@@ -239,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             let partes = resultado.split('-');
-            
+
             let esperado = (miId == localId) ? parseInt(partes[0]) : parseInt(partes[1]);
 
             let totalGoles = 0;
@@ -267,6 +269,44 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (totalAsistencias > totalGoles) {
                 alert("Error: Las asistencias no pueden superar a los goles.");
+                e.preventDefault();
+                return false;
+            }
+
+            let errorAsistenciaPropia = false;
+            let nombreJugadorError = "";
+
+            formStats.querySelectorAll('.fila-jugador-stats').forEach(fila => {
+                if (fila.style.display !== 'none') {
+
+                    let inputGol = fila.querySelector('input[name*="[goles]"]');
+                    let inputAsist = fila.querySelector('input[name*="[asistencias]"]');
+
+                    if (inputGol && inputAsist) {
+
+                        let golesJugador = parseInt(inputGol.value || 0);
+                        let asistenciasJugador = parseInt(inputAsist.value || 0);
+
+                        let nombreJugador = fila.querySelector('.stats-jugador-nombre')
+                            .innerText
+                            .split('\n')[0];
+
+                        let maxAsistenciasPermitidas = esperado - golesJugador;
+
+                        if (asistenciasJugador > maxAsistenciasPermitidas) {
+                            errorAsistenciaPropia = true;
+                            nombreJugadorError = nombreJugador;
+                        }
+                    }
+                }
+            });
+
+            if (errorAsistenciaPropia) {
+                alert(
+                    "Error: " +
+                    nombreJugadorError +
+                    " no puede tener tantas asistencias porque no puede asistirse a sí mismo."
+                );
                 e.preventDefault();
                 return false;
             }

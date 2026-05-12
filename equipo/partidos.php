@@ -38,14 +38,12 @@ if (isset($_POST['guardar'])) {
     $fecha = $_POST['fecha'] ?? '';
     $resultado = null;
 
-    /* si la fecha ya pasó → permitir resultado */
+    /* si la fecha ya pasó → NO pedir resultado al añadir (se añade sin resultado) */
     if (!empty($fecha) && $fecha < date('Y-m-d')) {
-        if (empty($_POST['resultado'])) {
-            $error_partido = "Debes ingresar el resultado del partido.";
-            $abrir_modal = true;
-        } else {
+        if (!empty($_POST['resultado'])) {
             $resultado = trim($_POST['resultado']);
         }
+        // Si no hay resultado, se guarda sin él y aparece en historial con botón "Añadir estadísticas"
     }
 
     if ($tipo == "local") {
@@ -73,7 +71,7 @@ if (isset($_POST['guardar'])) {
                 }
             }
 
-            if ($total_goleadores != $mis_goles) {
+            if (isset($_POST['jugador_id']) && $total_goleadores != $mis_goles) {
                 $error_partido = "Error: Tu equipo marcó $mis_goles goles, pero asignaste $total_goleadores. Deben coincidir exactamente.";
                 $abrir_modal = true;
             }
@@ -479,13 +477,6 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
                         <button
                             type="submit"
-                            name="actualizar"
-                            class="btn-guardar">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                        </button>
-
-                        <button
-                            type="submit"
                             name="eliminar"
                             class="btn-eliminar"
                             onclick="return confirm('¿Eliminar este partido?')">
@@ -611,49 +602,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                     required>
             </div>
 
-            <div class="form-group">
-                <label>Resultado</label>
-
-                <input
-                    type="text"
-                    name="resultado"
-                    id="resultado_partido"
-                    placeholder="Se añadirá después del partido"
-                    readonly>
-            </div>
-
-            <!-- ===== GOLEADORES MÚLTIPLES ===== -->
-            <div id="contenedor_goleadores" style="display: none;">
-                <div class="goleador-item">
-                    <div class="form-group">
-                        <label>Jugador que marcó</label>
-                        <select name="jugador_id[]" class="select-jugador">
-                            <option value="">Seleccionar jugador</option>
-                            <?php
-                            $stmt_jug = $pdo->prepare("SELECT j.id, j.nombre, j.equipo_id FROM jugadores j INNER JOIN equipos e ON j.equipo_id = e.id WHERE e.equipo_id = :club_id");
-                            $stmt_jug->execute([':club_id' => $club_id]);
-                            foreach ($stmt_jug->fetchAll() as $jug): ?>
-                                <option value="<?= $jug['id'] ?>" data-equipo="<?= $jug['equipo_id'] ?>" class="opcion-jugador">
-                                    <?= htmlspecialchars($jug['nombre']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Cantidad de goles</label>
-                        <input type="number" name="cantidad_goles[]" min="1" value="1">
-                    </div>
-                </div>
-            </div>
-
-            <button
-                id="btn_agregar_goleador"
-                type="button"
-                class="boton-add"
-                style="display: none;"
-                onclick="agregarGoleador()">
-                + Añadir otro goleador
-            </button>
+            <!-- Resultado y goles se añaden desde el botón "Añadir estadísticas" en el historial -->
 
             <button
                 type="submit"

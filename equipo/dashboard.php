@@ -22,10 +22,29 @@ $stEnt = $pdo->prepare("SELECT COUNT(*) FROM entrenamientos WHERE club_id = :clu
 $stEnt->execute([':club_id' => $club_id]);
 $totalEntrenamientos = (int)$stEnt->fetchColumn();
 
-// Partidos programados del club (si `partidos.club_id` está relleno)
-$stPart = $pdo->prepare("SELECT COUNT(*) FROM partidos WHERE club_id = :club_id AND fecha >= CURDATE()");
-$stPart->execute([':club_id' => $club_id]);
+// Partidos próximos (futuros) del club, enlazados via equipos
+$stPart = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM partidos p
+    LEFT JOIN equipos el ON p.equipo_local_id = el.id
+    LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
+    WHERE p.fecha >= CURDATE()
+      AND (el.equipo_id = :club_id OR ev.equipo_id = :club_id2)
+");
+$stPart->execute([':club_id' => $club_id, ':club_id2' => $club_id]);
 $totalPartidos = (int)$stPart->fetchColumn();
+
+// Total partidos jugados (histórico)
+$stPartJug = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM partidos p
+    LEFT JOIN equipos el ON p.equipo_local_id = el.id
+    LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
+    WHERE p.resultado IS NOT NULL AND p.resultado != ''
+      AND (el.equipo_id = :club_id OR ev.equipo_id = :club_id2)
+");
+$stPartJug->execute([':club_id' => $club_id, ':club_id2' => $club_id]);
+$totalPartidosJugados = (int)$stPartJug->fetchColumn();
 
 // Victorias recientes (últimos 30 días) de equipos del club (según resultado)
 $stVic = $pdo->prepare("
@@ -33,16 +52,15 @@ $stVic = $pdo->prepare("
     FROM partidos p
     LEFT JOIN equipos el ON p.equipo_local_id = el.id
     LEFT JOIN equipos ev ON p.equipo_visitante_id = ev.id
-    WHERE p.club_id = :club_id
-      AND p.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    WHERE p.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
       AND p.resultado IS NOT NULL AND p.resultado != ''
       AND (
-        (el.equipo_id = :club_id2 AND CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED))
+        (el.equipo_id = :club_id AND CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED))
         OR
-        (ev.equipo_id = :club_id3 AND CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED))
+        (ev.equipo_id = :club_id2 AND CAST(SUBSTRING_INDEX(p.resultado,'-',-1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(p.resultado,'-',1) AS UNSIGNED))
       )
 ");
-$stVic->execute([':club_id' => $club_id, ':club_id2' => $club_id, ':club_id3' => $club_id]);
+$stVic->execute([':club_id' => $club_id, ':club_id2' => $club_id]);
 $totalVictorias = (int)$stVic->fetchColumn();
 ?>
 <style>
@@ -99,24 +117,28 @@ $totalVictorias = (int)$stVic->fetchColumn();
         <i class="fa-solid fa-user"></i>
         <h3>Jugadores</h3>
         <p><?= $totalJugadores ?> registrados</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 20%;"></div></div>
+        <?php $barJug = $totalJugadores > 0 ? min(100, round($totalJugadores / max($totalJugadores, 30) * 100)) : 0; ?>
+        <div class="bar-container"><div class="bar-fill" style="width: <?= $barJug ?>%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-futbol"></i>
         <h3>Partidos</h3>
         <p><?= (int)$totalPartidos ?> programados</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
+        <?php $barPart = ($totalPartidos + $totalPartidosJugados) > 0 ? min(100, round(($totalPartidos) / max($totalPartidos + $totalPartidosJugados, 1) * 100)) : 0; ?>
+        <div class="bar-container"><div class="bar-fill" style="width: <?= $barPart ?>%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-dumbbell"></i>
         <h3>Entrenamientos</h3>
         <p><?= $totalEntrenamientos ?> entrenamientos pendientes</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 50%;"></div></div>
+        <?php $barEnt = $totalEntrenamientos > 0 ? min(100, round($totalEntrenamientos / max($totalEntrenamientos, 20) * 100)) : 0; ?>
+        <div class="bar-container"><div class="bar-fill" style="width: <?= $barEnt ?>%;"></div></div>
     </div>
     <div class="box">
         <i class="fa-solid fa-trophy"></i>
         <h3>Victorias</h3>
         <p><?= (int)$totalVictorias ?> recientes</p>
-        <div class="bar-container"><div class="bar-fill" style="width: 70%;"></div></div>
+        <?php $barVic = $totalVictorias > 0 && $totalPartidosJugados > 0 ? min(100, round($totalVictorias / $totalPartidosJugados * 100)) : 0; ?>
+        <div class="bar-container"><div class="bar-fill" style="width: <?= $barVic ?>%;"></div></div>
     </div>
 </div>

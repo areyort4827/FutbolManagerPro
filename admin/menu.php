@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo'])) {
     exit;
 }
 
-$paginaActual = $_SESSION['paginaActual'] ?? ($_GET['pagina'] ?? 'dashboard');
+$paginaActual = $_SESSION['paginaActual'] ?? ($_GET['pagina'] ?? ($_POST['pagina'] ?? 'dashboard'));
 unset($_SESSION['paginaActual']);
 
 if (!isset($_SESSION['user'])) {

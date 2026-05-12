@@ -31,15 +31,12 @@ if (isset($_POST['guardar'])) {
     $fecha = $_POST['fecha'] ?? '';
     $resultado = null;
 
-    /* Si la fecha es futura -> NO resultado */
+    /* Si la fecha ya pasó -> guardar sin resultado (se añade al historial sin estadísticas) */
     if (!empty($fecha) && $fecha < date('Y-m-d')) {
-
-        if (empty($_POST['resultado'])) {
-            $error_partido = "Debes ingresar el resultado del partido.";
-            $abrir_modal = true;
-        } else {
+        if (!empty($_POST['resultado'])) {
             $resultado = trim($_POST['resultado']);
         }
+        // Sin resultado: partido se guarda y aparece en historial con botón "Añadir estadísticas"
     }
 
     /* Definir local y visitante */
@@ -66,8 +63,8 @@ if (isset($_POST['guardar'])) {
         } else {
             $partes = explode('-', $resultado);
 
-            $goles_local = (int)$partes[0];
-            $goles_visitante = (int)$partes[1];
+            $goles_local = (int) $partes[0];
+            $goles_visitante = (int) $partes[1];
 
             /* Si soy local -> uso primer número */
             if ($tipo == "local") {
@@ -82,7 +79,7 @@ if (isset($_POST['guardar'])) {
             if (isset($_POST['cantidad_goles']) && isset($_POST['jugador_id'])) {
                 foreach ($_POST['cantidad_goles'] as $index => $gol) {
                     if (!empty($_POST['jugador_id'][$index])) {
-                        $total_goleadores += (int)$gol;
+                        $total_goleadores += (int) $gol;
                     }
                 }
             }
@@ -130,8 +127,8 @@ if (isset($_POST['guardar'])) {
 
             foreach ($_POST['jugador_id'] as $index => $jugador_id) {
 
-                $jugador_id = (int)$jugador_id;
-                $cantidad_goles = (int)$_POST['cantidad_goles'][$index];
+                $jugador_id = (int) $jugador_id;
+                $cantidad_goles = (int) $_POST['cantidad_goles'][$index];
 
                 if ($jugador_id > 0 && $cantidad_goles > 0) {
 
@@ -256,7 +253,7 @@ $historial = $stmt_historial->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===== GUARDAR ESTADÍSTICAS DE PARTIDO ===== */
 if (isset($_POST['guardar_estadisticas'])) {
-    $partido_id = (int)($_POST['partido_id'] ?? 0);
+    $partido_id = (int) ($_POST['partido_id'] ?? 0);
 
 
     $stmt_fecha = $pdo->prepare("
@@ -294,11 +291,11 @@ if (isset($_POST['guardar_estadisticas'])) {
         $stmt_p = $pdo->prepare("SELECT equipo_local_id FROM partidos WHERE id = ?");
         $stmt_p->execute([$partido_id]);
         $local_id_db = $stmt_p->fetchColumn();
-        $mis_goles_resultado = ($local_id_db == $mi_equipo_id) ? (int)$partes[0] : (int)$partes[1];
+        $mis_goles_resultado = ($local_id_db == $mi_equipo_id) ? (int) $partes[0] : (int) $partes[1];
 
         $suma_goles_jugadores = 0;
         foreach ($_POST['jugadores'] as $stats) {
-            $suma_goles_jugadores += (int)($stats['goles'] ?? 0);
+            $suma_goles_jugadores += (int) ($stats['goles'] ?? 0);
         }
 
         if ($suma_goles_jugadores !== $mis_goles_resultado) {
@@ -326,13 +323,13 @@ if (isset($_POST['guardar_estadisticas'])) {
 
         // Guardar estadísticas por jugador
         $jugadores_post = $_POST['jugadores'] ?? [];
-       foreach ($jugadores_post as $jid => $stats) {
-            $jid = (int)$jid;
-            $goles       = max(0, (int)($stats['goles'] ?? 0));
-            $asistencias = max(0, (int)($stats['asistencias'] ?? 0));
-            $amarillas   = max(0, (int)($stats['amarillas'] ?? 0));
-            $rojas       = max(0, (int)($stats['rojas'] ?? 0));
-            $minutos     = max(0, (int)($stats['minutos'] ?? 0));
+        foreach ($jugadores_post as $jid => $stats) {
+            $jid = (int) $jid;
+            $goles = max(0, (int) ($stats['goles'] ?? 0));
+            $asistencias = max(0, (int) ($stats['asistencias'] ?? 0));
+            $amarillas = max(0, (int) ($stats['amarillas'] ?? 0));
+            $rojas = max(0, (int) ($stats['rojas'] ?? 0));
+            $minutos = max(0, (int) ($stats['minutos'] ?? 0));
 
             if ($goles + $asistencias + $amarillas + $rojas + $minutos > 0) {
                 $pdo->prepare("INSERT INTO estadisticas_jugador (jugador_id, partido_id, goles, asistencias, tarjetas_amarillas, tarjetas_rojas, minutos_jugados)
@@ -365,26 +362,17 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="tabs">
 
-        <button
-            type="button"
-            class="tab active"
-            onclick="mostrarTab('proximos', this)">
+        <button type="button" class="tab active" onclick="mostrarTab('proximos', this)">
             Próximos Partidos
         </button>
 
-        <button
-            type="button"
-            class="tab"
-            onclick="mostrarTab('historial', this)">
+        <button type="button" class="tab" onclick="mostrarTab('historial', this)">
             Historial
         </button>
 
     </div>
 
-    <button
-        type="button"
-        class="boton-add"
-        onclick="abrirModalPartidos()">
+    <button type="button" class="boton-add" onclick="abrirModalPartidos()">
         + Añadir Partido
     </button>
 
@@ -423,30 +411,23 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
 
                         <?php if ($fila['fecha'] <= date('Y-m-d')): ?>
-                            <button
-                                type="button"
-                                class="btn-stats"
-                                onclick="abrirModalStats(
-                <?= $fila['id'] ?>,
-                '<?= htmlspecialchars($fila['local'], ENT_QUOTES) ?> vs <?= htmlspecialchars($fila['visitante'], ENT_QUOTES) ?>',
-                '',
-                <?= $mi_equipo_id ?>,
-                <?= $fila['equipo_local_id'] ?>
-            )">
+                            <button type="button" class="btn-stats" onclick="abrirModalStats(
+                            <?= $fila['id'] ?>,
+                             '<?= htmlspecialchars($fila['local'], ENT_QUOTES) ?> vs <?= htmlspecialchars($fila['visitante'], ENT_QUOTES) ?>',
+                            '<?= htmlspecialchars($fila['resultado'] ?? '', ENT_QUOTES) ?>',
+                            <?= $mi_equipo_id ?>,
+                            <?= $fila['equipo_local_id'] ?>,
+                            <?= $fila['equipo_visitante_id'] ?>
+                        )">
+
                                 <i class="fa-solid fa-pen"></i>
                             </button>
 
                         <?php endif; ?>
                         <form method="POST">
-                            <input
-                                type="hidden"
-                                name="id"
-                                value="<?= $fila['id'] ?>">
+                            <input type="hidden" name="id" value="<?= $fila['id'] ?>">
 
-                            <button
-                                type="submit"
-                                name="eliminar"
-                                class="btn-eliminar"
+                            <button type="submit" name="eliminar" class="btn-eliminar"
                                 onclick="return confirm('¿Eliminar este partido?')">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
@@ -467,10 +448,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- HISTORIAL -->
 
-<div
-    id="historial"
-    class="contenido-tab"
-    style="display:none;">
+<div id="historial" class="contenido-tab" style="display:none;">
 
     <h2>Historial de Partidos</h2>
 
@@ -493,35 +471,16 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                 <div class="resultado">
                     <form method="POST">
 
-                        <input
-                            type="hidden"
-                            name="id"
-                            value="<?= $fila['id'] ?>">
+                        <input type="hidden" name="id" value="<?= $fila['id'] ?>">
 
-                        <input
-                            type="text"
-                            name="resultado"
-                            value="<?= htmlspecialchars($fila['resultado'] ?? '') ?>">
+                        <input type="text" name="resultado" value="<?= htmlspecialchars($fila['resultado'] ?? '') ?>">
 
-                        <button
-                            type="submit"
-                            name="actualizar"
-                            class="btn-guardar">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                        </button>
-
-                        <button
-                            type="submit"
-                            name="eliminar"
-                            class="btn-eliminar"
+                        <button type="submit" name="eliminar" class="btn-eliminar"
                             onclick="return confirm('¿Eliminar este partido?')">
                             <i class="fa-solid fa-trash"></i>
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn-stats"
-                            onclick="abrirModalStats(
+                        <button type="button" class="btn-stats" onclick="abrirModalStats(
                 <?= $fila['id'] ?>,
                 '<?= htmlspecialchars($fila['local'], ENT_QUOTES) ?> vs <?= htmlspecialchars($fila['visitante'], ENT_QUOTES) ?>',
                 '<?= htmlspecialchars($fila['resultado'] ?? '', ENT_QUOTES) ?>',
@@ -555,7 +514,8 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
         </span>
 
         <?php if (!empty($error_partido)): ?>
-            <div class="error-form" style="color: #a94442; background-color: #f2dede; border: 1px solid #ebccd1; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <div class="error-form"
+                style="color: #a94442; background-color: #f2dede; border: 1px solid #ebccd1; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
                 <?= $error_partido ?>
             </div>
         <?php endif; ?>
@@ -569,11 +529,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
             <div class="form-group">
                 <label>Mi equipo juega como</label>
 
-                <select
-                    name="tipo_partido"
-                    id="tipo_partido"
-                    onchange="cambiarTipo()"
-                    required>
+                <select name="tipo_partido" id="tipo_partido" onchange="cambiarTipo()" required>
 
                     <option value="local">Local</option>
                     <option value="visitante">Visitante</option>
@@ -600,17 +556,10 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                 $nombre_mi_equipo = $stmt_nombre->fetchColumn();
                 ?>
 
-                <input
-                    type="text"
-                    id="campo_local"
-                    value="<?= htmlspecialchars($nombre_mi_equipo) ?>"
-                    disabled>
+                <input type="text" id="campo_local" value="<?= htmlspecialchars($nombre_mi_equipo) ?>" disabled>
 
 
-                <input
-                    type="hidden"
-                    name="mi_equipo_id"
-                    value="<?= $mi_equipo_id ?>">
+                <input type="hidden" name="mi_equipo_id" value="<?= $mi_equipo_id ?>">
             </div>
 
             <div class="form-group">
@@ -618,9 +567,7 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                     Equipo visitante (Rival)
                 </label>
 
-                <select
-                    name="rival"
-                    required>
+                <select name="rival" required>
 
                     <option value="">
                         Seleccionar rival
@@ -651,94 +598,12 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
             <div class="form-group">
                 <label>Fecha</label>
 
-                <input
-                    type="date"
-                    name="fecha"
-                    id="fecha_partido"
-                    onchange="validarResultado()"
-                    required>
+                <input type="date" name="fecha" id="fecha_partido" onchange="validarResultado()" required>
             </div>
 
-            <div class="form-group">
-                <label>Resultado</label>
+            <!-- Resultado y goles se añaden desde el botón "Añadir estadísticas" en el historial -->
 
-                <input
-                    type="text"
-                    name="resultado"
-                    id="resultado_partido"
-                    placeholder="Se añadirá después del partido"
-                    readonly>
-            </div>
-
-            <!-- ===== GOLEADORES MÚLTIPLES ===== -->
-
-            <div id="contenedor_goleadores" style="display: none;">
-
-                <div class="goleador-item">
-
-                    <div class="form-group">
-                        <label>Jugador que marcó</label>
-
-                        <select name="jugador_id[]">
-
-                            <option value="">
-                                Seleccionar jugador
-                            </option>
-
-                            <?php
-                            $sql_jugadores = "
-                    SELECT id, nombre
-                    FROM jugadores
-                    WHERE equipo_id = :mi_id
-                    ORDER BY nombre ASC
-                ";
-
-                            $stmt_jugadores = $pdo->prepare($sql_jugadores);
-                            $stmt_jugadores->execute([
-                                ':mi_id' => $mi_equipo_id
-                            ]);
-
-                            foreach ($stmt_jugadores as $jugador) {
-                                echo "
-                        <option value='{$jugador['id']}'>
-                            {$jugador['nombre']}
-                        </option>
-                    ";
-                            }
-                            ?>
-
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Cantidad de goles</label>
-
-                        <input
-                            type="number"
-                            name="cantidad_goles[]"
-                            min="1"
-                            value="1">
-                    </div>
-
-                </div>
-
-            </div>
-
-            <button
-                id="btn_agregar_goleador"
-                type="button"
-                class="boton-add"
-                style="display: none;"
-                onclick="agregarGoleador()">
-
-                + Añadir otro goleador
-
-            </button>
-
-            <button
-                type="submit"
-                name="guardar"
-                class="boton-add">
+            <button type="submit" name="guardar" class="boton-add">
 
                 Guardar Partido
 
@@ -782,7 +647,8 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="stats-resultado-row">
                 <label class="stats-label">Resultado del partido</label>
-                <input type="text" name="resultado_partido" id="stats-resultado" placeholder="Ej: 2-1" class="stats-resultado-input">
+                <input type="text" name="resultado_partido" id="stats-resultado" placeholder="Ej: 2-1"
+                    class="stats-resultado-input">
             </div>
 
             <div class="stats-table-wrap">
@@ -794,30 +660,36 @@ $jugadores_modal = $stmt_jug_modal->fetchAll(PDO::FETCH_ASSOC);
                             <th><i class="fa-solid fa-handshake-simple"></i> Asistencias</th>
                             <th><i class="fa-solid fa-square" style="color:#eab308"></i> Amarillas</th>
                             <th><i class="fa-solid fa-square" style="color:#ef4444"></i> Rojas</th>
-                             <th><i class="fa-regular fa-clock"></i> Minutos</th>
+                            <th><i class="fa-regular fa-clock"></i> Minutos</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($jugadores_modal as $jug): ?>
-                            <tr>
+                            <tr class="fila-jugador-stats" data-equipo-id="<?= $mi_equipo_id ?>">
                                 <td class="stats-jugador-nombre">
                                     <?= htmlspecialchars($jug['nombre']) ?>
                                     <span class="stats-posicion"><?= htmlspecialchars($jug['posicion']) ?></span>
                                 </td>
-                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][goles]" min="0" value="0" class="stats-num-input" data-jugador="<?= $jug['id'] ?>"></td>
-                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][asistencias]" min="0" value="0" class="stats-num-input"></td>
-                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][amarillas]" min="0" max="2" value="0" class="stats-num-input stats-amarilla"></td>
-                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][rojas]" min="0" max="1" value="0" class="stats-num-input stats-roja"></td>
-                                 <td><input type="number" name="jugadores[<?= $jug['id'] ?>][minutos]" min="0" max="120" value="0" class="stats-num-input stats-minutos"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][goles]" min="0" value="0"
+                                        class="stats-num-input" data-jugador="<?= $jug['id'] ?>"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][asistencias]" min="0" value="0"
+                                        class="stats-num-input"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][amarillas]" min="0" max="2"
+                                        value="0" class="stats-num-input stats-amarilla"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][rojas]" min="0" max="1"
+                                        value="0" class="stats-num-input stats-roja"></td>
+                                <td><input type="number" name="jugadores[<?= $jug['id'] ?>][minutos]" min="0" max="120"
+                                        value="0" class="stats-num-input stats-minutos"></td>
                             </tr>
                         <?php endforeach; ?>
-                    </tbody>
+                    </tbody>y
                 </table>
             </div>
 
             <div class="stats-footer">
                 <button type="button" class="stats-btn-cancelar" onclick="cerrarModalStats()">Cancelar</button>
-                <button type="submit" class="stats-btn-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar Estadísticas</button>
+                <button type="submit" class="stats-btn-guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar
+                    Estadísticas</button>
             </div>
         </form>
     </div>

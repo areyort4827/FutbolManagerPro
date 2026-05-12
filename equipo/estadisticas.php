@@ -41,9 +41,9 @@ $diferencia_goles = $goles_favor - $goles_contra;
 
 // ── Asistencia media a entrenamientos ────────────────────────────────────────
 $sqlAsist = "
-    SELECT ROUND(AVG(e.num_asistentes), 1) AS media
+    SELECT ROUND(SUM(e.num_asistentes) / COUNT(*), 1) AS media
     FROM entrenamientos e
-    WHERE e.club_id = :club_id AND e.num_asistentes > 0";
+    WHERE e.club_id = :club_id";
 $stmtA = $pdo->prepare($sqlAsist);
 $stmtA->execute([':club_id' => $club_id]);
 $asistencia_media = $stmtA->fetchColumn() ?? 'N/A';
