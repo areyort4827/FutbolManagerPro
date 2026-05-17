@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-05-2026 a las 15:11:59
+-- Tiempo de generación: 17-05-2026 a las 17:41:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -63,7 +63,9 @@ CREATE TABLE `entrenadores` (
 
 INSERT INTO `entrenadores` (`id`, `nombre`, `experiencia`, `equipo_id`, `usuario_id`) VALUES
 (1, 'Emerson Cruz', 2, 1, 1),
-(2, 'Carlo Ancelotti', 9, 6, 4);
+(2, 'Carlo Ancelotti', 9, 6, 4),
+(5, 'Anchelotti', 0, 8, 14),
+(6, 'Guardiola', 0, 5, 15);
 
 -- --------------------------------------------------------
 
@@ -97,7 +99,8 @@ INSERT INTO `entrenamientos` (`id`, `club_id`, `titulo`, `descripcion`, `fecha`,
 (11, 4, 'Sesión táctica', 'Salida de balón', '2026-04-21', '00:00:00', 0, 0, NULL, 14),
 (12, 4, 'Sesión táctica', 'Resistencia física', '2026-04-22', '00:00:00', 0, 0, NULL, 14),
 (15, 1, 'Sesión de físico', 'jajaja', '2026-05-12', '23:00:00', 200, 2, 'La Campana', 1),
-(18, 1, 'Sesión técnica', '', '2026-04-30', '10:48:00', 30, 0, 'Pabellon alcarrachela', 1);
+(18, 1, 'Sesión técnica', '', '2026-04-30', '10:48:00', 30, 0, 'Pabellon alcarrachela', 1),
+(19, 2, 'Sesión técnica', '', '2026-04-28', '12:30:00', 120, 0, 'Écija', 8);
 
 -- --------------------------------------------------------
 
@@ -119,7 +122,9 @@ CREATE TABLE `entrenamiento_asistencia` (
 INSERT INTO `entrenamiento_asistencia` (`id`, `entrenamiento_id`, `jugador_id`, `asistio`) VALUES
 (4, 4, 4, 1),
 (6, 4, 6, 1),
-(7, 7, 7, 1);
+(7, 7, 7, 1),
+(13, 15, 28, 1),
+(14, 18, 28, 1);
 
 -- --------------------------------------------------------
 
@@ -178,13 +183,17 @@ CREATE TABLE `estadisticas_jugador` (
 --
 
 INSERT INTO `estadisticas_jugador` (`id`, `jugador_id`, `partido_id`, `goles`, `asistencias`, `minutos_jugados`, `tarjetas_amarillas`, `tarjetas_rojas`) VALUES
-(16, 28, 83, 2, 3, 0, 0, 0),
-(17, 1, 83, 1, 0, 0, 0, 0),
-(45, 1, 84, 1, 0, 0, 0, 0),
 (46, 28, 87, 1, 3, 0, 0, 0),
 (47, 20, 87, 2, 0, 0, 0, 0),
 (48, 26, 89, 2, 0, 0, 0, 0),
-(50, 26, 90, 2, 1, 0, 0, 0);
+(50, 26, 90, 2, 1, 0, 0, 0),
+(69, 27, 94, 2, 2, 0, 0, 0),
+(71, 28, 95, 2, 2, 0, 0, 0),
+(72, 28, 96, 3, 1, 0, 0, 0),
+(73, 1, 96, 1, 0, 0, 0, 0),
+(74, 28, 85, 3, 0, 0, 0, 0),
+(75, 1, 85, 0, 2, 0, 0, 0),
+(76, 26, 88, 3, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -204,13 +213,16 @@ CREATE TABLE `goles_partido` (
 --
 
 INSERT INTO `goles_partido` (`id`, `partido_id`, `jugador_id`, `cantidad_goles`) VALUES
-(31, 83, 28, 2),
-(32, 83, 1, 1),
-(51, 84, 1, 1),
 (52, 87, 28, 1),
 (53, 87, 20, 2),
 (54, 89, 26, 2),
-(56, 90, 26, 2);
+(56, 90, 26, 2),
+(73, 94, 27, 2),
+(75, 95, 28, 2),
+(76, 96, 28, 3),
+(77, 96, 1, 1),
+(78, 85, 28, 3),
+(79, 88, 26, 3);
 
 -- --------------------------------------------------------
 
@@ -255,7 +267,10 @@ INSERT INTO `jugadores` (`id`, `nombre`, `fecha_nacimiento`, `edad`, `posicion`,
 (25, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', NULL, 1, 2, NULL),
 (26, 'Cristiano Ronaldo', '2026-04-30', NULL, 'portero', 2, 0, NULL, NULL),
 (27, 'Carlos Pavon', '1986-06-19', NULL, 'delantero', 1, 0, NULL, NULL),
-(28, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', 1, 0, NULL, 13);
+(28, 'Emerson Cruz', '2006-04-06', NULL, 'defensa', 1, 0, NULL, 13),
+(29, 'Fabian', '2006-04-06', NULL, 'mediocentro', 8, 0, NULL, NULL),
+(30, 'Dos Santos', '2000-04-06', NULL, 'delantero', 1, 0, NULL, NULL),
+(31, 'Neymar', '1995-04-20', NULL, 'delantero', 1, 0, NULL, 17);
 
 -- --------------------------------------------------------
 
@@ -280,13 +295,14 @@ CREATE TABLE `partidos` (
 --
 
 INSERT INTO `partidos` (`id`, `equipo_local`, `equipo_visitante`, `fecha`, `hora`, `club_id`, `resultado`, `equipo_local_id`, `equipo_visitante_id`) VALUES
-(83, NULL, NULL, '2026-04-27', NULL, NULL, '3-0', 1, 6),
-(84, NULL, NULL, '2026-05-06', NULL, NULL, '1-1', 9, 1),
-(85, NULL, NULL, '2026-05-09', NULL, NULL, NULL, 1, 15),
+(85, NULL, NULL, '2026-05-09', NULL, NULL, '3-0', 1, 15),
 (87, NULL, NULL, '2026-05-06', NULL, NULL, '3-0', 1, 6),
-(88, NULL, NULL, '2026-05-07', NULL, NULL, NULL, 2, 14),
+(88, NULL, NULL, '2026-05-07', NULL, NULL, '3-3', 2, 14),
 (89, NULL, NULL, '2026-05-06', NULL, NULL, '2-2', 2, 11),
-(90, NULL, NULL, '2026-05-06', NULL, NULL, '2-0', 2, 6);
+(90, NULL, NULL, '2026-05-06', NULL, NULL, '2-0', 2, 6),
+(94, NULL, NULL, '2026-05-03', NULL, NULL, '2-0', 1, 16),
+(95, NULL, NULL, '2026-04-30', NULL, NULL, '2-0', 1, 14),
+(96, NULL, NULL, '2026-04-28', NULL, NULL, '4-0', 1, 8);
 
 -- --------------------------------------------------------
 
@@ -315,7 +331,10 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `club_id`) V
 (5, 'Real Madrid CF', 'madrid2@gmail.com', '$2y$10$zlb4yXY9nX15d0LwEgI5Y.vjZ2wapQRHKCewRpK7TtSVzIj2NLnyy', 'equipo', 2),
 (7, 'Jeferson', 'jeferson@gmail.com', '$2y$10$GrVQ5BX7IB8zWQu8kcJCBe.SqKwYveQY6r5igA3mu8DYOTSt/pvyu', 'jugador', 1),
 (8, 'Barcelona benjamin', 'barcelonabenjamin@gmail.com', '$2y$10$Fw6B9QLCc5pkM7P2FPov0OX9xDnQk2FweRtSWgyKzY8Cm54XEdO.e', 'equipo', 1),
-(13, 'Emerson Cruz', 'emersoncruz712@gmail.com', '$2y$10$lohUgeA9abgq3Owi0yRIm.wY00qSDaUS3jGuZ.lxB0Ba3OcAsl4hi', 'jugador', 1);
+(13, 'Emerson Cruz', 'emersoncruz712@gmail.com', '$2y$10$lohUgeA9abgq3Owi0yRIm.wY00qSDaUS3jGuZ.lxB0Ba3OcAsl4hi', 'jugador', 1),
+(14, 'Anchelotti', 'anchelotti@gmail.com', '$2y$10$PE5H52H6AV24a4yqlaMUlO76zjk.kbQRooDwSw9C2eff/bJFYLX6W', 'entrenador', 2),
+(15, 'Guardiola', 'guardiola@gmail.com', '$2y$10$RicHqNQ6PKtBgGw5XLRxaOnZHiiUikmOWELDq/F5Wc.ZaQdYlBmX.', 'entrenador', 1),
+(17, 'Neymar', 'neymar@gmail.com', '$2y$10$Qpj66Ao96hLeTqOoedfzLecLXv7SHGMysWEcKGFCmCFB453YUSfOq', 'jugador', 1);
 
 --
 -- Índices para tablas volcadas
@@ -410,19 +429,19 @@ ALTER TABLE `clubes`
 -- AUTO_INCREMENT de la tabla `entrenadores`
 --
 ALTER TABLE `entrenadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenamientos`
 --
 ALTER TABLE `entrenamientos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `entrenamiento_asistencia`
 --
 ALTER TABLE `entrenamiento_asistencia`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `equipos`
@@ -434,31 +453,31 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `estadisticas_jugador`
 --
 ALTER TABLE `estadisticas_jugador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT de la tabla `goles_partido`
 --
 ALTER TABLE `goles_partido`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT de la tabla `jugadores`
 --
 ALTER TABLE `jugadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de la tabla `partidos`
 --
 ALTER TABLE `partidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas
